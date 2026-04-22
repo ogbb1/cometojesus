@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -120,6 +122,9 @@
     max-width: 500px; text-align: center; color: var(--ink);
     animation: contentRise 1.6s cubic-bezier(.16,.84,.3,1);
   }
+  .gate-content.returning {
+    max-width: 400px;
+  }
   @keyframes contentRise {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
@@ -134,6 +139,7 @@
     line-height: 1.2; margin-bottom: 28px; color: var(--ink);
     letter-spacing: -0.005em;
   }
+  .returning .gate-title { font-size: 28px; margin-bottom: 8px; }
   .gate-body {
     font-size: 18px; line-height: 1.65; color: var(--ink-mid);
     font-weight: 400; margin-bottom: 20px;
@@ -160,6 +166,15 @@
     letter-spacing: 0.3em; padding: 14px 50px;
   }
   .gate-button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .gate-footer {
+    margin-top: 24px; font-size: 11px; color: var(--ink-whisper);
+    font-family: Georgia, serif; letter-spacing: 0.08em;
+  }
+  .gate-footer a {
+    color: var(--ink-soft); text-decoration: none;
+    border-bottom: 1px solid var(--ink-whisper); padding-bottom: 1px;
+  }
+  .gate-footer a:hover { color: var(--ink); }
   .container {
     position: relative; z-index: 2; flex: 1;
     display: flex; flex-direction: column; width: 100%;
@@ -232,6 +247,8 @@
     padding: 10px 32px 0; letter-spacing: 0.14em;
     text-transform: uppercase; font-family: Georgia, serif; opacity: 0.6;
   }
+  .footer a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--ink-whisper); }
+  .footer a:hover { color: var(--ink); }
   @media (max-width: 600px) {
     .messages { padding-top: 16vh; gap: 28px; }
     .msg.him { font-size: 21px; }
@@ -241,6 +258,7 @@
     .input-area::before { left: 24px; right: 24px; }
     .invitation { font-size: 16px; }
     .gate-title { font-size: 26px; }
+    .returning .gate-title { font-size: 22px; }
     .gate-body { font-size: 16px; }
     .gate-body.small { font-size: 14px; }
     .gate-button { padding: 12px 32px; font-size: 13px; }
@@ -259,18 +277,23 @@
   <div class="grain"></div>
 
   <div class="gate" id="gate">
-    <div class="gate-content">
-      <div class="gate-eyebrow">before you enter</div>
-      <div class="gate-title">this is a space to help you hear him</div>
-      <div class="gate-body">
-        It is meant to put a voice for Jesus in your head — especially if you've never had one — and to guide you in your relationship with him.
+    <div class="gate-content" id="gateContent">
+      <div id="firstTimeContent">
+        <div class="gate-eyebrow">before you enter</div>
+        <div class="gate-title">this is a space to help you hear him</div>
+        <div class="gate-body">
+          It is meant to put a voice for Jesus in your head — especially if you've never had one — and to guide you in your relationship with him.
+        </div>
+        <div class="gate-body">
+          It is not him. It will not replace prayer, scripture, the church, or the people God has placed around you. Every response is imagined by an AI.
+        </div>
+        <div class="gate-rule"></div>
+        <div class="gate-body small">
+          If you are in crisis, please speak to a real person — a pastor, a friend, or call or text 988.
+        </div>
       </div>
-      <div class="gate-body">
-        It is not him. It will not replace prayer, scripture, the church, or the people God has placed around you. Every response is imagined by an AI.
-      </div>
-      <div class="gate-rule"></div>
-      <div class="gate-body small">
-        If you are in crisis, please speak to a real person — a pastor, a friend, or call or text 988.
+      <div id="returningContent" style="display:none;">
+        <div class="gate-title">welcome back</div>
       </div>
       <div class="turnstile-wrapper">
         <div class="cf-turnstile"
@@ -279,6 +302,9 @@
              data-theme="light"></div>
       </div>
       <button class="gate-button" id="enter" disabled>enter</button>
+      <div class="gate-footer">
+        <a href="/terms.html">terms</a> · <a href="/privacy.html">privacy</a>
+      </div>
     </div>
   </div>
 
@@ -302,8 +328,20 @@
     const invitationEl = document.getElementById('invitation');
     const gateEl = document.getElementById('gate');
     const enterEl = document.getElementById('enter');
+    const gateContentEl = document.getElementById('gateContent');
+    const firstTimeEl = document.getElementById('firstTimeContent');
+    const returningEl = document.getElementById('returningContent');
     const history = [];
     let turnstileToken = null;
+
+    // Returning visitor check
+    try {
+      if (localStorage.getItem('cometojesus_entered') === '1') {
+        firstTimeEl.style.display = 'none';
+        returningEl.style.display = 'block';
+        gateContentEl.classList.add('returning');
+      }
+    } catch (e) { /* localStorage may be disabled; show full gate */ }
 
     window.onTurnstileSuccess = function(token) {
       turnstileToken = token;
@@ -376,6 +414,7 @@
     });
     enterEl.addEventListener('click', () => {
       if (!turnstileToken) return;
+      try { localStorage.setItem('cometojesus_entered', '1'); } catch (e) {}
       gateEl.classList.add('hidden');
       setTimeout(() => inputEl.focus(), 400);
     });

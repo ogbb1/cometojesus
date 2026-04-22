@@ -1,5 +1,6 @@
 // api/chat.js — Vercel serverless function
-// Proxies chat to Anthropic with rate limiting, crisis screening, and Turnstile verification.
+// Proxies chat to Anthropic with rate limiting, crisis screening,
+// Turnstile verification, and output screening.
 
 const SYSTEM_PROMPT = `You are speaking as Jesus of Nazareth would if he were walking the earth today — not a stained-glass figure or a theological abstraction, but the person in the gospels: a carpenter from Galilee who spoke plainly, asked penetrating questions, told small stories, ate with tax collectors and prostitutes and fishermen, and met people inside their pain.
 
@@ -141,12 +142,37 @@ if you can, tell one person tonight — a friend, a family member, anyone who ca
 
 you are loved. please stay. i'll be here when you come back.`;
 
+const OUTPUT_FALLBACK = 'give me a moment to listen again. try saying that once more.';
+
+// Output screening patterns — things the model should not have said.
+// If any match, we return the fallback instead of the model's reply.
+const OUTPUT_BLOCKLIST = [
+  // Slurs — common ones. Extend as needed.
+  /\bn[i1]gg[e3]r/i,
+  /\bf[a@]gg[o0]t/i,
+  /\bk[i1]k[e3]\b/i,
+  /\br[e3]t[a@]rd\b/i,
+  // Explicit sexual content
+  /\b(fuck|fucking|cock|pussy|cum|blowjob|dick)\b/i,
+  // Political endorsement
+  /\b(vote for|voting for|endorse)\s+(trump|biden|harris|republican|democrat|gop)/i,
+  // Specific damnation of named individuals ("X is going to hell", "X is in hell")
+  /\b(is|are|will be)\s+(going\s+to\s+hell|damned|in\s+hell)\b/i,
+  // Medical dosage advice
+  /\b(take|stop taking)\s+\d+\s*(mg|milligrams|tablets|pills)/i,
+];
+
+function outputBlocked(text) {
+  if (!text) return true;
+  return OUTPUT_BLOCKLIST.some(re => re.test(text));
+}
+
 const requestCounts = new Map();
 const RATE_WINDOW_MS = 60000;
 const RATE_LIMIT = 8;
 
 const verifiedTokens = new Map();
-const TOKEN_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+const TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
 
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -171,17 +197,13 @@ function containsCrisisKeyword(text) {
 
 async function verifyTurnstileToken(token, ip) {
   if (!token) return false;
-
-  // Cache: if we've already verified this token recently, accept it.
   const cached = verifiedTokens.get(token);
   if (cached && Date.now() - cached < TOKEN_TTL_MS) return true;
-
   try {
     const params = new URLSearchParams();
     params.append('secret', process.env.TURNSTILE_SECRET_KEY);
     params.append('response', token);
     if (ip) params.append('remoteip', ip);
-
     const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -221,7 +243,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid message shape' });
   }
 
-  // Verify Turnstile token
   const tokenOk = await verifyTurnstileToken(turnstileToken, ip);
   if (!tokenOk) {
     return res.status(403).json({
@@ -270,6 +291,12 @@ export default async function handler(req, res) {
       .map(c => c.text)
       .join('')
       .trim();
+
+    // Output screening — block if the model said something it shouldn't.
+    if (outputBlocked(reply)) {
+      console.warn('Output blocked by screening filter');
+      return res.status(200).json({ reply: OUTPUT_FALLBACK });
+    }
 
     return res.status(200).json({ reply });
   } catch (err) {
