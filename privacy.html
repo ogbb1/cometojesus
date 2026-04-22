@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>privacy · come to me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #fbf8f1; --ink: #0f0c08; --ink-mid: #2a231a; --ink-soft: #5a4f40;
+    --ink-whisper: #9a8f7e;
+  }
+  body {
+    background: var(--bg); font-family: 'Cormorant Garamond', Georgia, serif;
+    color: var(--ink-mid); -webkit-font-smoothing: antialiased;
+    min-height: 100vh; padding: 80px 32px 120px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  .back {
+    display: inline-block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.24em; color: var(--ink-soft); text-decoration: none;
+    font-family: Georgia, serif; margin-bottom: 56px; opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+  .back:hover { opacity: 1; }
+  h1 {
+    font-size: 40px; font-weight: 400; font-style: italic; color: var(--ink);
+    margin-bottom: 12px; letter-spacing: -0.005em;
+  }
+  .eyebrow {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.24em;
+    color: var(--ink-soft); font-family: Georgia, serif; margin-bottom: 48px; opacity: 0.7;
+  }
+  h2 {
+    font-size: 22px; font-weight: 500; color: var(--ink);
+    margin-top: 40px; margin-bottom: 14px; letter-spacing: -0.003em;
+  }
+  p { font-size: 17px; line-height: 1.7; margin-bottom: 16px; }
+  a { color: var(--ink); }
+  .small {
+    font-size: 13px; color: var(--ink-soft); font-style: italic;
+    margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(15,12,8,0.08);
+  }
+  .highlight {
+    background: rgba(15,12,8,0.04); border-left: 2px solid var(--ink-whisper);
+    padding: 16px 20px; margin: 24px 0; font-style: italic; color: var(--ink);
+  }
+  @media (max-width: 600px) {
+    body { padding: 48px 24px 80px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 19px; }
+    p { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="/" class="back">← back</a>
+    <div class="eyebrow">privacy policy</div>
+    <h1>privacy</h1>
+    <p>Last updated April 21, 2026.</p>
+
+    <div class="highlight">
+      We do not store your conversations. What you type here stays between you and, we pray, God.
+    </div>
+
+    <h2>what we don't collect</h2>
+    <p>We do not store the content of your conversations. Messages you send and responses you receive are processed in memory to generate a reply and are then discarded. We do not read your conversations. We do not save them to a database. We do not use them to train any AI model. We cannot recover them even if you asked us to.</p>
+
+    <h2>what is processed temporarily</h2>
+    <p>To generate responses, your message is sent to <a href="https://www.anthropic.com/legal/privacy">Anthropic</a> (the AI provider) and to <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a> (for bot protection). Both providers have their own privacy policies. Anthropic has committed to not training its models on traffic from paid API usage such as ours. These requests are not logged with identifying information on our end.</p>
+
+    <h2>what we do log</h2>
+    <p>To keep the service running and protected from abuse, we log the following minimal information, in aggregate and with IP addresses hashed:</p>
+    <p>• How many requests come from a given (hashed) IP, for rate limiting.<br>
+    • Whether requests were flagged by our safety filters (category and timestamp only — never content).<br>
+    • Server-side errors, for debugging.</p>
+    <p>None of this is tied to your identity. We cannot use these logs to reconstruct what you typed.</p>
+
+    <h2>analytics</h2>
+    <p>We use Cloudflare Web Analytics to count page views and basic navigation. Cloudflare Web Analytics is privacy-preserving: it does not use cookies, does not fingerprint visitors, and does not track individuals across sites. See <a href="https://www.cloudflare.com/web-analytics/">Cloudflare's statement</a>.</p>
+
+    <h2>cookies and local storage</h2>
+    <p>We store a single flag in your browser's local storage (<code>cometojesus_entered</code>) so that returning visitors see a shorter welcome message instead of the full disclaimer every visit. We do not use cookies. Clearing your browser storage will remove the flag.</p>
+
+    <h2>children</h2>
+    <p>We do not knowingly collect information from children under 13. This service is not intended for use by anyone under 13. Users between 13 and 17 should only use this service with the knowledge and consent of a parent or legal guardian.</p>
+
+    <h2>your rights</h2>
+    <p>Because we do not store your conversations or personal information, there is nothing to request, export, or delete. If you want to reset the returning-visitor flag, clear your browser's local storage for this site.</p>
+
+    <h2>third parties</h2>
+    <p>This service relies on: <a href="https://www.anthropic.com/legal/privacy">Anthropic</a> (AI responses), <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a> (bot protection, analytics, DNS), <a href="https://vercel.com/legal/privacy-policy">Vercel</a> (hosting), and <a href="https://github.com/privacy">GitHub</a> (source code). Each has its own privacy practices.</p>
+
+    <h2>changes</h2>
+    <p>This policy may be updated. Continued use of the service after changes constitutes acceptance.</p>
+
+    <h2>contact</h2>
+    <p>Questions: <a href="mailto:ograbowski132@gmail.com">ograbowski132@gmail.com</a></p>
+
+    <p class="small">See also the <a href="/terms.html">terms of use</a>.</p>
+  </div>
+</body>
+</html>
