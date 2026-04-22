@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -144,17 +145,21 @@
     width: 36px; height: 1px; background: var(--ink-whisper);
     margin: 32px auto; opacity: 0.5;
   }
+  .turnstile-wrapper {
+    margin-top: 24px; display: flex; justify-content: center; min-height: 65px;
+  }
   .gate-button {
     background: none; border: 1px solid var(--ink-mid); color: var(--ink);
     font-family: inherit; font-size: 15px; letter-spacing: 0.22em;
-    text-transform: uppercase; padding: 14px 42px; margin-top: 32px;
+    text-transform: uppercase; padding: 14px 42px; margin-top: 20px;
     cursor: pointer; transition: all 0.5s cubic-bezier(.16,.84,.3,1);
     font-weight: 400;
   }
-  .gate-button:hover {
+  .gate-button:hover:not(:disabled) {
     background: var(--ink); color: var(--bg);
     letter-spacing: 0.3em; padding: 14px 50px;
   }
+  .gate-button:disabled { opacity: 0.3; cursor: not-allowed; }
   .container {
     position: relative; z-index: 2; flex: 1;
     display: flex; flex-direction: column; width: 100%;
@@ -239,7 +244,7 @@
     .gate-body { font-size: 16px; }
     .gate-body.small { font-size: 14px; }
     .gate-button { padding: 12px 32px; font-size: 13px; }
-    .gate-button:hover { padding: 12px 38px; }
+    .gate-button:hover:not(:disabled) { padding: 12px 38px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .light-source, .rays-soft, .msg, .gate, .gate-content { animation: none; }
@@ -267,7 +272,13 @@
       <div class="gate-body small">
         If you are in crisis, please speak to a real person — a pastor, a friend, or call or text 988.
       </div>
-      <button class="gate-button" id="enter">enter</button>
+      <div class="turnstile-wrapper">
+        <div class="cf-turnstile"
+             data-sitekey="0x4AAAAAADA2i5EmVkeDR0ho"
+             data-callback="onTurnstileSuccess"
+             data-theme="light"></div>
+      </div>
+      <button class="gate-button" id="enter" disabled>enter</button>
     </div>
   </div>
 
@@ -292,6 +303,12 @@
     const gateEl = document.getElementById('gate');
     const enterEl = document.getElementById('enter');
     const history = [];
+    let turnstileToken = null;
+
+    window.onTurnstileSuccess = function(token) {
+      turnstileToken = token;
+      enterEl.disabled = false;
+    };
 
     function hideInvitation() { invitationEl.classList.add('hidden'); }
 
@@ -321,7 +338,7 @@
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: history })
+          body: JSON.stringify({ messages: history, turnstileToken: turnstileToken })
         });
         if (!response.ok && response.status !== 429) throw new Error('Request failed');
         const data = await response.json();
@@ -358,6 +375,7 @@
       if (inputEl.value.trim()) hideInvitation();
     });
     enterEl.addEventListener('click', () => {
+      if (!turnstileToken) return;
       gateEl.classList.add('hidden');
       setTimeout(() => inputEl.focus(), 400);
     });

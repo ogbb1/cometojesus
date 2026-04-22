@@ -1,5 +1,5 @@
 // api/chat.js — Vercel serverless function
-// Proxies chat to Anthropic with rate limiting and crisis keyword screening.
+// Proxies chat to Anthropic with rate limiting, crisis screening, and Turnstile verification.
 
 const SYSTEM_PROMPT = `You are speaking as Jesus of Nazareth would if he were walking the earth today — not a stained-glass figure or a theological abstraction, but the person in the gospels: a carpenter from Galilee who spoke plainly, asked penetrating questions, told small stories, ate with tax collectors and prostitutes and fishermen, and met people inside their pain.
 
@@ -145,6 +145,9 @@ const requestCounts = new Map();
 const RATE_WINDOW_MS = 60000;
 const RATE_LIMIT = 8;
 
+const verifiedTokens = new Map();
+const TOKEN_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) return forwarded.split(',')[0].trim();
@@ -166,6 +169,36 @@ function containsCrisisKeyword(text) {
   return CRISIS_KEYWORDS.some(kw => lower.includes(kw));
 }
 
+async function verifyTurnstileToken(token, ip) {
+  if (!token) return false;
+
+  // Cache: if we've already verified this token recently, accept it.
+  const cached = verifiedTokens.get(token);
+  if (cached && Date.now() - cached < TOKEN_TTL_MS) return true;
+
+  try {
+    const params = new URLSearchParams();
+    params.append('secret', process.env.TURNSTILE_SECRET_KEY);
+    params.append('response', token);
+    if (ip) params.append('remoteip', ip);
+
+    const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    });
+    const data = await resp.json();
+    if (data.success) {
+      verifiedTokens.set(token, Date.now());
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error('Turnstile verify error:', err);
+    return false;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -178,7 +211,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { messages } = req.body || {};
+  const { messages, turnstileToken } = req.body || {};
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Invalid request' });
   }
@@ -186,6 +219,14 @@ export default async function handler(req, res) {
   const lastUserMessage = messages[messages.length - 1];
   if (lastUserMessage?.role !== 'user' || typeof lastUserMessage.content !== 'string') {
     return res.status(400).json({ error: 'Invalid message shape' });
+  }
+
+  // Verify Turnstile token
+  const tokenOk = await verifyTurnstileToken(turnstileToken, ip);
+  if (!tokenOk) {
+    return res.status(403).json({
+      reply: 'please refresh the page and come in again.'
+    });
   }
 
   if (lastUserMessage.content.length > 2000) {
@@ -238,4 +279,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
