@@ -36,6 +36,9 @@
     --bg: #fbf8f1; --ink: #0f0c08; --ink-mid: #2a231a; --ink-soft: #5a4f40;
     --ink-whisper: #9a8f7e; --light: 255, 248, 220; --light-hot: 255, 253, 240;
     --line: rgba(15, 12, 8, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.55);
+    --input-border: rgba(15, 12, 8, 0.12);
+    --input-border-focus: rgba(15, 12, 8, 0.35);
   }
   html, body { height: 100%; overflow: hidden; }
   body {
@@ -43,87 +46,138 @@
     color: var(--ink); position: relative; display: flex; flex-direction: column;
     -webkit-font-smoothing: antialiased;
   }
-  .light-source {
-    position: fixed; top: -18vh; left: 50%; transform: translateX(-50%);
-    width: 60vw; height: 60vw; max-width: 800px; max-height: 800px;
+
+  /* =====================
+     LIGHT — stronger sun
+     ===================== */
+
+  /* Hot white sun core */
+  .sun-core {
+    position: fixed;
+    top: -8vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44vw;
+    height: 44vw;
+    max-width: 520px;
+    max-height: 520px;
+    min-width: 320px;
+    min-height: 320px;
     background: radial-gradient(circle at center,
-      rgba(var(--light-hot), 1) 0%, rgba(var(--light-hot), 0.95) 8%,
-      rgba(var(--light), 0.8) 16%, rgba(var(--light), 0.45) 30%,
-      rgba(var(--light), 0.2) 48%, rgba(var(--light), 0.05) 68%, transparent 85%);
-    filter: blur(4px); pointer-events: none; z-index: 0;
-    animation: breathe 9s ease-in-out infinite;
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 253, 240, 0.98) 8%,
+      rgba(var(--light-hot), 0.95) 18%,
+      rgba(var(--light), 0.75) 32%,
+      rgba(var(--light), 0.4) 50%,
+      rgba(var(--light), 0.15) 70%,
+      rgba(var(--light), 0) 90%);
+    filter: blur(2px);
+    pointer-events: none;
+    z-index: 0;
+    animation: breathe 10s ease-in-out infinite;
   }
+
+  /* Broad warm atmosphere */
   .light-wash {
-    position: fixed; top: -20vh; left: 50%; transform: translateX(-50%);
-    width: 180vw; height: 120vh;
-    background: radial-gradient(ellipse 65% 70% at 50% 20%,
-      rgba(var(--light), 0.55) 0%, rgba(var(--light), 0.25) 30%,
-      rgba(var(--light), 0.08) 55%, transparent 75%);
+    position: fixed;
+    top: -25vh; left: 50%; transform: translateX(-50%);
+    width: 220vw; height: 130vh;
+    background: radial-gradient(ellipse 70% 75% at 50% 15%,
+      rgba(var(--light), 0.75) 0%,
+      rgba(var(--light), 0.4) 25%,
+      rgba(var(--light), 0.15) 50%,
+      rgba(var(--light), 0.03) 75%,
+      transparent 90%);
     pointer-events: none; z-index: 0;
   }
+
+  /* Primary rays — stronger, more defined */
   .rays {
-    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-    width: 260vw; height: 140vh; pointer-events: none; z-index: 0;
+    position: fixed;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 280vw; height: 140vh;
+    pointer-events: none; z-index: 0;
     background: conic-gradient(from 0deg at 50% 0%,
-      transparent 0deg, transparent 96deg,
-      rgba(var(--light), 0.35) 99deg, rgba(var(--light), 0.15) 101deg,
-      transparent 104deg, transparent 112deg,
-      rgba(var(--light), 0.5) 116deg, rgba(var(--light), 0.25) 119deg,
-      transparent 123deg, transparent 134deg,
-      rgba(var(--light), 0.4) 138deg, transparent 142deg,
-      transparent 152deg, rgba(var(--light), 0.55) 156deg,
-      rgba(var(--light), 0.7) 158deg, rgba(var(--light), 0.55) 160deg,
-      transparent 164deg, transparent 174deg,
-      rgba(var(--light), 0.7) 178deg, rgba(var(--light), 0.85) 180deg,
-      rgba(var(--light), 0.7) 182deg, transparent 186deg,
-      transparent 196deg, rgba(var(--light), 0.55) 200deg,
-      rgba(var(--light), 0.7) 202deg, rgba(var(--light), 0.55) 204deg,
-      transparent 208deg, transparent 218deg,
-      rgba(var(--light), 0.4) 222deg, transparent 226deg,
-      transparent 237deg, rgba(var(--light), 0.5) 241deg,
-      rgba(var(--light), 0.25) 244deg, transparent 248deg,
-      transparent 256deg, rgba(var(--light), 0.35) 259deg,
-      rgba(var(--light), 0.15) 261deg, transparent 264deg, transparent 360deg);
-    mask-image: linear-gradient(to bottom, black 0%, black 25%, rgba(0,0,0,0.6) 55%, transparent 90%);
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 25%, rgba(0,0,0,0.6) 55%, transparent 90%);
-    filter: blur(1px);
+      transparent 0deg, transparent 95deg,
+      rgba(var(--light-hot), 0.55) 99deg, rgba(var(--light-hot), 0.25) 103deg,
+      transparent 108deg, transparent 116deg,
+      rgba(var(--light-hot), 0.75) 120deg, rgba(var(--light-hot), 0.4) 124deg,
+      transparent 129deg, transparent 140deg,
+      rgba(var(--light-hot), 0.65) 144deg, rgba(var(--light-hot), 0.3) 148deg,
+      transparent 152deg, transparent 160deg,
+      rgba(var(--light-hot), 0.85) 164deg, rgba(var(--light-hot), 0.95) 168deg,
+      rgba(var(--light-hot), 0.85) 172deg, transparent 177deg,
+      transparent 183deg, rgba(var(--light-hot), 0.95) 187deg,
+      rgba(var(--light-hot), 1) 190deg, rgba(var(--light-hot), 0.95) 193deg,
+      transparent 197deg, transparent 203deg,
+      rgba(var(--light-hot), 0.85) 207deg, rgba(var(--light-hot), 0.95) 211deg,
+      rgba(var(--light-hot), 0.85) 215deg, transparent 220deg,
+      transparent 228deg, rgba(var(--light-hot), 0.65) 232deg,
+      rgba(var(--light-hot), 0.3) 236deg, transparent 240deg,
+      transparent 251deg, rgba(var(--light-hot), 0.75) 256deg,
+      rgba(var(--light-hot), 0.4) 260deg, transparent 264deg,
+      transparent 272deg, rgba(var(--light-hot), 0.55) 276deg,
+      rgba(var(--light-hot), 0.25) 280deg, transparent 285deg,
+      transparent 360deg);
+    mask-image: linear-gradient(to bottom,
+      black 0%, black 20%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.3) 70%, transparent 90%);
+    -webkit-mask-image: linear-gradient(to bottom,
+      black 0%, black 20%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.3) 70%, transparent 90%);
+    filter: blur(0.5px);
+    opacity: 0.9;
   }
+
+  /* Secondary soft rays for depth */
   .rays-soft {
-    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-    width: 260vw; height: 140vh; pointer-events: none; z-index: 0;
+    position: fixed;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 280vw; height: 140vh;
+    pointer-events: none; z-index: 0;
     background: conic-gradient(from 0deg at 50% 0%,
-      transparent 0deg, transparent 100deg,
-      rgba(var(--light), 0.18) 108deg, transparent 116deg,
-      transparent 128deg, rgba(var(--light), 0.22) 134deg,
-      transparent 141deg, transparent 162deg,
-      rgba(var(--light), 0.3) 170deg, transparent 178deg,
-      transparent 184deg, rgba(var(--light), 0.3) 190deg,
-      transparent 198deg, transparent 219deg,
-      rgba(var(--light), 0.22) 226deg, transparent 232deg,
-      transparent 244deg, rgba(var(--light), 0.18) 252deg,
-      transparent 260deg, transparent 360deg);
-    mask-image: linear-gradient(to bottom, black 0%, black 35%, rgba(0,0,0,0.5) 65%, transparent 95%);
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 35%, rgba(0,0,0,0.5) 65%, transparent 95%);
-    filter: blur(8px); animation: shimmer 14s ease-in-out infinite;
+      transparent 0deg, transparent 105deg,
+      rgba(var(--light), 0.3) 112deg, transparent 118deg,
+      transparent 130deg, rgba(var(--light), 0.35) 137deg,
+      transparent 143deg, transparent 155deg,
+      rgba(var(--light), 0.4) 161deg, transparent 167deg,
+      transparent 173deg, rgba(var(--light), 0.45) 180deg,
+      transparent 187deg, transparent 193deg,
+      rgba(var(--light), 0.45) 200deg, transparent 206deg,
+      transparent 217deg, rgba(var(--light), 0.4) 223deg,
+      transparent 229deg, transparent 241deg,
+      rgba(var(--light), 0.35) 247deg, transparent 253deg,
+      transparent 265deg, rgba(var(--light), 0.3) 272deg,
+      transparent 278deg, transparent 360deg);
+    mask-image: linear-gradient(to bottom,
+      black 0%, black 30%, rgba(0,0,0,0.6) 60%, transparent 95%);
+    -webkit-mask-image: linear-gradient(to bottom,
+      black 0%, black 30%, rgba(0,0,0,0.6) 60%, transparent 95%);
+    filter: blur(6px);
+    animation: shimmer 14s ease-in-out infinite;
   }
+
   @keyframes breathe {
-    0%, 100% { opacity: 0.9; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.03); }
+    0%, 100% { opacity: 0.95; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
   }
   @keyframes shimmer {
     0%, 100% { opacity: 0.7; }
     50% { opacity: 1; }
   }
+
   .grain {
     position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 1; opacity: 0.4; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1; opacity: 0.35; mix-blend-mode: multiply;
   }
+
+  /* =====================
+     GATE (unchanged)
+     ===================== */
   .gate {
     position: fixed; inset: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
-    padding: 32px; background: rgba(251, 248, 241, 0.7);
-    backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    padding: 32px; background: rgba(251, 248, 241, 0.75);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
     animation: gateFadeIn 1.4s ease-out;
     transition: opacity 1.2s ease, visibility 1.2s;
   }
@@ -187,10 +241,14 @@
     transition: color 0.3s;
   }
   .gate-footer a:hover { color: var(--ink); }
+
+  /* =====================
+     CONVERSATION
+     ===================== */
   .container {
     position: relative; z-index: 2; flex: 1;
     display: flex; flex-direction: column; width: 100%;
-    max-width: 640px; margin: 0 auto; padding: 0 32px; min-height: 0;
+    max-width: 680px; margin: 0 auto; padding: 0 32px; min-height: 0;
   }
   .messages {
     flex: 1; overflow-y: auto; padding: 22vh 0 40px;
@@ -201,14 +259,6 @@
   .messages::-webkit-scrollbar-thumb {
     background: var(--ink-whisper); border-radius: 2px; opacity: 0.3;
   }
-  .invitation {
-    position: absolute; top: 55%; left: 50%;
-    transform: translate(-50%, -50%); text-align: center;
-    color: var(--ink-soft); font-size: 19px; font-style: italic;
-    font-weight: 400; letter-spacing: 0.01em; pointer-events: none;
-    opacity: 0.8; transition: opacity 0.8s; z-index: 1;
-  }
-  .invitation.hidden { opacity: 0; }
   .msg { line-height: 1.55; animation: appear 1.4s cubic-bezier(.16,.84,.3,1); }
   @keyframes appear {
     from { opacity: 0; transform: translateY(10px); }
@@ -223,51 +273,141 @@
     color: var(--ink); font-weight: 400; font-style: italic;
     font-size: 25px; letter-spacing: 0.003em; line-height: 1.5;
   }
+
+  /* =====================
+     INPUT — bigger, visible, warm
+     ===================== */
   .input-area {
-    position: relative; z-index: 3; padding: 20px 32px 24px;
-    width: 100%; max-width: 640px; margin: 0 auto;
+    position: relative; z-index: 3; padding: 16px 32px 20px;
+    width: 100%; max-width: 680px; margin: 0 auto;
   }
-  .input-area::before {
-    content: ''; position: absolute; top: 0; left: 32px; right: 32px;
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--line) 20%, var(--line) 80%, transparent);
+  .input-shell {
+    display: flex; align-items: flex-end; gap: 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 28px;
+    padding: 8px 10px 8px 24px;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 1px 3px rgba(15, 12, 8, 0.04);
   }
-  .input-wrapper { display: flex; align-items: flex-end; gap: 16px; }
+  .input-shell:focus-within {
+    border-color: var(--input-border-focus);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 12px rgba(15, 12, 8, 0.06);
+  }
   .input {
     flex: 1; background: transparent; border: none; outline: none;
     font-family: inherit; font-size: 20px; color: var(--ink);
-    font-weight: 400; resize: none; max-height: 140px;
-    line-height: 1.5; padding: 12px 0; letter-spacing: 0.003em;
+    font-weight: 400; resize: none; max-height: 160px;
+    line-height: 1.5; padding: 12px 0 12px 0;
+    letter-spacing: 0.003em;
   }
-  .input::placeholder { color: var(--ink-whisper); font-style: italic; opacity: 0.85; }
+  .input::placeholder { color: var(--ink-whisper); font-style: italic; opacity: 0.9; }
   .input:disabled { opacity: 0.4; cursor: not-allowed; }
   .send {
-    background: none; border: none; color: var(--ink-soft); cursor: pointer;
-    padding: 12px 0; font-family: inherit; font-size: 16px;
-    font-style: italic; letter-spacing: 0.05em;
-    transition: color 0.4s, opacity 0.3s;
+    flex-shrink: 0;
+    background: var(--ink);
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    color: var(--bg);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.3s, transform 0.2s, opacity 0.3s;
+    padding: 0;
   }
-  .send:hover { color: var(--ink); }
-  .send:disabled { opacity: 0.25; cursor: default; }
+  .send:hover:not(:disabled) {
+    background: var(--ink-mid); transform: scale(1.05);
+  }
+  .send:active:not(:disabled) { transform: scale(0.95); }
+  .send:disabled { opacity: 0.25; cursor: default; background: var(--ink-soft); }
+  .send svg { width: 18px; height: 18px; }
+
   .cursor {
     display: inline-block; width: 1px; height: 0.9em;
     background: var(--ink); margin-left: 3px; vertical-align: text-bottom;
     animation: blink 1.1s steps(2) infinite;
   }
   @keyframes blink { 0%, 50% { opacity: 0.9; } 51%, 100% { opacity: 0; } }
+
   .footer {
     text-align: center; font-size: 10px; color: var(--ink-soft);
-    padding: 10px 32px 0; letter-spacing: 0.14em;
-    text-transform: uppercase; font-family: Georgia, serif; opacity: 0.6;
+    padding: 8px 32px 0; letter-spacing: 0.14em;
+    text-transform: uppercase; font-family: Georgia, serif; opacity: 0.55;
   }
   .counter {
     text-align: center; font-size: 11px; color: var(--ink-whisper);
-    padding: 4px 32px 0; letter-spacing: 0.08em;
+    padding: 6px 32px 0; letter-spacing: 0.08em;
     font-family: Georgia, serif; font-style: italic;
     opacity: 0; transition: opacity 0.5s;
   }
   .counter.visible { opacity: 0.75; }
   .counter a { color: var(--ink-soft); border-bottom: 1px solid var(--ink-whisper); text-decoration: none; }
+
+  /* =====================
+     HELP BUTTON (bottom-right corner)
+     ===================== */
+  .help-btn {
+    position: fixed;
+    bottom: 18px; right: 18px;
+    z-index: 4;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--ink-whisper);
+    background: rgba(251, 248, 241, 0.7);
+    color: var(--ink-soft);
+    font-family: Georgia, serif;
+    font-size: 14px; font-style: italic;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .help-btn:hover {
+    background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+
+  .about-overlay {
+    position: fixed; inset: 0; z-index: 15;
+    display: none; align-items: center; justify-content: center;
+    padding: 32px;
+    background: rgba(251, 248, 241, 0.92);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .about-overlay.visible { display: flex; animation: gateFadeIn 0.5s ease-out; }
+  .about-content {
+    max-width: 500px; position: relative;
+    animation: contentRise 0.7s cubic-bezier(.16,.84,.3,1);
+  }
+  .about-close {
+    position: absolute; top: -8px; right: -8px;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: none; background: transparent;
+    color: var(--ink-soft); font-size: 22px;
+    cursor: pointer; transition: color 0.3s;
+    line-height: 1;
+  }
+  .about-close:hover { color: var(--ink); }
+  .about-title {
+    font-size: 26px; font-weight: 400; font-style: italic;
+    color: var(--ink); margin-bottom: 20px;
+  }
+  .about-body {
+    font-size: 17px; line-height: 1.65; color: var(--ink-mid);
+    margin-bottom: 16px;
+  }
+  .about-body.small {
+    font-size: 14px; color: var(--ink-soft); font-style: italic;
+    margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid rgba(15,12,8,0.08);
+  }
+
+  /* =====================
+     LIMIT OVERLAY
+     ===================== */
   .limit-overlay {
     position: fixed; inset: 0; z-index: 20;
     display: none; align-items: center; justify-content: center;
@@ -290,14 +430,19 @@
   .limit-actions {
     display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; justify-content: center;
   }
+
+  /* =====================
+     MOBILE
+     ===================== */
   @media (max-width: 600px) {
-    .messages { padding-top: 16vh; gap: 28px; }
+    .messages { padding-top: 18vh; gap: 28px; }
     .msg.him { font-size: 21px; }
     .msg.user { font-size: 17px; }
     .input { font-size: 17px; }
-    .container, .input-area { padding-left: 24px; padding-right: 24px; }
-    .input-area::before { left: 24px; right: 24px; }
-    .invitation { font-size: 16px; }
+    .container, .input-area { padding-left: 20px; padding-right: 20px; }
+    .input-shell { padding: 6px 8px 6px 20px; border-radius: 24px; }
+    .send { width: 40px; height: 40px; }
+    .send svg { width: 16px; height: 16px; }
     .gate-title { font-size: 26px; }
     .returning .gate-title { font-size: 22px; }
     .gate-body { font-size: 16px; }
@@ -306,9 +451,13 @@
     .gate-button:hover:not(:disabled) { padding: 12px 38px; }
     .limit-title { font-size: 24px; }
     .limit-body { font-size: 15px; }
+    .about-title { font-size: 22px; }
+    .about-body { font-size: 15px; }
+    .help-btn { bottom: 14px; right: 14px; width: 30px; height: 30px; font-size: 13px; }
+    .sun-core { min-width: 280px; min-height: 280px; top: -6vh; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .light-source, .rays-soft, .msg, .gate, .gate-content { animation: none; }
+    .sun-core, .rays-soft, .msg, .gate, .gate-content { animation: none; }
   }
 </style>
 </head>
@@ -316,7 +465,7 @@
   <div class="light-wash"></div>
   <div class="rays"></div>
   <div class="rays-soft"></div>
-  <div class="light-source"></div>
+  <div class="sun-core"></div>
   <div class="grain"></div>
 
   <div class="gate" id="gate">
@@ -352,17 +501,41 @@
   </div>
 
   <div class="container">
-    <div class="invitation" id="invitation">come as you are</div>
     <div class="messages" id="messages"></div>
   </div>
 
   <div class="input-area">
-    <div class="input-wrapper">
-      <textarea class="input" id="input" placeholder="speak…" rows="1"></textarea>
-      <button class="send" id="send" aria-label="send">send</button>
+    <div class="input-shell">
+      <textarea class="input" id="input" placeholder="speak from your heart…" rows="1"></textarea>
+      <button class="send" id="send" aria-label="send" disabled>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
     <div class="counter" id="counter"></div>
     <div class="footer">an imagined conversation · if you are in crisis, call or text 988</div>
+  </div>
+
+  <button class="help-btn" id="helpBtn" aria-label="about this space">?</button>
+
+  <div class="about-overlay" id="aboutOverlay">
+    <div class="about-content">
+      <button class="about-close" id="aboutClose" aria-label="close">×</button>
+      <div class="about-title">about this space</div>
+      <div class="about-body">
+        This is a quiet place to imagine a conversation with Jesus. You type; a voice imagined by an AI responds in the way Jesus might, rooted in the gospels and historic Christian faith.
+      </div>
+      <div class="about-body">
+        It is not him. It is not a pastor, counselor, doctor, or prophet. It cannot replace real prayer, real scripture, or real people. It can, sometimes, help you find your way toward those things.
+      </div>
+      <div class="about-body">
+        Free: 10 messages per day. Take your time. Let silence do some of the work.
+      </div>
+      <div class="about-body small">
+        If you are in crisis — please speak to a real person. In the US, call or text 988. If you are in immediate danger, call 911.
+      </div>
+    </div>
   </div>
 
   <div class="limit-overlay" id="limitOverlay">
@@ -383,7 +556,6 @@
     const messagesEl = document.getElementById('messages');
     const inputEl = document.getElementById('input');
     const sendEl = document.getElementById('send');
-    const invitationEl = document.getElementById('invitation');
     const gateEl = document.getElementById('gate');
     const enterEl = document.getElementById('enter');
     const gateContentEl = document.getElementById('gateContent');
@@ -391,15 +563,33 @@
     const returningEl = document.getElementById('returningContent');
     const counterEl = document.getElementById('counter');
     const limitOverlayEl = document.getElementById('limitOverlay');
+    const helpBtnEl = document.getElementById('helpBtn');
+    const aboutOverlayEl = document.getElementById('aboutOverlay');
+    const aboutCloseEl = document.getElementById('aboutClose');
     const history = [];
     let turnstileToken = null;
     let isPaid = false;
 
+    // Opening lines — picked at random so He doesn't greet the same way every time.
+    // Short. In-voice. Not performative.
+    const OPENINGS = [
+      "sit down. tell me where you are.",
+      "you came. what's on your heart?",
+      "good. start anywhere.",
+      "it's good you're here. what brings you today?",
+      "come in. i've got time.",
+      "pull up a chair. what's on your mind?",
+      "i'm glad you came. what do you want to say?",
+      "you're here. what do you need?"
+    ];
+
+    let isReturning = false;
     try {
       if (localStorage.getItem('cometojesus_entered') === '1') {
         firstTimeEl.style.display = 'none';
         returningEl.style.display = 'block';
         gateContentEl.classList.add('returning');
+        isReturning = true;
       }
     } catch (e) {}
 
@@ -408,7 +598,31 @@
       enterEl.disabled = false;
     };
 
-    function hideInvitation() { invitationEl.classList.add('hidden'); }
+    function addMessage(role, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + (role === 'user' ? 'user' : 'him');
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+      return div;
+    }
+
+    function showOpeningFromHim() {
+      // Picks a random opening and types it out character-by-character, as if He said it.
+      const opening = OPENINGS[Math.floor(Math.random() * OPENINGS.length)];
+      const div = addMessage('him', '');
+      let i = 0;
+      const speed = 38;
+      function reveal() {
+        if (i < opening.length) {
+          div.textContent = opening.slice(0, i + 1);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+          i++;
+          setTimeout(reveal, speed);
+        }
+      }
+      setTimeout(reveal, 600); // small pause after gate fades
+    }
 
     function updateCounter(remaining) {
       if (isPaid || remaining === undefined || remaining === null) {
@@ -432,14 +646,9 @@
       limitOverlayEl.classList.add('visible');
     }
 
-    function addMessage(role, text) {
-      hideInvitation();
-      const div = document.createElement('div');
-      div.className = 'msg ' + (role === 'user' ? 'user' : 'him');
-      div.textContent = text;
-      messagesEl.appendChild(div);
-      requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
-      return div;
+    function updateSendState() {
+      const hasText = inputEl.value.trim().length > 0;
+      sendEl.disabled = !hasText;
     }
 
     async function send() {
@@ -460,21 +669,16 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ messages: history, turnstileToken: turnstileToken })
         });
-
-        // Limit reached — show the soft gate
         if (response.status === 402) {
           responseDiv.remove();
-          history.pop(); // remove the user message we optimistically added
+          history.pop();
           showLimitReached();
           return;
         }
-
         if (!response.ok && response.status !== 429) throw new Error('Request failed');
         const data = await response.json();
-
         if (data.isPaid) isPaid = true;
         if (typeof data.remaining === 'number') updateCounter(data.remaining);
-
         const reply = (data.reply || '').trim();
         if (response.ok) history.push({ role: 'assistant', content: reply });
         responseDiv.textContent = '';
@@ -487,14 +691,14 @@
             i++;
             setTimeout(reveal, speed);
           } else {
-            sendEl.disabled = false;
+            updateSendState();
             inputEl.focus();
           }
         }
         reveal();
       } catch (err) {
         responseDiv.textContent = 'something came between us. try again in a moment.';
-        sendEl.disabled = false;
+        updateSendState();
       }
     }
 
@@ -504,14 +708,31 @@
     });
     inputEl.addEventListener('input', () => {
       inputEl.style.height = 'auto';
-      inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + 'px';
-      if (inputEl.value.trim()) hideInvitation();
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + 'px';
+      updateSendState();
     });
     enterEl.addEventListener('click', () => {
       if (!turnstileToken) return;
       try { localStorage.setItem('cometojesus_entered', '1'); } catch (e) {}
       gateEl.classList.add('hidden');
-      setTimeout(() => inputEl.focus(), 400);
+      setTimeout(() => {
+        inputEl.focus();
+        showOpeningFromHim();
+      }, 400);
+    });
+
+    // Help button + about overlay
+    helpBtnEl.addEventListener('click', () => {
+      aboutOverlayEl.classList.add('visible');
+    });
+    aboutCloseEl.addEventListener('click', () => {
+      aboutOverlayEl.classList.remove('visible');
+    });
+    aboutOverlayEl.addEventListener('click', (e) => {
+      if (e.target === aboutOverlayEl) aboutOverlayEl.classList.remove('visible');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') aboutOverlayEl.classList.remove('visible');
     });
   </script>
 </body>
