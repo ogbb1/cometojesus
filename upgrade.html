@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>stay longer · come to me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #fbf8f1; --ink: #0f0c08; --ink-mid: #2a231a; --ink-soft: #5a4f40;
+    --ink-whisper: #9a8f7e; --light: 255, 248, 220; --light-hot: 255, 253, 240;
+  }
+  html, body { min-height: 100%; }
+  body {
+    background: var(--bg); font-family: 'Cormorant Garamond', Georgia, serif;
+    color: var(--ink); -webkit-font-smoothing: antialiased;
+    display: flex; flex-direction: column; min-height: 100vh;
+    position: relative; overflow-x: hidden;
+  }
+  .light-source {
+    position: fixed; top: -18vh; left: 50%; transform: translateX(-50%);
+    width: 60vw; height: 60vw; max-width: 800px; max-height: 800px;
+    background: radial-gradient(circle at center,
+      rgba(var(--light-hot), 1) 0%, rgba(var(--light-hot), 0.95) 8%,
+      rgba(var(--light), 0.8) 16%, rgba(var(--light), 0.45) 30%,
+      rgba(var(--light), 0.2) 48%, rgba(var(--light), 0.05) 68%, transparent 85%);
+    filter: blur(4px); pointer-events: none; z-index: 0; opacity: 0.6;
+  }
+  .wrap {
+    position: relative; z-index: 2; flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 80px 32px 60px;
+    animation: rise 1.2s cubic-bezier(.16,.84,.3,1);
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .content {
+    max-width: 500px; text-align: center;
+  }
+  .eyebrow {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.24em;
+    color: var(--ink-soft); font-family: Georgia, serif;
+    margin-bottom: 28px; opacity: 0.7;
+  }
+  h1 {
+    font-size: 44px; font-weight: 400; font-style: italic; color: var(--ink);
+    line-height: 1.15; margin-bottom: 28px; letter-spacing: -0.005em;
+  }
+  p {
+    font-size: 18px; line-height: 1.65; color: var(--ink-mid);
+    margin-bottom: 20px;
+  }
+  p.small {
+    font-size: 15px; color: var(--ink-soft); font-style: italic; line-height: 1.6;
+    margin-top: 32px;
+  }
+  .rule {
+    width: 36px; height: 1px; background: var(--ink-whisper);
+    margin: 40px auto; opacity: 0.5;
+  }
+  .form {
+    display: flex; gap: 8px; margin: 32px auto 8px;
+    max-width: 360px; flex-direction: column;
+  }
+  .form input {
+    background: transparent; border: none;
+    border-bottom: 1px solid var(--ink-whisper);
+    font-family: inherit; font-size: 17px; color: var(--ink);
+    padding: 12px 4px; outline: none; text-align: center;
+    transition: border-color 0.3s;
+  }
+  .form input:focus { border-bottom-color: var(--ink); }
+  .form input::placeholder { color: var(--ink-whisper); font-style: italic; }
+  .btn {
+    background: none; border: 1px solid var(--ink-mid); color: var(--ink);
+    font-family: inherit; font-size: 14px; letter-spacing: 0.22em;
+    text-transform: uppercase; padding: 14px 36px; margin-top: 20px;
+    cursor: pointer; transition: all 0.5s cubic-bezier(.16,.84,.3,1);
+    font-weight: 400; text-decoration: none; display: inline-block;
+  }
+  .btn:hover:not(:disabled) {
+    background: var(--ink); color: var(--bg);
+    letter-spacing: 0.3em; padding: 14px 44px;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .back {
+    display: inline-block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.24em; color: var(--ink-soft); text-decoration: none;
+    font-family: Georgia, serif; margin-top: 48px; opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+  .back:hover { opacity: 1; }
+  .success {
+    display: none; font-size: 18px; font-style: italic; color: var(--ink);
+    margin: 32px 0;
+  }
+  .success.visible { display: block; animation: rise 0.8s ease-out; }
+  @media (max-width: 600px) {
+    .wrap { padding: 48px 24px 48px; }
+    h1 { font-size: 34px; }
+    p { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="light-source"></div>
+  <div class="wrap">
+    <div class="content">
+      <div class="eyebrow">stay longer</div>
+      <h1>an unlimited version is coming</h1>
+      <p>The free version gives you ten messages a day, which is enough for most people most of the time.</p>
+      <p>An unlimited version — for those who want to keep talking, who are wrestling through something, who use this as part of a daily practice — is coming soon.</p>
+      <div class="rule"></div>
+      <p>If you'd like to know when it's ready, leave your email. No marketing, no newsletter — one message when it launches, then silence.</p>
+      <form class="form" id="form">
+        <input type="email" id="email" placeholder="your email" required autocomplete="email" />
+        <button type="submit" class="btn" id="submit">let me know</button>
+      </form>
+      <div class="success" id="success">thank you. i'll be in touch.</div>
+      <p class="small">in the meantime, your ten daily messages reset on a rolling 24-hour window.</p>
+      <a href="/" class="back">← back</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const emailInput = document.getElementById('email');
+    const submitBtn = document.getElementById('submit');
+    const successEl = document.getElementById('success');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      if (!email) return;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'saving...';
+      try {
+        const r = await fetch('/api/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+        if (!r.ok) throw new Error('failed');
+        form.style.display = 'none';
+        successEl.classList.add('visible');
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'try again';
+      }
+    });
+  </script>
+</body>
+</html>

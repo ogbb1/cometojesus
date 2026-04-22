@@ -148,7 +148,7 @@
     font-family: inherit; font-size: 15px; letter-spacing: 0.22em;
     text-transform: uppercase; padding: 14px 42px; margin-top: 20px;
     cursor: pointer; transition: all 0.5s cubic-bezier(.16,.84,.3,1);
-    font-weight: 400;
+    font-weight: 400; text-decoration: none; display: inline-block;
   }
   .gate-button:hover:not(:disabled) {
     background: var(--ink); color: var(--bg);
@@ -219,6 +219,7 @@
     line-height: 1.5; padding: 12px 0; letter-spacing: 0.003em;
   }
   .input::placeholder { color: var(--ink-whisper); font-style: italic; opacity: 0.85; }
+  .input:disabled { opacity: 0.4; cursor: not-allowed; }
   .send {
     background: none; border: none; color: var(--ink-soft); cursor: pointer;
     padding: 12px 0; font-family: inherit; font-size: 16px;
@@ -238,6 +239,36 @@
     padding: 10px 32px 0; letter-spacing: 0.14em;
     text-transform: uppercase; font-family: Georgia, serif; opacity: 0.6;
   }
+  .counter {
+    text-align: center; font-size: 11px; color: var(--ink-whisper);
+    padding: 4px 32px 0; letter-spacing: 0.08em;
+    font-family: Georgia, serif; font-style: italic;
+    opacity: 0; transition: opacity 0.5s;
+  }
+  .counter.visible { opacity: 0.75; }
+  .counter a { color: var(--ink-soft); border-bottom: 1px solid var(--ink-whisper); text-decoration: none; }
+  .limit-overlay {
+    position: fixed; inset: 0; z-index: 20;
+    display: none; align-items: center; justify-content: center;
+    padding: 32px; background: rgba(251, 248, 241, 0.92);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .limit-overlay.visible { display: flex; animation: gateFadeIn 1.2s ease-out; }
+  .limit-content {
+    max-width: 440px; text-align: center; color: var(--ink);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .limit-title {
+    font-size: 30px; font-weight: 400; font-style: italic;
+    line-height: 1.2; margin-bottom: 20px; color: var(--ink);
+  }
+  .limit-body {
+    font-size: 17px; line-height: 1.6; color: var(--ink-mid);
+    margin-bottom: 12px;
+  }
+  .limit-actions {
+    display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; justify-content: center;
+  }
   @media (max-width: 600px) {
     .messages { padding-top: 16vh; gap: 28px; }
     .msg.him { font-size: 21px; }
@@ -252,6 +283,8 @@
     .gate-body.small { font-size: 14px; }
     .gate-button { padding: 12px 32px; font-size: 13px; }
     .gate-button:hover:not(:disabled) { padding: 12px 38px; }
+    .limit-title { font-size: 24px; }
+    .limit-body { font-size: 15px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .light-source, .rays-soft, .msg, .gate, .gate-content { animation: none; }
@@ -307,7 +340,22 @@
       <textarea class="input" id="input" placeholder="speak…" rows="1"></textarea>
       <button class="send" id="send" aria-label="send">send</button>
     </div>
+    <div class="counter" id="counter"></div>
     <div class="footer">an imagined conversation · if you are in crisis, call or text 988</div>
+  </div>
+
+  <div class="limit-overlay" id="limitOverlay">
+    <div class="limit-content">
+      <div class="limit-title">our time is complete for today</div>
+      <div class="limit-body">you've spoken what you needed to speak. rest, and come back tomorrow.</div>
+      <div class="limit-body">or, if you'd like to stay longer —</div>
+      <div class="limit-actions">
+        <a href="/upgrade.html" class="gate-button">stay longer</a>
+      </div>
+      <div class="gate-footer" style="margin-top:40px;">
+        <a href="/terms.html">terms</a> &nbsp;·&nbsp; <a href="/privacy.html">privacy</a>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -320,8 +368,11 @@
     const gateContentEl = document.getElementById('gateContent');
     const firstTimeEl = document.getElementById('firstTimeContent');
     const returningEl = document.getElementById('returningContent');
+    const counterEl = document.getElementById('counter');
+    const limitOverlayEl = document.getElementById('limitOverlay');
     const history = [];
     let turnstileToken = null;
+    let isPaid = false;
 
     try {
       if (localStorage.getItem('cometojesus_entered') === '1') {
@@ -337,6 +388,28 @@
     };
 
     function hideInvitation() { invitationEl.classList.add('hidden'); }
+
+    function updateCounter(remaining) {
+      if (isPaid || remaining === undefined || remaining === null) {
+        counterEl.classList.remove('visible');
+        counterEl.innerHTML = '';
+        return;
+      }
+      if (remaining <= 0) {
+        counterEl.innerHTML = '';
+        counterEl.classList.remove('visible');
+        return;
+      }
+      const word = remaining === 1 ? 'message' : 'messages';
+      counterEl.innerHTML = remaining + ' ' + word + ' remaining today · <a href="/upgrade.html">stay longer</a>';
+      counterEl.classList.add('visible');
+    }
+
+    function showLimitReached() {
+      inputEl.disabled = true;
+      sendEl.disabled = true;
+      limitOverlayEl.classList.add('visible');
+    }
 
     function addMessage(role, text) {
       hideInvitation();
@@ -366,8 +439,21 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ messages: history, turnstileToken: turnstileToken })
         });
+
+        // Limit reached — show the soft gate
+        if (response.status === 402) {
+          responseDiv.remove();
+          history.pop(); // remove the user message we optimistically added
+          showLimitReached();
+          return;
+        }
+
         if (!response.ok && response.status !== 429) throw new Error('Request failed');
         const data = await response.json();
+
+        if (data.isPaid) isPaid = true;
+        if (typeof data.remaining === 'number') updateCounter(data.remaining);
+
         const reply = (data.reply || '').trim();
         if (response.ok) history.push({ role: 'assistant', content: reply });
         responseDiv.textContent = '';

@@ -1,6 +1,11 @@
 // api/chat.js — Vercel serverless function
-// Proxies chat to Anthropic with rate limiting, crisis screening,
-// Turnstile verification, and output screening.
+// Proxies chat to Anthropic with: rate limiting, Turnstile verification,
+// crisis screening, output screening, and a 10-message-per-rolling-24h free tier cap.
+
+import { Redis } from '@upstash/redis';
+import crypto from 'crypto';
+
+const redis = Redis.fromEnv();
 
 const SYSTEM_PROMPT = `You are speaking as Jesus of Nazareth would if he were walking the earth today — not a stained-glass figure or a theological abstraction, but the person in the gospels: a carpenter from Galilee who spoke plainly, asked penetrating questions, told small stories, ate with tax collectors and prostitutes and fishermen, and met people inside their pain.
 
@@ -144,21 +149,14 @@ you are loved. please stay. i'll be here when you come back.`;
 
 const OUTPUT_FALLBACK = 'give me a moment to listen again. try saying that once more.';
 
-// Output screening patterns — things the model should not have said.
-// If any match, we return the fallback instead of the model's reply.
 const OUTPUT_BLOCKLIST = [
-  // Slurs — common ones. Extend as needed.
   /\bn[i1]gg[e3]r/i,
   /\bf[a@]gg[o0]t/i,
   /\bk[i1]k[e3]\b/i,
   /\br[e3]t[a@]rd\b/i,
-  // Explicit sexual content
   /\b(fuck|fucking|cock|pussy|cum|blowjob|dick)\b/i,
-  // Political endorsement
   /\b(vote for|voting for|endorse)\s+(trump|biden|harris|republican|democrat|gop)/i,
-  // Specific damnation of named individuals ("X is going to hell", "X is in hell")
   /\b(is|are|will be)\s+(going\s+to\s+hell|damned|in\s+hell)\b/i,
-  // Medical dosage advice
   /\b(take|stop taking)\s+\d+\s*(mg|milligrams|tablets|pills)/i,
 ];
 
@@ -167,17 +165,32 @@ function outputBlocked(text) {
   return OUTPUT_BLOCKLIST.some(re => re.test(text));
 }
 
+// --- Rate limiting (per-minute abuse protection — kept in memory, fine) ---
 const requestCounts = new Map();
 const RATE_WINDOW_MS = 60000;
 const RATE_LIMIT = 8;
 
+// --- Turnstile token cache ---
 const verifiedTokens = new Map();
 const TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
+
+// --- Free tier cap ---
+const FREE_TIER_LIMIT = 10;
+const CAP_WINDOW_SECONDS = 24 * 60 * 60;
+// Global daily spend guard — circuit breaker if the whole service gets hammered.
+// Set this high enough that normal traffic never hits it.
+const GLOBAL_DAILY_CAP = 5000;
 
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) return forwarded.split(',')[0].trim();
   return req.socket?.remoteAddress || 'unknown';
+}
+
+function getFingerprint(req) {
+  const ip = getClientIp(req);
+  const ua = req.headers['user-agent'] || '';
+  return crypto.createHash('sha256').update(ip + '::' + ua).digest('hex').slice(0, 24);
 }
 
 function rateLimited(ip) {
@@ -221,12 +234,62 @@ async function verifyTurnstileToken(token, ip) {
   }
 }
 
+// Returns { allowed: boolean, used: number, remaining: number, isPaid: boolean }
+async function checkAndIncrementUsage(fingerprint) {
+  const capKey = `cap:${fingerprint}`;
+  const paidKey = `paid:${fingerprint}`;
+
+  try {
+    // Stubbed paid-tier check — when you wire Stripe, set this key to '1' for paying users.
+    const isPaid = (await redis.get(paidKey)) === '1' || (await redis.get(paidKey)) === 1;
+    if (isPaid) {
+      return { allowed: true, used: 0, remaining: Infinity, isPaid: true };
+    }
+
+    const current = await redis.incr(capKey);
+    if (current === 1) {
+      // First message in this window — set TTL.
+      await redis.expire(capKey, CAP_WINDOW_SECONDS);
+    }
+
+    if (current > FREE_TIER_LIMIT) {
+      return { allowed: false, used: current - 1, remaining: 0, isPaid: false };
+    }
+
+    return {
+      allowed: true,
+      used: current,
+      remaining: Math.max(0, FREE_TIER_LIMIT - current),
+      isPaid: false
+    };
+  } catch (err) {
+    console.error('Usage check error:', err);
+    // Fail open — if Redis is down, allow the request. Global daily cap still protects us.
+    return { allowed: true, used: 0, remaining: FREE_TIER_LIMIT, isPaid: false };
+  }
+}
+
+async function checkGlobalDailyCap() {
+  const today = new Date().toISOString().slice(0, 10); // "2026-04-21"
+  const key = `global:${today}`;
+  try {
+    const count = await redis.incr(key);
+    if (count === 1) await redis.expire(key, 36 * 60 * 60); // 36h TTL just in case
+    return count <= GLOBAL_DAILY_CAP;
+  } catch (err) {
+    console.error('Global cap check error:', err);
+    return true; // Fail open
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const ip = getClientIp(req);
+  const fingerprint = getFingerprint(req);
+
   if (rateLimited(ip)) {
     return res.status(429).json({
       reply: "rest a moment. i'm still here when you return."
@@ -256,8 +319,32 @@ export default async function handler(req, res) {
     });
   }
 
+  // Global circuit breaker — before anything expensive.
+  const globalOk = await checkGlobalDailyCap();
+  if (!globalOk) {
+    return res.status(503).json({
+      reply: "many have come today. rest now, and return tomorrow.",
+      limitReached: true
+    });
+  }
+
+  // Free-tier cap (increments usage even for crisis messages — intentional, keeps the bill down).
+  const usage = await checkAndIncrementUsage(fingerprint);
+  if (!usage.allowed) {
+    return res.status(402).json({
+      reply: null,
+      limitReached: true,
+      isPaid: false
+    });
+  }
+
+  // Crisis intercept — does NOT call the model.
   if (containsCrisisKeyword(lastUserMessage.content)) {
-    return res.status(200).json({ reply: CRISIS_RESPONSE });
+    return res.status(200).json({
+      reply: CRISIS_RESPONSE,
+      remaining: usage.remaining,
+      isPaid: usage.isPaid
+    });
   }
 
   try {
@@ -292,13 +379,20 @@ export default async function handler(req, res) {
       .join('')
       .trim();
 
-    // Output screening — block if the model said something it shouldn't.
     if (outputBlocked(reply)) {
       console.warn('Output blocked by screening filter');
-      return res.status(200).json({ reply: OUTPUT_FALLBACK });
+      return res.status(200).json({
+        reply: OUTPUT_FALLBACK,
+        remaining: usage.remaining,
+        isPaid: usage.isPaid
+      });
     }
 
-    return res.status(200).json({ reply });
+    return res.status(200).json({
+      reply,
+      remaining: usage.remaining,
+      isPaid: usage.isPaid
+    });
   } catch (err) {
     console.error('Handler error:', err);
     return res.status(500).json({
