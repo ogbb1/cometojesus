@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/cometojesus-touch-icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/cometojesus-icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/cometojesus-icon-512.png">
-<meta name="theme-color" content="#fbf8f1">
+<meta name="theme-color" content="#f4eadb">
 <meta name="description" content="come to me, all you who are weary. an imagined conversation with Jesus.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="come to me">
@@ -33,27 +33,27 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #fbf8f1;
-    --ink: #1a1309;
-    --ink-mid: #2a231a;
-    --ink-soft: #5a4f40;
-    --ink-whisper: #9a8f7e;
-    --light: 255, 250, 230;
+    /* Warmer cream palette — paper/parchment feel */
+    --bg: #f4eadb;
+    --bg-deep: #ebdfca;
+    --ink: #1c1409;
+    --ink-mid: #2d241a;
+    --ink-soft: #605242;
+    --ink-whisper: #9a8c76;
+    --light: 255, 248, 220;
     --light-hot: 255, 253, 245;
-    --line: rgba(26, 19, 9, 0.1);
-    --input-bg: rgba(255, 255, 255, 0.7);
-    --input-border: rgba(26, 19, 9, 0.14);
-    --input-border-focus: rgba(26, 19, 9, 0.38);
+    --line: rgba(28, 20, 9, 0.1);
+    --input-bg: rgba(255, 252, 244, 0.7);
+    --input-border: rgba(28, 20, 9, 0.14);
+    --input-border-focus: rgba(28, 20, 9, 0.38);
   }
 
-  /* ===== APP SHELL (dvh/svh for mobile keyboard sanity) ===== */
   html, body {
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
   }
   body {
-    /* dvh = dynamic viewport height. 100svh as fallback for older browsers. */
     height: 100svh;
     height: 100dvh;
     background: var(--bg);
@@ -75,11 +75,11 @@
     min-width: 320px; min-height: 320px;
     background: radial-gradient(circle at center,
       rgba(255, 255, 255, 1) 0%,
-      rgba(255, 253, 245, 0.98) 9%,
-      rgba(var(--light-hot), 0.9) 20%,
-      rgba(var(--light), 0.6) 36%,
-      rgba(var(--light), 0.25) 55%,
-      rgba(var(--light), 0.08) 75%,
+      rgba(255, 253, 245, 0.95) 9%,
+      rgba(var(--light-hot), 0.85) 20%,
+      rgba(var(--light), 0.55) 36%,
+      rgba(var(--light), 0.22) 55%,
+      rgba(var(--light), 0.07) 75%,
       rgba(var(--light), 0) 92%);
     filter: blur(2px);
     pointer-events: none; z-index: 0;
@@ -90,8 +90,8 @@
     top: -25vh; left: 50%; transform: translateX(-50%);
     width: 220vw; height: 130vh;
     background: radial-gradient(ellipse 70% 75% at 50% 15%,
-      rgba(var(--light), 0.6) 0%,
-      rgba(var(--light), 0.3) 28%,
+      rgba(var(--light), 0.55) 0%,
+      rgba(var(--light), 0.28) 28%,
       rgba(var(--light), 0.1) 55%,
       rgba(var(--light), 0.02) 78%,
       transparent 92%);
@@ -104,25 +104,25 @@
     pointer-events: none; z-index: 0;
     background: conic-gradient(from 0deg at 50% 0%,
       transparent 0deg, transparent 95deg,
-      rgba(var(--light-hot), 0.45) 99deg, rgba(var(--light-hot), 0.2) 103deg,
+      rgba(var(--light-hot), 0.42) 99deg, rgba(var(--light-hot), 0.18) 103deg,
       transparent 108deg, transparent 116deg,
-      rgba(var(--light-hot), 0.65) 120deg, rgba(var(--light-hot), 0.3) 124deg,
+      rgba(var(--light-hot), 0.62) 120deg, rgba(var(--light-hot), 0.28) 124deg,
       transparent 129deg, transparent 140deg,
-      rgba(var(--light-hot), 0.55) 144deg, rgba(var(--light-hot), 0.25) 148deg,
+      rgba(var(--light-hot), 0.52) 144deg, rgba(var(--light-hot), 0.22) 148deg,
       transparent 152deg, transparent 160deg,
-      rgba(var(--light-hot), 0.75) 164deg, rgba(var(--light-hot), 0.85) 168deg,
-      rgba(var(--light-hot), 0.75) 172deg, transparent 177deg,
-      transparent 183deg, rgba(var(--light-hot), 0.85) 187deg,
-      rgba(var(--light-hot), 0.95) 190deg, rgba(var(--light-hot), 0.85) 193deg,
+      rgba(var(--light-hot), 0.72) 164deg, rgba(var(--light-hot), 0.82) 168deg,
+      rgba(var(--light-hot), 0.72) 172deg, transparent 177deg,
+      transparent 183deg, rgba(var(--light-hot), 0.82) 187deg,
+      rgba(var(--light-hot), 0.92) 190deg, rgba(var(--light-hot), 0.82) 193deg,
       transparent 197deg, transparent 203deg,
-      rgba(var(--light-hot), 0.75) 207deg, rgba(var(--light-hot), 0.85) 211deg,
-      rgba(var(--light-hot), 0.75) 215deg, transparent 220deg,
-      transparent 228deg, rgba(var(--light-hot), 0.55) 232deg,
-      rgba(var(--light-hot), 0.25) 236deg, transparent 240deg,
-      transparent 251deg, rgba(var(--light-hot), 0.65) 256deg,
-      rgba(var(--light-hot), 0.3) 260deg, transparent 264deg,
-      transparent 272deg, rgba(var(--light-hot), 0.45) 276deg,
-      rgba(var(--light-hot), 0.2) 280deg, transparent 285deg,
+      rgba(var(--light-hot), 0.72) 207deg, rgba(var(--light-hot), 0.82) 211deg,
+      rgba(var(--light-hot), 0.72) 215deg, transparent 220deg,
+      transparent 228deg, rgba(var(--light-hot), 0.52) 232deg,
+      rgba(var(--light-hot), 0.22) 236deg, transparent 240deg,
+      transparent 251deg, rgba(var(--light-hot), 0.62) 256deg,
+      rgba(var(--light-hot), 0.28) 260deg, transparent 264deg,
+      transparent 272deg, rgba(var(--light-hot), 0.42) 276deg,
+      rgba(var(--light-hot), 0.18) 280deg, transparent 285deg,
       transparent 360deg);
     mask-image: linear-gradient(to bottom,
       black 0%, black 20%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0.25) 70%, transparent 90%);
@@ -158,25 +158,44 @@
     animation: shimmer 14s ease-in-out infinite;
   }
   @keyframes breathe {
-    0%, 100% { opacity: 0.95; transform: translateX(-50%) scale(1); }
+    0%, 100% { opacity: 0.92; transform: translateX(-50%) scale(1); }
     50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
   }
   @keyframes shimmer {
-    0%, 100% { opacity: 0.65; }
-    50% { opacity: 0.95; }
-  }
-  .grain {
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 1; opacity: 0.3; mix-blend-mode: multiply;
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.9; }
   }
 
-  /* ===== GATE — now anchored with Matthew 11:28 ===== */
+  /* ===== PAPER FIBER TEXTURE (two layers) =====
+     Layer 1: finer noise, slightly horizontal frequency bias — "fiber direction"
+     Layer 2: coarser noise for uneven paper feel
+     Both fixed-position so they don't scroll with content.
+  */
+  .fiber-fine {
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85 0.35' numOctaves='2' stitchTiles='stitch' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.08 0 0 0 0 0.04 0 0 0 0.11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    background-size: 400px 400px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.75;
+    mix-blend-mode: multiply;
+  }
+  .fiber-coarse {
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='3' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.13 0 0 0 0 0.07 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+    background-size: 600px 600px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.7;
+    mix-blend-mode: multiply;
+  }
+
+  /* ===== GATE ===== */
   .gate {
     position: fixed; inset: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
     padding: 32px 32px calc(32px + env(safe-area-inset-bottom)) 32px;
-    background: rgba(251, 248, 241, 0.78);
+    background: rgba(244, 234, 219, 0.78);
     backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
     animation: gateFadeIn 1.4s ease-out;
     transition: opacity 1.2s ease, visibility 1.2s;
@@ -197,7 +216,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Scripture anchor at the top of the gate */
   .scripture-anchor {
     margin-bottom: 36px;
     display: flex; flex-direction: column; align-items: center;
@@ -214,7 +232,7 @@
   }
   .scripture-ref {
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
-    color: var(--ink-soft); font-family: Georgia, serif; opacity: 0.75;
+    color: var(--ink-soft); font-family: Georgia, serif; opacity: 0.78;
   }
   .scripture-rule {
     width: 28px; height: 1px; background: var(--ink-whisper);
@@ -224,7 +242,7 @@
   .gate-eyebrow {
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
     color: var(--ink-soft); font-family: Georgia, serif;
-    margin-bottom: 22px; opacity: 0.7;
+    margin-bottom: 22px; opacity: 0.72;
   }
   .gate-title {
     font-size: 26px; font-weight: 400; font-style: italic;
@@ -271,7 +289,7 @@
   }
   .gate-footer a:hover { color: var(--ink); }
 
-  /* ===== CONVERSATION AREA ===== */
+  /* ===== CONVERSATION ===== */
   .container {
     position: relative; z-index: 2;
     flex: 1 1 auto;
@@ -308,15 +326,13 @@
     font-size: 25px; letter-spacing: 0.003em; line-height: 1.5;
   }
 
-  /* ===== COMPOSER (mobile-first) ===== */
+  /* ===== COMPOSER ===== */
   .input-area {
-    position: relative;
-    z-index: 3;
+    position: relative; z-index: 3;
     flex-shrink: 0;
     padding: 12px 20px calc(14px + env(safe-area-inset-bottom)) 20px;
-    width: 100%; max-width: 680px;
-    margin: 0 auto;
-    background: linear-gradient(to top, rgba(251, 248, 241, 0.95) 70%, rgba(251, 248, 241, 0));
+    width: 100%; max-width: 680px; margin: 0 auto;
+    background: linear-gradient(to top, rgba(244, 234, 219, 0.95) 70%, rgba(244, 234, 219, 0));
   }
   .input-shell {
     display: flex; align-items: flex-end; gap: 10px;
@@ -327,12 +343,12 @@
     transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 1px 3px rgba(26, 19, 9, 0.04);
+    box-shadow: 0 1px 3px rgba(28, 20, 9, 0.04);
   }
   .input-shell:focus-within {
     border-color: var(--input-border-focus);
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 2px 12px rgba(26, 19, 9, 0.06);
+    background: rgba(255, 252, 244, 0.88);
+    box-shadow: 0 2px 12px rgba(28, 20, 9, 0.06);
   }
   .input {
     flex: 1; background: transparent; border: none; outline: none;
@@ -374,7 +390,7 @@
   .footer {
     text-align: center; font-size: 9px; color: var(--ink-soft);
     padding: 6px 20px 0; letter-spacing: 0.18em;
-    text-transform: uppercase; font-family: Georgia, serif; opacity: 0.5;
+    text-transform: uppercase; font-family: Georgia, serif; opacity: 0.55;
   }
   .counter {
     text-align: center; font-size: 10px; color: var(--ink-whisper);
@@ -385,7 +401,7 @@
   .counter.visible { opacity: 0.75; }
   .counter a { color: var(--ink-soft); border-bottom: 1px solid var(--ink-whisper); text-decoration: none; }
 
-  /* ===== HELP BUTTON ===== */
+  /* ===== HELP ===== */
   .help-btn {
     position: fixed;
     bottom: calc(12px + env(safe-area-inset-bottom));
@@ -394,7 +410,7 @@
     width: 30px; height: 30px;
     border-radius: 50%;
     border: 1px solid var(--ink-whisper);
-    background: rgba(251, 248, 241, 0.7);
+    background: rgba(244, 234, 219, 0.7);
     color: var(--ink-soft);
     font-family: Georgia, serif;
     font-size: 13px; font-style: italic;
@@ -411,7 +427,7 @@
     position: fixed; inset: 0; z-index: 15;
     display: none; align-items: center; justify-content: center;
     padding: 32px;
-    background: rgba(251, 248, 241, 0.92);
+    background: rgba(244, 234, 219, 0.92);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   }
   .about-overlay.visible { display: flex; animation: gateFadeIn 0.5s ease-out; }
@@ -437,14 +453,14 @@
   .about-body.small {
     font-size: 13px; color: var(--ink-soft); font-style: italic;
     margin-top: 20px; padding-top: 16px;
-    border-top: 1px solid rgba(26,19,9,0.08);
+    border-top: 1px solid rgba(28,20,9,0.08);
   }
 
-  /* ===== LIMIT OVERLAY ===== */
+  /* ===== LIMIT ===== */
   .limit-overlay {
     position: fixed; inset: 0; z-index: 20;
     display: none; align-items: center; justify-content: center;
-    padding: 32px; background: rgba(251, 248, 241, 0.94);
+    padding: 32px; background: rgba(244, 234, 219, 0.94);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   }
   .limit-overlay.visible { display: flex; animation: gateFadeIn 1.2s ease-out; }
@@ -463,12 +479,11 @@
     display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; justify-content: center;
   }
 
-  /* ===== MOBILE ===== */
   @media (max-width: 600px) {
     .messages { padding-top: 14vh; gap: 26px; }
     .msg.him { font-size: 20px; }
     .msg.user { font-size: 17px; }
-    .input { font-size: 16px; }  /* 16px avoids iOS zoom on focus */
+    .input { font-size: 16px; }
     .container { padding: 0 18px; }
     .input-area { padding-left: 14px; padding-right: 14px; }
     .input-shell { padding: 6px 6px 6px 18px; border-radius: 22px; }
@@ -488,6 +503,9 @@
     .about-body { font-size: 14px; }
     .help-btn { width: 28px; height: 28px; font-size: 12px; right: 10px; }
     .sun-core { min-width: 260px; min-height: 260px; top: -6vh; }
+    /* Slightly reduce grain on small screens so text stays crisp */
+    .fiber-fine { opacity: 0.55; }
+    .fiber-coarse { opacity: 0.5; }
   }
   @media (prefers-reduced-motion: reduce) {
     .sun-core, .rays-soft, .msg, .gate, .gate-content { animation: none; }
@@ -499,11 +517,11 @@
   <div class="rays"></div>
   <div class="rays-soft"></div>
   <div class="sun-core"></div>
-  <div class="grain"></div>
+  <div class="fiber-coarse"></div>
+  <div class="fiber-fine"></div>
 
   <div class="gate" id="gate">
     <div class="gate-content" id="gateContent">
-      <!-- Scripture anchor — always visible, first-time and returning -->
       <div class="scripture-anchor">
         <div class="scripture-headline">come to me</div>
         <div class="scripture-verse">I will give you rest.</div>
@@ -695,7 +713,6 @@
       sendEl.disabled = !hasText;
     }
 
-    /* ===== AUTO-GROW VIA requestAnimationFrame (cheap, no layout thrash) ===== */
     let rafId = null;
     function resizeInput() {
       if (rafId) return;
@@ -707,7 +724,6 @@
       });
     }
 
-    /* ===== iOS KEYBOARD: use visualViewport to hold composer above keyboard ===== */
     function handleVisualViewport() {
       if (!window.visualViewport) return;
       const vv = window.visualViewport;
