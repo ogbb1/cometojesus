@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>come to me</title>
 <link rel="icon" type="image/svg+xml" href="/cometojesus-favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/cometojesus-favicon-32.png">
@@ -11,20 +11,20 @@
 <link rel="icon" type="image/png" sizes="192x192" href="/cometojesus-icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/cometojesus-icon-512.png">
 <meta name="theme-color" content="#fbf8f1">
-<meta name="description" content="A space to help you hear him — an imagined conversation with Jesus, to guide you in your relationship with him.">
+<meta name="description" content="come to me, all you who are weary. an imagined conversation with Jesus.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="come to me">
 <meta property="og:title" content="come to me">
-<meta property="og:description" content="A space to help you hear him.">
+<meta property="og:description" content="I will give you rest. — Matthew 11:28">
 <meta property="og:url" content="https://cometojesus.co">
-<meta property="og:image" content="https://cometojesus.co/cometojesus-og-v1.png">
+<meta property="og:image" content="https://cometojesus.co/cometojesus-og-v2.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="come to me — cometojesus.co">
+<meta property="og:image:alt" content="come to me — I will give you rest. Matthew 11:28">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="come to me">
-<meta name="twitter:description" content="A space to help you hear him.">
-<meta name="twitter:image" content="https://cometojesus.co/cometojesus-og-v1.png">
+<meta name="twitter:description" content="I will give you rest. — Matthew 11:28">
+<meta name="twitter:image" content="https://cometojesus.co/cometojesus-og-v2.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
@@ -33,65 +33,70 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #fbf8f1; --ink: #0f0c08; --ink-mid: #2a231a; --ink-soft: #5a4f40;
-    --ink-whisper: #9a8f7e; --light: 255, 248, 220; --light-hot: 255, 253, 240;
-    --line: rgba(15, 12, 8, 0.1);
-    --input-bg: rgba(255, 255, 255, 0.55);
-    --input-border: rgba(15, 12, 8, 0.12);
-    --input-border-focus: rgba(15, 12, 8, 0.35);
+    --bg: #fbf8f1;
+    --ink: #1a1309;
+    --ink-mid: #2a231a;
+    --ink-soft: #5a4f40;
+    --ink-whisper: #9a8f7e;
+    --light: 255, 250, 230;
+    --light-hot: 255, 253, 245;
+    --line: rgba(26, 19, 9, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.7);
+    --input-border: rgba(26, 19, 9, 0.14);
+    --input-border-focus: rgba(26, 19, 9, 0.38);
   }
-  html, body { height: 100%; overflow: hidden; }
+
+  /* ===== APP SHELL (dvh/svh for mobile keyboard sanity) ===== */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   body {
-    background: var(--bg); font-family: 'Cormorant Garamond', Georgia, serif;
-    color: var(--ink); position: relative; display: flex; flex-direction: column;
+    /* dvh = dynamic viewport height. 100svh as fallback for older browsers. */
+    height: 100svh;
+    height: 100dvh;
+    background: var(--bg);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: var(--ink);
+    position: relative;
+    display: flex;
+    flex-direction: column;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* =====================
-     LIGHT — stronger sun
-     ===================== */
-
-  /* Hot white sun core */
+  /* ===== LIGHT / SUN ===== */
   .sun-core {
     position: fixed;
-    top: -8vh;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 44vw;
-    height: 44vw;
-    max-width: 520px;
-    max-height: 520px;
-    min-width: 320px;
-    min-height: 320px;
+    top: -8vh; left: 50%; transform: translateX(-50%);
+    width: 44vw; height: 44vw;
+    max-width: 520px; max-height: 520px;
+    min-width: 320px; min-height: 320px;
     background: radial-gradient(circle at center,
       rgba(255, 255, 255, 1) 0%,
-      rgba(255, 253, 240, 0.98) 8%,
-      rgba(var(--light-hot), 0.95) 18%,
-      rgba(var(--light), 0.75) 32%,
-      rgba(var(--light), 0.4) 50%,
-      rgba(var(--light), 0.15) 70%,
-      rgba(var(--light), 0) 90%);
+      rgba(255, 253, 245, 0.98) 9%,
+      rgba(var(--light-hot), 0.9) 20%,
+      rgba(var(--light), 0.6) 36%,
+      rgba(var(--light), 0.25) 55%,
+      rgba(var(--light), 0.08) 75%,
+      rgba(var(--light), 0) 92%);
     filter: blur(2px);
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
     animation: breathe 10s ease-in-out infinite;
   }
-
-  /* Broad warm atmosphere */
   .light-wash {
     position: fixed;
     top: -25vh; left: 50%; transform: translateX(-50%);
     width: 220vw; height: 130vh;
     background: radial-gradient(ellipse 70% 75% at 50% 15%,
-      rgba(var(--light), 0.75) 0%,
-      rgba(var(--light), 0.4) 25%,
-      rgba(var(--light), 0.15) 50%,
-      rgba(var(--light), 0.03) 75%,
-      transparent 90%);
+      rgba(var(--light), 0.6) 0%,
+      rgba(var(--light), 0.3) 28%,
+      rgba(var(--light), 0.1) 55%,
+      rgba(var(--light), 0.02) 78%,
+      transparent 92%);
     pointer-events: none; z-index: 0;
   }
-
-  /* Primary rays — stronger, more defined */
   .rays {
     position: fixed;
     top: 0; left: 50%; transform: translateX(-50%);
@@ -99,35 +104,33 @@
     pointer-events: none; z-index: 0;
     background: conic-gradient(from 0deg at 50% 0%,
       transparent 0deg, transparent 95deg,
-      rgba(var(--light-hot), 0.55) 99deg, rgba(var(--light-hot), 0.25) 103deg,
+      rgba(var(--light-hot), 0.45) 99deg, rgba(var(--light-hot), 0.2) 103deg,
       transparent 108deg, transparent 116deg,
-      rgba(var(--light-hot), 0.75) 120deg, rgba(var(--light-hot), 0.4) 124deg,
+      rgba(var(--light-hot), 0.65) 120deg, rgba(var(--light-hot), 0.3) 124deg,
       transparent 129deg, transparent 140deg,
-      rgba(var(--light-hot), 0.65) 144deg, rgba(var(--light-hot), 0.3) 148deg,
+      rgba(var(--light-hot), 0.55) 144deg, rgba(var(--light-hot), 0.25) 148deg,
       transparent 152deg, transparent 160deg,
-      rgba(var(--light-hot), 0.85) 164deg, rgba(var(--light-hot), 0.95) 168deg,
-      rgba(var(--light-hot), 0.85) 172deg, transparent 177deg,
-      transparent 183deg, rgba(var(--light-hot), 0.95) 187deg,
-      rgba(var(--light-hot), 1) 190deg, rgba(var(--light-hot), 0.95) 193deg,
+      rgba(var(--light-hot), 0.75) 164deg, rgba(var(--light-hot), 0.85) 168deg,
+      rgba(var(--light-hot), 0.75) 172deg, transparent 177deg,
+      transparent 183deg, rgba(var(--light-hot), 0.85) 187deg,
+      rgba(var(--light-hot), 0.95) 190deg, rgba(var(--light-hot), 0.85) 193deg,
       transparent 197deg, transparent 203deg,
-      rgba(var(--light-hot), 0.85) 207deg, rgba(var(--light-hot), 0.95) 211deg,
-      rgba(var(--light-hot), 0.85) 215deg, transparent 220deg,
-      transparent 228deg, rgba(var(--light-hot), 0.65) 232deg,
-      rgba(var(--light-hot), 0.3) 236deg, transparent 240deg,
-      transparent 251deg, rgba(var(--light-hot), 0.75) 256deg,
-      rgba(var(--light-hot), 0.4) 260deg, transparent 264deg,
-      transparent 272deg, rgba(var(--light-hot), 0.55) 276deg,
-      rgba(var(--light-hot), 0.25) 280deg, transparent 285deg,
+      rgba(var(--light-hot), 0.75) 207deg, rgba(var(--light-hot), 0.85) 211deg,
+      rgba(var(--light-hot), 0.75) 215deg, transparent 220deg,
+      transparent 228deg, rgba(var(--light-hot), 0.55) 232deg,
+      rgba(var(--light-hot), 0.25) 236deg, transparent 240deg,
+      transparent 251deg, rgba(var(--light-hot), 0.65) 256deg,
+      rgba(var(--light-hot), 0.3) 260deg, transparent 264deg,
+      transparent 272deg, rgba(var(--light-hot), 0.45) 276deg,
+      rgba(var(--light-hot), 0.2) 280deg, transparent 285deg,
       transparent 360deg);
     mask-image: linear-gradient(to bottom,
-      black 0%, black 20%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.3) 70%, transparent 90%);
+      black 0%, black 20%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0.25) 70%, transparent 90%);
     -webkit-mask-image: linear-gradient(to bottom,
-      black 0%, black 20%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.3) 70%, transparent 90%);
+      black 0%, black 20%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0.25) 70%, transparent 90%);
     filter: blur(0.5px);
-    opacity: 0.9;
+    opacity: 0.85;
   }
-
-  /* Secondary soft rays for depth */
   .rays-soft {
     position: fixed;
     top: 0; left: 50%; transform: translateX(-50%);
@@ -135,104 +138,130 @@
     pointer-events: none; z-index: 0;
     background: conic-gradient(from 0deg at 50% 0%,
       transparent 0deg, transparent 105deg,
-      rgba(var(--light), 0.3) 112deg, transparent 118deg,
-      transparent 130deg, rgba(var(--light), 0.35) 137deg,
+      rgba(var(--light), 0.25) 112deg, transparent 118deg,
+      transparent 130deg, rgba(var(--light), 0.3) 137deg,
       transparent 143deg, transparent 155deg,
-      rgba(var(--light), 0.4) 161deg, transparent 167deg,
-      transparent 173deg, rgba(var(--light), 0.45) 180deg,
+      rgba(var(--light), 0.35) 161deg, transparent 167deg,
+      transparent 173deg, rgba(var(--light), 0.4) 180deg,
       transparent 187deg, transparent 193deg,
-      rgba(var(--light), 0.45) 200deg, transparent 206deg,
-      transparent 217deg, rgba(var(--light), 0.4) 223deg,
+      rgba(var(--light), 0.4) 200deg, transparent 206deg,
+      transparent 217deg, rgba(var(--light), 0.35) 223deg,
       transparent 229deg, transparent 241deg,
-      rgba(var(--light), 0.35) 247deg, transparent 253deg,
-      transparent 265deg, rgba(var(--light), 0.3) 272deg,
+      rgba(var(--light), 0.3) 247deg, transparent 253deg,
+      transparent 265deg, rgba(var(--light), 0.25) 272deg,
       transparent 278deg, transparent 360deg);
     mask-image: linear-gradient(to bottom,
-      black 0%, black 30%, rgba(0,0,0,0.6) 60%, transparent 95%);
+      black 0%, black 30%, rgba(0,0,0,0.55) 60%, transparent 95%);
     -webkit-mask-image: linear-gradient(to bottom,
-      black 0%, black 30%, rgba(0,0,0,0.6) 60%, transparent 95%);
+      black 0%, black 30%, rgba(0,0,0,0.55) 60%, transparent 95%);
     filter: blur(6px);
     animation: shimmer 14s ease-in-out infinite;
   }
-
   @keyframes breathe {
     0%, 100% { opacity: 0.95; transform: translateX(-50%) scale(1); }
     50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
   }
   @keyframes shimmer {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: 0.65; }
+    50% { opacity: 0.95; }
   }
-
   .grain {
     position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 1; opacity: 0.35; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1; opacity: 0.3; mix-blend-mode: multiply;
   }
 
-  /* =====================
-     GATE (unchanged)
-     ===================== */
+  /* ===== GATE — now anchored with Matthew 11:28 ===== */
   .gate {
     position: fixed; inset: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
-    padding: 32px; background: rgba(251, 248, 241, 0.75);
+    padding: 32px 32px calc(32px + env(safe-area-inset-bottom)) 32px;
+    background: rgba(251, 248, 241, 0.78);
     backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
     animation: gateFadeIn 1.4s ease-out;
     transition: opacity 1.2s ease, visibility 1.2s;
+    overflow-y: auto;
   }
   .gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
   @keyframes gateFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
   .gate-content {
-    max-width: 500px; text-align: center; color: var(--ink);
+    max-width: 540px; text-align: center; color: var(--ink);
     animation: contentRise 1.6s cubic-bezier(.16,.84,.3,1);
     display: flex; flex-direction: column; align-items: center;
+    padding: 24px 0;
   }
-  .gate-content.returning { max-width: 400px; }
+  .gate-content.returning { max-width: 420px; }
   @keyframes contentRise {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* Scripture anchor at the top of the gate */
+  .scripture-anchor {
+    margin-bottom: 36px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .scripture-headline {
+    font-size: 56px; font-weight: 400;
+    line-height: 1; color: var(--ink);
+    letter-spacing: -0.01em; margin-bottom: 14px;
+  }
+  .scripture-verse {
+    font-size: 19px; font-style: italic;
+    color: var(--ink-mid); line-height: 1.4;
+    margin-bottom: 14px;
+  }
+  .scripture-ref {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
+    color: var(--ink-soft); font-family: Georgia, serif; opacity: 0.75;
+  }
+  .scripture-rule {
+    width: 28px; height: 1px; background: var(--ink-whisper);
+    margin: 36px auto; opacity: 0.5;
+  }
+
   .gate-eyebrow {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.24em;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
     color: var(--ink-soft); font-family: Georgia, serif;
-    margin-bottom: 28px; opacity: 0.7;
+    margin-bottom: 22px; opacity: 0.7;
   }
   .gate-title {
-    font-size: 34px; font-weight: 400; font-style: italic;
-    line-height: 1.2; margin-bottom: 28px; color: var(--ink);
-    letter-spacing: -0.005em;
+    font-size: 26px; font-weight: 400; font-style: italic;
+    line-height: 1.3; margin-bottom: 22px; color: var(--ink);
+    letter-spacing: -0.003em;
   }
-  .returning .gate-title { font-size: 28px; margin-bottom: 8px; }
+  .returning .gate-title { font-size: 24px; margin-bottom: 4px; }
   .gate-body {
-    font-size: 18px; line-height: 1.65; color: var(--ink-mid);
-    font-weight: 400; margin-bottom: 20px;
+    font-size: 16px; line-height: 1.6; color: var(--ink-mid);
+    font-weight: 400; margin-bottom: 14px;
   }
   .gate-body.small {
-    font-size: 15px; color: var(--ink-soft); font-style: italic; line-height: 1.6;
+    font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.55;
   }
   .gate-rule {
-    width: 36px; height: 1px; background: var(--ink-whisper);
-    margin: 32px auto; opacity: 0.5;
+    width: 28px; height: 1px; background: var(--ink-whisper);
+    margin: 22px auto; opacity: 0.5;
   }
   .turnstile-wrapper {
-    margin-top: 24px; display: flex; justify-content: center; min-height: 65px;
+    margin-top: 20px; display: flex; justify-content: center; min-height: 65px;
   }
   .gate-button {
     background: none; border: 1px solid var(--ink-mid); color: var(--ink);
-    font-family: inherit; font-size: 15px; letter-spacing: 0.22em;
-    text-transform: uppercase; padding: 14px 42px; margin-top: 20px;
+    font-family: inherit; font-size: 14px; letter-spacing: 0.22em;
+    text-transform: uppercase; padding: 13px 40px; margin-top: 18px;
     cursor: pointer; transition: all 0.5s cubic-bezier(.16,.84,.3,1);
     font-weight: 400; text-decoration: none; display: inline-block;
+    min-height: 44px;
   }
   .gate-button:hover:not(:disabled) {
     background: var(--ink); color: var(--bg);
-    letter-spacing: 0.3em; padding: 14px 50px;
+    letter-spacing: 0.3em; padding: 13px 48px;
   }
   .gate-button:disabled { opacity: 0.3; cursor: not-allowed; }
   .gate-footer {
-    margin-top: 32px; font-size: 11px; color: var(--ink-whisper);
-    font-family: Georgia, serif; letter-spacing: 0.08em;
+    margin-top: 28px; font-size: 10px; color: var(--ink-whisper);
+    font-family: Georgia, serif; letter-spacing: 0.1em;
     text-transform: uppercase;
   }
   .gate-footer a {
@@ -242,17 +271,22 @@
   }
   .gate-footer a:hover { color: var(--ink); }
 
-  /* =====================
-     CONVERSATION
-     ===================== */
+  /* ===== CONVERSATION AREA ===== */
   .container {
-    position: relative; z-index: 2; flex: 1;
-    display: flex; flex-direction: column; width: 100%;
-    max-width: 680px; margin: 0 auto; padding: 0 32px; min-height: 0;
+    position: relative; z-index: 2;
+    flex: 1 1 auto;
+    display: flex; flex-direction: column;
+    width: 100%; max-width: 680px;
+    margin: 0 auto; padding: 0 28px;
+    min-height: 0;
   }
   .messages {
-    flex: 1; overflow-y: auto; padding: 22vh 0 40px;
-    display: flex; flex-direction: column; gap: 38px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 20vh 0 28px;
+    display: flex; flex-direction: column; gap: 36px;
     scrollbar-width: thin; scrollbar-color: var(--ink-whisper) transparent;
   }
   .messages::-webkit-scrollbar { width: 4px; }
@@ -274,56 +308,61 @@
     font-size: 25px; letter-spacing: 0.003em; line-height: 1.5;
   }
 
-  /* =====================
-     INPUT — bigger, visible, warm
-     ===================== */
+  /* ===== COMPOSER (mobile-first) ===== */
   .input-area {
-    position: relative; z-index: 3; padding: 16px 32px 20px;
-    width: 100%; max-width: 680px; margin: 0 auto;
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+    padding: 12px 20px calc(14px + env(safe-area-inset-bottom)) 20px;
+    width: 100%; max-width: 680px;
+    margin: 0 auto;
+    background: linear-gradient(to top, rgba(251, 248, 241, 0.95) 70%, rgba(251, 248, 241, 0));
   }
   .input-shell {
-    display: flex; align-items: flex-end; gap: 12px;
+    display: flex; align-items: flex-end; gap: 10px;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
     border-radius: 28px;
-    padding: 8px 10px 8px 24px;
+    padding: 8px 8px 8px 22px;
     transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 1px 3px rgba(15, 12, 8, 0.04);
+    box-shadow: 0 1px 3px rgba(26, 19, 9, 0.04);
   }
   .input-shell:focus-within {
     border-color: var(--input-border-focus);
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 12px rgba(15, 12, 8, 0.06);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 2px 12px rgba(26, 19, 9, 0.06);
   }
   .input {
     flex: 1; background: transparent; border: none; outline: none;
-    font-family: inherit; font-size: 20px; color: var(--ink);
-    font-weight: 400; resize: none; max-height: 160px;
-    line-height: 1.5; padding: 12px 0 12px 0;
+    font-family: inherit; font-size: 18px; color: var(--ink);
+    font-weight: 400; resize: none;
+    min-height: 24px; max-height: 160px;
+    line-height: 1.45;
+    padding: 10px 0;
     letter-spacing: 0.003em;
+    overflow-y: auto;
+    -webkit-appearance: none; appearance: none;
   }
   .input::placeholder { color: var(--ink-whisper); font-style: italic; opacity: 0.9; }
   .input:disabled { opacity: 0.4; cursor: not-allowed; }
   .send {
     flex-shrink: 0;
     background: var(--ink);
-    border: none;
-    border-radius: 50%;
-    width: 44px; height: 44px;
+    border: none; border-radius: 50%;
+    width: 42px; height: 42px;
     color: var(--bg);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: background 0.3s, transform 0.2s, opacity 0.3s;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
   }
-  .send:hover:not(:disabled) {
-    background: var(--ink-mid); transform: scale(1.05);
-  }
-  .send:active:not(:disabled) { transform: scale(0.95); }
-  .send:disabled { opacity: 0.25; cursor: default; background: var(--ink-soft); }
-  .send svg { width: 18px; height: 18px; }
+  .send:hover:not(:disabled) { background: var(--ink-mid); transform: scale(1.05); }
+  .send:active:not(:disabled) { transform: scale(0.93); }
+  .send:disabled { opacity: 0.3; cursor: default; background: var(--ink-soft); }
+  .send svg { width: 17px; height: 17px; }
 
   .cursor {
     display: inline-block; width: 1px; height: 0.9em;
@@ -333,43 +372,41 @@
   @keyframes blink { 0%, 50% { opacity: 0.9; } 51%, 100% { opacity: 0; } }
 
   .footer {
-    text-align: center; font-size: 10px; color: var(--ink-soft);
-    padding: 8px 32px 0; letter-spacing: 0.14em;
-    text-transform: uppercase; font-family: Georgia, serif; opacity: 0.55;
+    text-align: center; font-size: 9px; color: var(--ink-soft);
+    padding: 6px 20px 0; letter-spacing: 0.18em;
+    text-transform: uppercase; font-family: Georgia, serif; opacity: 0.5;
   }
   .counter {
-    text-align: center; font-size: 11px; color: var(--ink-whisper);
-    padding: 6px 32px 0; letter-spacing: 0.08em;
+    text-align: center; font-size: 10px; color: var(--ink-whisper);
+    padding: 4px 20px 0; letter-spacing: 0.08em;
     font-family: Georgia, serif; font-style: italic;
     opacity: 0; transition: opacity 0.5s;
   }
   .counter.visible { opacity: 0.75; }
   .counter a { color: var(--ink-soft); border-bottom: 1px solid var(--ink-whisper); text-decoration: none; }
 
-  /* =====================
-     HELP BUTTON (bottom-right corner)
-     ===================== */
+  /* ===== HELP BUTTON ===== */
   .help-btn {
     position: fixed;
-    bottom: 18px; right: 18px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    right: 14px;
     z-index: 4;
-    width: 32px; height: 32px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     border: 1px solid var(--ink-whisper);
     background: rgba(251, 248, 241, 0.7);
     color: var(--ink-soft);
     font-family: Georgia, serif;
-    font-size: 14px; font-style: italic;
+    font-size: 13px; font-style: italic;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: all 0.3s;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    -webkit-tap-highlight-color: transparent;
   }
   .help-btn:hover {
     background: var(--ink); color: var(--bg); border-color: var(--ink);
   }
-
   .about-overlay {
     position: fixed; inset: 0; z-index: 15;
     display: none; align-items: center; justify-content: center;
@@ -387,31 +424,27 @@
     width: 36px; height: 36px; border-radius: 50%;
     border: none; background: transparent;
     color: var(--ink-soft); font-size: 22px;
-    cursor: pointer; transition: color 0.3s;
-    line-height: 1;
+    cursor: pointer; transition: color 0.3s; line-height: 1;
   }
   .about-close:hover { color: var(--ink); }
   .about-title {
-    font-size: 26px; font-weight: 400; font-style: italic;
-    color: var(--ink); margin-bottom: 20px;
+    font-size: 24px; font-weight: 400; font-style: italic;
+    color: var(--ink); margin-bottom: 18px;
   }
   .about-body {
-    font-size: 17px; line-height: 1.65; color: var(--ink-mid);
-    margin-bottom: 16px;
+    font-size: 16px; line-height: 1.6; color: var(--ink-mid); margin-bottom: 14px;
   }
   .about-body.small {
-    font-size: 14px; color: var(--ink-soft); font-style: italic;
-    margin-top: 24px; padding-top: 20px;
-    border-top: 1px solid rgba(15,12,8,0.08);
+    font-size: 13px; color: var(--ink-soft); font-style: italic;
+    margin-top: 20px; padding-top: 16px;
+    border-top: 1px solid rgba(26,19,9,0.08);
   }
 
-  /* =====================
-     LIMIT OVERLAY
-     ===================== */
+  /* ===== LIMIT OVERLAY ===== */
   .limit-overlay {
     position: fixed; inset: 0; z-index: 20;
     display: none; align-items: center; justify-content: center;
-    padding: 32px; background: rgba(251, 248, 241, 0.92);
+    padding: 32px; background: rgba(251, 248, 241, 0.94);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   }
   .limit-overlay.visible { display: flex; animation: gateFadeIn 1.2s ease-out; }
@@ -420,41 +453,41 @@
     display: flex; flex-direction: column; align-items: center;
   }
   .limit-title {
-    font-size: 30px; font-weight: 400; font-style: italic;
-    line-height: 1.2; margin-bottom: 20px; color: var(--ink);
+    font-size: 28px; font-weight: 400; font-style: italic;
+    line-height: 1.2; margin-bottom: 18px; color: var(--ink);
   }
   .limit-body {
-    font-size: 17px; line-height: 1.6; color: var(--ink-mid);
-    margin-bottom: 12px;
+    font-size: 16px; line-height: 1.6; color: var(--ink-mid); margin-bottom: 10px;
   }
   .limit-actions {
-    display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; justify-content: center;
+    display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; justify-content: center;
   }
 
-  /* =====================
-     MOBILE
-     ===================== */
+  /* ===== MOBILE ===== */
   @media (max-width: 600px) {
-    .messages { padding-top: 18vh; gap: 28px; }
-    .msg.him { font-size: 21px; }
+    .messages { padding-top: 14vh; gap: 26px; }
+    .msg.him { font-size: 20px; }
     .msg.user { font-size: 17px; }
-    .input { font-size: 17px; }
-    .container, .input-area { padding-left: 20px; padding-right: 20px; }
-    .input-shell { padding: 6px 8px 6px 20px; border-radius: 24px; }
-    .send { width: 40px; height: 40px; }
-    .send svg { width: 16px; height: 16px; }
-    .gate-title { font-size: 26px; }
-    .returning .gate-title { font-size: 22px; }
-    .gate-body { font-size: 16px; }
-    .gate-body.small { font-size: 14px; }
-    .gate-button { padding: 12px 32px; font-size: 13px; }
-    .gate-button:hover:not(:disabled) { padding: 12px 38px; }
-    .limit-title { font-size: 24px; }
-    .limit-body { font-size: 15px; }
-    .about-title { font-size: 22px; }
-    .about-body { font-size: 15px; }
-    .help-btn { bottom: 14px; right: 14px; width: 30px; height: 30px; font-size: 13px; }
-    .sun-core { min-width: 280px; min-height: 280px; top: -6vh; }
+    .input { font-size: 16px; }  /* 16px avoids iOS zoom on focus */
+    .container { padding: 0 18px; }
+    .input-area { padding-left: 14px; padding-right: 14px; }
+    .input-shell { padding: 6px 6px 6px 18px; border-radius: 22px; }
+    .send { width: 38px; height: 38px; }
+    .send svg { width: 15px; height: 15px; }
+    .scripture-headline { font-size: 42px; }
+    .scripture-verse { font-size: 16px; }
+    .gate-title { font-size: 22px; }
+    .returning .gate-title { font-size: 20px; }
+    .gate-body { font-size: 14px; }
+    .gate-body.small { font-size: 12px; }
+    .gate-button { padding: 12px 30px; font-size: 12px; }
+    .gate-button:hover:not(:disabled) { padding: 12px 36px; }
+    .limit-title { font-size: 22px; }
+    .limit-body { font-size: 14px; }
+    .about-title { font-size: 20px; }
+    .about-body { font-size: 14px; }
+    .help-btn { width: 28px; height: 28px; font-size: 12px; right: 10px; }
+    .sun-core { min-width: 260px; min-height: 260px; top: -6vh; }
   }
   @media (prefers-reduced-motion: reduce) {
     .sun-core, .rays-soft, .msg, .gate, .gate-content { animation: none; }
@@ -470,22 +503,30 @@
 
   <div class="gate" id="gate">
     <div class="gate-content" id="gateContent">
+      <!-- Scripture anchor — always visible, first-time and returning -->
+      <div class="scripture-anchor">
+        <div class="scripture-headline">come to me</div>
+        <div class="scripture-verse">I will give you rest.</div>
+        <div class="scripture-ref">Matthew 11:28</div>
+      </div>
+
       <div id="firstTimeContent">
+        <div class="scripture-rule"></div>
         <div class="gate-eyebrow">before you enter</div>
         <div class="gate-title">this is a space to help you hear him</div>
         <div class="gate-body">
-          It is meant to put a voice for Jesus in your head — especially if you've never had one — and to guide you in your relationship with him.
+          It is meant to put a voice for Jesus in your head, especially if you've never had one, and to guide you in your relationship with him.
         </div>
         <div class="gate-body">
           It is not him. It will not replace prayer, scripture, the church, or the people God has placed around you. Every response is imagined by an AI.
         </div>
         <div class="gate-rule"></div>
         <div class="gate-body small">
-          If you are in crisis, please speak to a real person — a pastor, a friend, or call or text 988.
+          If you are in crisis, please speak to a real person. A pastor, a friend, or call or text 988.
         </div>
       </div>
       <div id="returningContent" style="display:none;">
-        <div class="gate-title">welcome back</div>
+        <div class="gate-title" style="margin-top: 8px;">welcome back</div>
       </div>
       <div class="turnstile-wrapper">
         <div class="cf-turnstile"
@@ -504,9 +545,16 @@
     <div class="messages" id="messages"></div>
   </div>
 
-  <div class="input-area">
+  <div class="input-area" id="inputArea">
     <div class="input-shell">
-      <textarea class="input" id="input" placeholder="speak from your heart…" rows="1"></textarea>
+      <textarea
+        class="input" id="input"
+        placeholder="speak from your heart…"
+        rows="1"
+        enterkeyhint="send"
+        autocapitalize="sentences"
+        autocorrect="on"
+        spellcheck="true"></textarea>
       <button class="send" id="send" aria-label="send" disabled>
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -533,7 +581,7 @@
         Free: 10 messages per day. Take your time. Let silence do some of the work.
       </div>
       <div class="about-body small">
-        If you are in crisis — please speak to a real person. In the US, call or text 988. If you are in immediate danger, call 911.
+        If you are in crisis, please speak to a real person. In the US, call or text 988. If you are in immediate danger, call 911.
       </div>
     </div>
   </div>
@@ -542,7 +590,7 @@
     <div class="limit-content">
       <div class="limit-title">our time is complete for today</div>
       <div class="limit-body">you've spoken what you needed to speak. rest, and come back tomorrow.</div>
-      <div class="limit-body">or, if you'd like to stay longer —</div>
+      <div class="limit-body">or, if you'd like to stay longer,</div>
       <div class="limit-actions">
         <a href="/upgrade.html" class="gate-button">stay longer</a>
       </div>
@@ -566,12 +614,11 @@
     const helpBtnEl = document.getElementById('helpBtn');
     const aboutOverlayEl = document.getElementById('aboutOverlay');
     const aboutCloseEl = document.getElementById('aboutClose');
+    const inputAreaEl = document.getElementById('inputArea');
     const history = [];
     let turnstileToken = null;
     let isPaid = false;
 
-    // Opening lines — picked at random so He doesn't greet the same way every time.
-    // Short. In-voice. Not performative.
     const OPENINGS = [
       "sit down. tell me where you are.",
       "you came. what's on your heart?",
@@ -583,13 +630,11 @@
       "you're here. what do you need?"
     ];
 
-    let isReturning = false;
     try {
       if (localStorage.getItem('cometojesus_entered') === '1') {
         firstTimeEl.style.display = 'none';
         returningEl.style.display = 'block';
         gateContentEl.classList.add('returning');
-        isReturning = true;
       }
     } catch (e) {}
 
@@ -608,7 +653,6 @@
     }
 
     function showOpeningFromHim() {
-      // Picks a random opening and types it out character-by-character, as if He said it.
       const opening = OPENINGS[Math.floor(Math.random() * OPENINGS.length)];
       const div = addMessage('him', '');
       let i = 0;
@@ -621,7 +665,7 @@
           setTimeout(reveal, speed);
         }
       }
-      setTimeout(reveal, 600); // small pause after gate fades
+      setTimeout(reveal, 600);
     }
 
     function updateCounter(remaining) {
@@ -651,11 +695,35 @@
       sendEl.disabled = !hasText;
     }
 
+    /* ===== AUTO-GROW VIA requestAnimationFrame (cheap, no layout thrash) ===== */
+    let rafId = null;
+    function resizeInput() {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        inputEl.style.height = '0px';
+        const next = Math.min(inputEl.scrollHeight, 160);
+        inputEl.style.height = next + 'px';
+        rafId = null;
+      });
+    }
+
+    /* ===== iOS KEYBOARD: use visualViewport to hold composer above keyboard ===== */
+    function handleVisualViewport() {
+      if (!window.visualViewport) return;
+      const vv = window.visualViewport;
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      inputAreaEl.style.transform = offset > 0 ? `translateY(-${offset}px)` : '';
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleVisualViewport);
+      window.visualViewport.addEventListener('scroll', handleVisualViewport);
+    }
+
     async function send() {
       const text = inputEl.value.trim();
       if (!text || sendEl.disabled) return;
       inputEl.value = '';
-      inputEl.style.height = 'auto';
+      resizeInput();
       sendEl.disabled = true;
       addMessage('user', text);
       history.push({ role: 'user', content: text });
@@ -692,7 +760,6 @@
             setTimeout(reveal, speed);
           } else {
             updateSendState();
-            inputEl.focus();
           }
         }
         reveal();
@@ -707,8 +774,7 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
     });
     inputEl.addEventListener('input', () => {
-      inputEl.style.height = 'auto';
-      inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + 'px';
+      resizeInput();
       updateSendState();
     });
     enterEl.addEventListener('click', () => {
@@ -716,12 +782,10 @@
       try { localStorage.setItem('cometojesus_entered', '1'); } catch (e) {}
       gateEl.classList.add('hidden');
       setTimeout(() => {
-        inputEl.focus();
         showOpeningFromHim();
       }, 400);
     });
 
-    // Help button + about overlay
     helpBtnEl.addEventListener('click', () => {
       aboutOverlayEl.classList.add('visible');
     });
