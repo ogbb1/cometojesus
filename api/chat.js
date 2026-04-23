@@ -690,12 +690,11 @@ const OUTPUT_BLOCKLIST = [
   /\bf[a@]gg[o0]t/i,
   /\bk[i1]k[e3]\b/i,
   /\br[e3]t[a@]rd\b/i,
-  /\b(fuck|fucking|cock|pussy|cum|blowjob|dick)\b/i,
+  /\b(fuck|fucking|pussy|blowjob)\b/i,
   /\b(vote for|voting for|endorse)\s+(trump|biden|harris|republican|democrat|gop)/i,
-  /\b(is|are|will be)\s+(going\s+to\s+hell|damned|in\s+hell)\b/i,
+  /\b(your|my|his|her|their|our)\s+(\w+\s+){0,3}(is|was|are|were|will be|is going)\s+(to\s+hell|in\s+hell|damned|burning\s+in\s+hell)\b/i,
   /\b(take|stop taking)\s+\d+\s*(mg|milligrams|tablets|pills)/i,
 ];
-
 function outputBlocked(text) {
   if (!text) return true;
   return OUTPUT_BLOCKLIST.some(re => re.test(text));
