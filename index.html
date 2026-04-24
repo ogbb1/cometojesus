@@ -67,27 +67,25 @@
   }
 
   /* ===== LIGHT / SUN =====
-     The sun reacts to conversation state via body classes:
-     - default: slow breathing (listening, calm)
-     - body.typing: slightly more attentive (user is typing)
-     - body.thinking: dimmer, holding (500ms pause before reply)
-     - body.speaking: warmer pulse (reply is arriving)
+     The sun sits at the origin of the rays (top-center) so the light source
+     is visibly present, not implied.
+     Reacts to conversation state via body classes.
   */
   .sun-core {
     position: fixed;
-    top: -8vh; left: 50%; transform: translateX(-50%);
-    width: 44vw; height: 44vw;
-    max-width: 520px; max-height: 520px;
-    min-width: 320px; min-height: 320px;
+    top: -18vh; left: 50%; transform: translateX(-50%);
+    width: 56vw; height: 56vw;
+    max-width: 640px; max-height: 640px;
+    min-width: 380px; min-height: 380px;
     background: radial-gradient(circle at center,
       rgba(255, 255, 255, 1) 0%,
-      rgba(255, 253, 245, 0.95) 9%,
-      rgba(var(--light-hot), 0.85) 20%,
-      rgba(var(--light), 0.55) 36%,
-      rgba(var(--light), 0.22) 55%,
-      rgba(var(--light), 0.07) 75%,
-      rgba(var(--light), 0) 92%);
-    filter: blur(2px);
+      rgba(255, 253, 245, 0.95) 6%,
+      rgba(var(--light-hot), 0.88) 14%,
+      rgba(var(--light), 0.65) 28%,
+      rgba(var(--light), 0.32) 48%,
+      rgba(var(--light), 0.1) 70%,
+      rgba(var(--light), 0) 90%);
+    filter: blur(1px);
     pointer-events: none; z-index: 0;
     animation: breathe 10s ease-in-out infinite;
     transition: opacity 1.2s ease, filter 1.2s ease;
@@ -97,7 +95,7 @@
   }
   body.thinking .sun-core {
     opacity: 0.78;
-    filter: blur(3px);
+    filter: blur(2.5px);
     animation: breathe 14s ease-in-out infinite;
   }
   body.speaking .sun-core {
@@ -325,7 +323,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 20vh 0 28px;
+    padding: 20vh 0 48px;
     display: flex; flex-direction: column; gap: 36px;
     scrollbar-width: thin; scrollbar-color: var(--ink-whisper) transparent;
   }
@@ -339,13 +337,13 @@
     to { opacity: 1; transform: translateY(0); }
   }
   .msg.user {
-    color: var(--ink-mid); font-weight: 400; font-size: 19px;
+    color: var(--ink-mid); font-weight: 400; font-size: 21px;
     letter-spacing: 0.003em; padding-left: 20px;
     border-left: 2px solid var(--ink-whisper);
   }
   .msg.him {
     color: var(--ink); font-weight: 400; font-style: italic;
-    font-size: 25px; letter-spacing: 0.003em; line-height: 1.5;
+    font-size: 34px; letter-spacing: 0.003em; line-height: 1.45;
   }
 
   /* ===== CONSIDERED WORD REVEAL =====
@@ -453,28 +451,30 @@
   .counter.visible { opacity: 0.75; }
   .counter a { color: var(--ink-soft); border-bottom: 1px solid var(--ink-whisper); text-decoration: none; }
 
-  /* ===== AUTH CORNER LINK ===== */
+  /* ===== AUTH CORNER =====
+     Bare italic text, top right. No pill, no decoration. Just composed.
+     Hovering reveals a soft underline — a gentle invitation, not a CTA.
+     When signed in, shows first name; clicking reveals sign-out affordance.
+  */
   .auth-corner {
     position: fixed;
-    top: calc(14px + env(safe-area-inset-top));
-    right: 14px;
+    top: calc(22px + env(safe-area-inset-top));
+    right: 26px;
     z-index: 5;
     font-family: 'Cormorant Garamond', serif;
-    font-size: 15px;
+    font-size: 18px;
     font-style: italic;
+    font-weight: 400;
     color: var(--ink-soft);
-    text-decoration: none;
-    padding: 10px 18px;
-    border-radius: 18px;
-    background: rgba(244, 234, 219, 0.6);
-    border: 1px solid rgba(28, 20, 9, 0.08);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    transition: all 0.3s;
+    background: transparent;
+    border: none;
+    padding: 6px 2px;
     cursor: pointer;
+    transition: color 0.3s ease;
     -webkit-tap-highlight-color: transparent;
     opacity: 0;
     pointer-events: none;
+    letter-spacing: 0.003em;
   }
   .auth-corner.visible {
     opacity: 1;
@@ -482,15 +482,71 @@
   }
   .auth-corner:hover {
     color: var(--ink);
-    background: rgba(244, 234, 219, 0.85);
-    border-color: var(--ink-whisper);
+  }
+  .auth-corner::after {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 0;
+    background: var(--ink);
+    transition: width 0.3s ease;
+    margin-top: 2px;
+  }
+  .auth-corner:hover::after {
+    width: 100%;
+  }
+  /* Tiny floating menu when user clicks their name */
+  .auth-menu {
+    position: fixed;
+    top: calc(58px + env(safe-area-inset-top));
+    right: 26px;
+    z-index: 6;
+    background: rgba(255, 252, 244, 0.95);
+    border: 1px solid rgba(28, 20, 9, 0.12);
+    border-radius: 10px;
+    padding: 8px 4px;
+    min-width: 140px;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(28, 20, 9, 0.08);
+  }
+  .auth-menu.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .auth-menu button {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 10px 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink-soft);
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+    border-radius: 6px;
+  }
+  .auth-menu button:hover {
+    color: var(--ink);
+    background: rgba(28, 20, 9, 0.04);
   }
   @media (max-width: 600px) {
     .auth-corner {
-      font-size: 13px;
-      padding: 8px 14px;
-      top: calc(10px + env(safe-area-inset-top));
-      right: 10px;
+      font-size: 16px;
+      top: calc(16px + env(safe-area-inset-top));
+      right: 18px;
+    }
+    .auth-menu {
+      top: calc(46px + env(safe-area-inset-top));
+      right: 18px;
     }
   }
 
@@ -772,8 +828,8 @@
 
   @media (max-width: 600px) {
     .messages { padding-top: 14vh; gap: 26px; }
-    .msg.him { font-size: 20px; }
-    .msg.user { font-size: 17px; }
+    .msg.him { font-size: 27px; line-height: 1.4; }
+    .msg.user { font-size: 18px; }
     .input { font-size: 16px; }
     .container { padding: 0 18px; }
     .input-area { padding-left: 14px; padding-right: 14px; }
@@ -852,7 +908,10 @@
     </div>
   </div>
 
-  <a class="auth-corner" id="authCorner" role="button">sign in</a>
+  <button class="auth-corner" id="authCorner" type="button">come home.</button>
+  <div class="auth-menu" id="authMenu">
+    <button type="button" id="authMenuSignOut">sign out</button>
+  </div>
 
   <div class="container">
     <div class="messages" id="messages"></div>
@@ -1004,11 +1063,31 @@
 
     function updateAuthUI() {
       const authCornerEl = document.getElementById('authCorner');
+      const authMenuEl = document.getElementById('authMenu');
       if (currentUser) {
-        authCornerEl.textContent = 'sign out';
+        // Show first name if we have one, otherwise "friend"
+        const displayName = extractFirstName(currentUser) || 'friend';
+        authCornerEl.textContent = displayName + '.';
       } else {
-        authCornerEl.textContent = 'sign in';
+        authCornerEl.textContent = 'come home.';
+        if (authMenuEl) authMenuEl.classList.remove('visible');
       }
+    }
+
+    function extractFirstName(user) {
+      if (!user) return null;
+      // Try user_metadata first (OAuth often populates this)
+      const meta = user.user_metadata || {};
+      if (meta.full_name) return meta.full_name.split(/\s+/)[0].toLowerCase();
+      if (meta.name) return meta.name.split(/\s+/)[0].toLowerCase();
+      if (meta.first_name) return meta.first_name.toLowerCase();
+      // Fall back to email local part, cleaned up
+      if (user.email) {
+        const local = user.email.split('@')[0];
+        // Strip numbers and special chars, lowercase
+        return local.replace(/[^a-zA-Z]/g, '').toLowerCase() || null;
+      }
+      return null;
     }
 
     // Expose helpers for the non-module script
@@ -1165,13 +1244,29 @@
       }
     });
 
-    // Corner link toggles between sign-in (if anonymous) and sign-out (if logged in)
-    authCornerBtn.addEventListener('click', async () => {
+    // Corner element: opens modal when anonymous, toggles menu when signed in
+    authCornerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (currentUser) {
-        await window.__signOut();
+        const menu = document.getElementById('authMenu');
+        menu.classList.toggle('visible');
       } else {
         window.__openAuthModal('signin');
       }
+    });
+
+    // Menu: sign out handler
+    document.getElementById('authMenuSignOut').addEventListener('click', async () => {
+      document.getElementById('authMenu').classList.remove('visible');
+      await window.__signOut();
+    });
+
+    // Close menu if user clicks outside it
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('authMenu');
+      if (!menu || !menu.classList.contains('visible')) return;
+      if (menu.contains(e.target) || authCornerBtn.contains(e.target)) return;
+      menu.classList.remove('visible');
     });
   </script>
 
@@ -1227,7 +1322,7 @@
       div.className = 'msg ' + (role === 'user' ? 'user' : 'him');
       div.textContent = text;
       messagesEl.appendChild(div);
-      requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; });
+      scrollToLatest();
       return div;
     }
 
@@ -1263,7 +1358,7 @@
         counterEl.innerHTML = remaining + ' ' + word + ' remaining this month';
       } else {
         // anonymous
-        counterEl.innerHTML = remaining + ' ' + word + ' remaining · <a id="counterSignInLink">sign in for more</a>';
+        counterEl.innerHTML = remaining + ' ' + word + ' remaining · <a id="counterSignInLink">come home for more</a>';
         // Wire the sign-in link
         const link = document.getElementById('counterSignInLink');
         if (link) {
@@ -1284,7 +1379,7 @@
       if (tier === 'anonymous') {
         limitTitleEl.textContent = "we've been at this a while.";
         limitBodyEl.textContent = 'to keep going, come home.';
-        limitCtaBtnEl.textContent = 'sign in';
+        limitCtaBtnEl.textContent = 'come home';
         limitCtaBtnEl.href = '#';
         limitCtaBtnEl.onclick = (e) => {
           e.preventDefault();
@@ -1383,11 +1478,14 @@
         container.appendChild(span);
         spans.push(span);
       });
+      // Scroll the container into view at the start
+      scrollToLatest();
       tokens.forEach(({ delay }, i) => {
         cumulative += delay;
         setTimeout(() => {
           spans[i].classList.add('seen');
-          messagesEl.scrollTop = messagesEl.scrollHeight;
+          // Scroll on every word so as the text grows, the view follows
+          scrollToLatest();
           if (i === tokens.length - 1 && typeof onDone === 'function') {
             setTimeout(onDone, 200);
           }
@@ -1407,8 +1505,21 @@
         span.textContent = t;
         container.appendChild(span);
       });
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      scrollToLatest();
       if (typeof onDone === 'function') setTimeout(onDone, 100);
+    }
+
+    // Scroll to the bottom of the messages container. Uses requestAnimationFrame
+    // to wait for layout to settle, then scrolls. Also uses scrollIntoView as a
+    // belt-and-suspenders fallback for mobile viewports where scrollTop can lag.
+    function scrollToLatest() {
+      requestAnimationFrame(() => {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        const lastChild = messagesEl.lastElementChild;
+        if (lastChild && lastChild.scrollIntoView) {
+          try { lastChild.scrollIntoView({ block: 'end', behavior: 'auto' }); } catch (e) {}
+        }
+      });
     }
 
     // ===== BODY STATE MANAGEMENT =====
