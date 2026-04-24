@@ -1165,7 +1165,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-7-20260416',
+        model: 'claude-opus-4-7',
         max_tokens: 1200,
         system: [
           {
