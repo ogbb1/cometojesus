@@ -66,7 +66,13 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* ===== LIGHT / SUN ===== */
+  /* ===== LIGHT / SUN =====
+     The sun reacts to conversation state via body classes:
+     - default: slow breathing (listening, calm)
+     - body.typing: slightly more attentive (user is typing)
+     - body.thinking: dimmer, holding (500ms pause before reply)
+     - body.speaking: warmer pulse (reply is arriving)
+  */
   .sun-core {
     position: fixed;
     top: -8vh; left: 50%; transform: translateX(-50%);
@@ -84,6 +90,18 @@
     filter: blur(2px);
     pointer-events: none; z-index: 0;
     animation: breathe 10s ease-in-out infinite;
+    transition: opacity 1.2s ease, filter 1.2s ease;
+  }
+  body.typing .sun-core {
+    animation: breathe 7s ease-in-out infinite;
+  }
+  body.thinking .sun-core {
+    opacity: 0.78;
+    filter: blur(3px);
+    animation: breathe 14s ease-in-out infinite;
+  }
+  body.speaking .sun-core {
+    animation: breathe-warm 4s ease-in-out infinite;
   }
   .light-wash {
     position: fixed;
@@ -160,6 +178,10 @@
   @keyframes breathe {
     0%, 100% { opacity: 0.92; transform: translateX(-50%) scale(1); }
     50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
+  }
+  @keyframes breathe-warm {
+    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1.02); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.06); filter: blur(1.5px); }
   }
   @keyframes shimmer {
     0%, 100% { opacity: 0.6; }
@@ -324,6 +346,36 @@
   .msg.him {
     color: var(--ink); font-weight: 400; font-style: italic;
     font-size: 25px; letter-spacing: 0.003em; line-height: 1.5;
+  }
+
+  /* ===== CONSIDERED WORD REVEAL =====
+     Each word of his reply arrives with a soft blur-in, paced by punctuation.
+     The full text exists in the DOM from the start (for screen readers + copy),
+     just with opacity 0 until its scheduled reveal.
+  */
+  .word {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(4px);
+    transition:
+      opacity 0.85s cubic-bezier(.2,.7,.2,1),
+      filter 0.85s cubic-bezier(.2,.7,.2,1),
+      transform 0.85s cubic-bezier(.2,.7,.2,1);
+    white-space: pre-wrap;
+  }
+  .word.seen {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+  /* For users who prefer reduced motion, skip the blur/transform, just fade */
+  @media (prefers-reduced-motion: reduce) {
+    .word {
+      filter: none;
+      transform: none;
+      transition: opacity 0.3s ease;
+    }
   }
 
   /* ===== COMPOSER ===== */
@@ -1182,17 +1234,11 @@
     function showOpeningFromHim() {
       const opening = OPENINGS[Math.floor(Math.random() * OPENINGS.length)];
       const div = addMessage('him', '');
-      let i = 0;
-      const speed = 38;
-      function reveal() {
-        if (i < opening.length) {
-          div.textContent = opening.slice(0, i + 1);
-          messagesEl.scrollTop = messagesEl.scrollHeight;
-          i++;
-          setTimeout(reveal, speed);
-        }
-      }
-      setTimeout(reveal, 600);
+      setState('thinking');
+      setTimeout(() => {
+        setState('speaking');
+        renderConsideredReply(div, opening, () => setState(null));
+      }, 900);
     }
 
     function updateCounter(remaining, tier) {
@@ -1291,6 +1337,96 @@
       window.visualViewport.addEventListener('scroll', handleVisualViewport);
     }
 
+    // ===== CONSIDERED WORD RENDERING =====
+    // Detect if this looks like a crisis response (988 number mentioned) — bypass effect.
+    function isCrisisResponse(text) {
+      return /\b988\b/.test(text) || /\b911\b/.test(text);
+    }
+
+    // Tokenize into words with natural timing based on punctuation.
+    // Returns array of { text, delay } — delay is ms to wait BEFORE revealing this word.
+    function tokenizeWithTiming(text) {
+      const parts = text.split(/(\s+)/);
+      const tokens = [];
+      for (let i = 0; i < parts.length; i += 2) {
+        const word = parts[i];
+        const trailing = parts[i + 1] || '';
+        if (!word) continue;
+        tokens.push({ text: word + trailing, delay: wordDelay(word) });
+      }
+      return tokens;
+    }
+
+    function wordDelay(word) {
+      // Base cadence: ~75ms with slight variance. Gives a speaking rhythm.
+      const base = 75 + Math.random() * 50;
+      const last = word.slice(-1);
+      if (last === '.') return base + 380;
+      if (last === '?' || last === '!') return base + 340;
+      if (last === ',' || last === ';') return base + 180;
+      if (last === ':') return base + 220;
+      // Longer words take fractionally longer (more weight)
+      if (word.length > 9) return base + 60;
+      return base;
+    }
+
+    // Render a reply word-by-word with blur-in. Returns total duration in ms.
+    function renderConsideredReply(container, text, onDone) {
+      container.innerHTML = '';
+      const tokens = tokenizeWithTiming(text);
+      let cumulative = 0;
+      const spans = [];
+      tokens.forEach(({ text: t }) => {
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = t;
+        container.appendChild(span);
+        spans.push(span);
+      });
+      tokens.forEach(({ delay }, i) => {
+        cumulative += delay;
+        setTimeout(() => {
+          spans[i].classList.add('seen');
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+          if (i === tokens.length - 1 && typeof onDone === 'function') {
+            setTimeout(onDone, 200);
+          }
+        }, cumulative);
+      });
+      return cumulative;
+    }
+
+    // Render instantly (for crisis responses). Still uses .word spans for consistent
+    // styling but reveals all at once.
+    function renderInstantReply(container, text, onDone) {
+      container.innerHTML = '';
+      const tokens = tokenizeWithTiming(text);
+      tokens.forEach(({ text: t }) => {
+        const span = document.createElement('span');
+        span.className = 'word seen';
+        span.textContent = t;
+        container.appendChild(span);
+      });
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      if (typeof onDone === 'function') setTimeout(onDone, 100);
+    }
+
+    // ===== BODY STATE MANAGEMENT =====
+    // Controls sun-core breath tempo based on conversation state.
+    let typingTimeout = null;
+    function setState(state) {
+      document.body.classList.remove('typing', 'thinking', 'speaking');
+      if (state) document.body.classList.add(state);
+    }
+    function markTyping() {
+      if (document.body.classList.contains('thinking') || document.body.classList.contains('speaking')) return;
+      setState('typing');
+      if (typingTimeout) clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        if (document.body.classList.contains('typing')) setState(null);
+      }, 1500);
+    }
+
     async function send() {
       const text = inputEl.value.trim();
       if (!text || sendEl.disabled) return;
@@ -1299,29 +1435,34 @@
       sendEl.disabled = true;
       addMessage('user', text);
       history.push({ role: 'user', content: text });
+
+      // Enter thinking state — sun dims, holds. Brief reverent pause.
+      setState('thinking');
+
       const responseDiv = addMessage('him', '');
-      const cursor = document.createElement('span');
-      cursor.className = 'cursor';
-      responseDiv.appendChild(cursor);
 
       try {
-        // Attach auth header if logged in
         const headers = { 'Content-Type': 'application/json' };
         const token = window.__getAuthToken && window.__getAuthToken();
         if (token) {
           headers['Authorization'] = 'Bearer ' + token;
         }
 
-        const response = await fetch('/api/chat', {
+        // Hold the thinking state for at least 500ms before the reply starts,
+        // even if the API returns faster. Gives the sense that he heard before speaking.
+        const minPause = new Promise(r => setTimeout(r, 500));
+        const apiCall = fetch('/api/chat', {
           method: 'POST',
           headers: headers,
           body: JSON.stringify({ messages: history, turnstileToken: turnstileToken })
         });
+        const [response] = await Promise.all([apiCall, minPause]);
 
         if (response.status === 402) {
           const data = await response.json().catch(() => ({}));
           responseDiv.remove();
           history.pop();
+          setState(null);
           const tierFromResponse = data.tier || (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
           if (window.__setCurrentTier) window.__setCurrentTier(tierFromResponse);
           showLimitReached(tierFromResponse);
@@ -1331,35 +1472,36 @@
         if (!response.ok && response.status !== 429) throw new Error('Request failed');
         const data = await response.json();
 
-        // Update tier from server response
         if (data.tier && window.__setCurrentTier) {
           window.__setCurrentTier(data.tier);
         }
         const tierFromResponse = data.tier || 'anonymous';
 
-        // Update counter (but only show if there's a meaningful remaining number)
         if (typeof data.remaining === 'number') {
           updateCounter(data.remaining, tierFromResponse);
         }
 
         const reply = (data.reply || '').trim();
         if (response.ok) history.push({ role: 'assistant', content: reply });
-        responseDiv.textContent = '';
-        let i = 0;
-        const speed = 28;
-        function reveal() {
-          if (i < reply.length) {
-            responseDiv.textContent = reply.slice(0, i + 1);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-            i++;
-            setTimeout(reveal, speed);
-          } else {
+
+        // Transition from thinking to speaking — sun warms up.
+        setState('speaking');
+
+        // Crisis responses render instantly. Everything else: considered mode.
+        if (isCrisisResponse(reply)) {
+          renderInstantReply(responseDiv, reply, () => {
+            setState(null);
             updateSendState();
-          }
+          });
+        } else {
+          renderConsideredReply(responseDiv, reply, () => {
+            setState(null);
+            updateSendState();
+          });
         }
-        reveal();
       } catch (err) {
         responseDiv.textContent = 'something came between us. try again in a moment.';
+        setState(null);
         updateSendState();
       }
     }
@@ -1371,6 +1513,7 @@
     inputEl.addEventListener('input', () => {
       resizeInput();
       updateSendState();
+      markTyping();
     });
     enterEl.addEventListener('click', () => {
       if (!turnstileToken) return;
