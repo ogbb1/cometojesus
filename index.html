@@ -375,7 +375,7 @@
   .word {
     display: inline;
     opacity: 0;
-    filter: blur(5px);
+    filter: blur(2.5px);
     transition:
       opacity 0.85s cubic-bezier(.2,.7,.2,1),
       filter 0.85s cubic-bezier(.2,.7,.2,1);
@@ -402,19 +402,15 @@
   }
   .input-shell {
     display: flex; align-items: flex-end; gap: 10px;
-    background: var(--input-bg);
+    background: rgba(255, 252, 244, 0.88);
     border: 1px solid var(--input-border);
     border-radius: 28px;
     padding: 8px 8px 8px 22px;
-    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 1px 3px rgba(28, 20, 9, 0.04);
+    transition: border-color 0.3s, background 0.3s;
   }
   .input-shell:focus-within {
     border-color: var(--input-border-focus);
-    background: rgba(255, 252, 244, 0.88);
-    box-shadow: 0 2px 12px rgba(28, 20, 9, 0.06);
+    background: rgba(255, 252, 244, 1);
   }
   .input {
     flex: 1; background: transparent; border: none; outline: none;
