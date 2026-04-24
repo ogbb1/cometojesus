@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>come in · cometojesus</title>
+<meta name="theme-color" content="#f4eadb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    min-height: 100vh;
+    background: #f4eadb;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: #1c1409;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    text-align: center;
+    padding: 32px;
+  }
+  .message {
+    font-size: 22px;
+    font-style: italic;
+    color: #605242;
+    animation: fade 1.5s ease-in-out infinite alternate;
+  }
+  .error {
+    color: #a63a28;
+    font-size: 18px;
+    font-style: italic;
+    margin-top: 16px;
+  }
+  .error a {
+    color: #1c1409;
+    text-decoration: underline;
+  }
+  @keyframes fade {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="message" id="message">coming in...</div>
+    <div class="error" id="error" style="display:none;"></div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://hatyoorjnakvgtuvwzhv.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_hSVTVaJypGLLZ4zwAjNu3Q_hG5MQgyCv';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    const messageEl = document.getElementById('message');
+    const errorEl = document.getElementById('error');
+
+    function showError(text) {
+      messageEl.style.display = 'none';
+      errorEl.style.display = 'block';
+      errorEl.innerHTML = text;
+    }
+
+    (async () => {
+      try {
+        // detectSessionInUrl in the createClient config handles the hash fragment.
+        // Wait a moment for it to complete, then check session.
+        await new Promise(r => setTimeout(r, 300));
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          showError('something came between us. <a href="/">try again</a>');
+          return;
+        }
+
+        if (session) {
+          // Success — redirect to main page
+          window.location.href = '/';
+        } else {
+          // No session found — show error with link back
+          showError('we couldn\'t find you. <a href="/">try again</a>');
+        }
+      } catch (err) {
+        showError('something came between us. <a href="/">try again</a>');
+      }
+    })();
+  </script>
+</body>
+</html>

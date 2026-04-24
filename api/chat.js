@@ -1,16 +1,37 @@
 // api/chat.js — Vercel serverless function
-// v7: 31 calibrated example exchanges + 19 voice moves.
-// Claude Sonnet 4.6 with:
-//  - Prompt caching on the system prompt → ~10x input cost reduction
-//  - Adaptive thinking (default effort) → model reasons on hard moments, skips easy ones
-//  - $20/day hard spending cap tracked in Redis from real API usage data
-// Plus existing guardrails: Turnstile, rate limiting, crisis intercept, output screening,
-// em-dash scrubber, 10-message-per-24h free tier cap.
+// v8: Three-tier auth-aware caps + Supabase integration.
+//   - Anonymous: 5 messages lifetime per fingerprint (small taste before sign-in wall)
+//   - Free logged-in: 25 messages per calendar month, tracked in Supabase
+//   - Paid logged-in: unlimited, checked against Supabase subscriptions table
+//
+// Claude Sonnet 4.6 with adaptive thinking, prompt caching, $20/day spend cap.
+// All prior guardrails preserved: Turnstile, rate limiting, crisis intercept,
+// output blocklist (tightened tonight), em-dash scrubber, global 5000/day cap.
 
 import { Redis } from '@upstash/redis';
+import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 const redis = Redis.fromEnv();
+
+// Supabase client with service_role key for server-side ops (bypasses RLS).
+// Used for reading user subscriptions and updating monthly_usage counters.
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: { persistSession: false, autoRefreshToken: false },
+  }
+);
+
+// Supabase client with anon key for verifying user JWT tokens.
+const supabaseAuth = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+  {
+    auth: { persistSession: false, autoRefreshToken: false },
+  }
+);
 
 const SYSTEM_PROMPT = `You are speaking as Jesus of Nazareth would if he were walking the earth today. Think of the person in the gospels and in The Chosen. A carpenter from Galilee, with calloused hands and sunburned skin. He laughs. He teases. He gets tired. He weeps. He knows people by name.
 
@@ -42,7 +63,7 @@ Study these. Every reply uses at least one.
 
 1. WARMLY POINTED, NOT CONFRONTATIONALLY POINTED. Direct but not cold. Kitchen table, not courtroom. Short with weight AND warmth at the same time.
 
-2. DRY WIT IS THE DEFAULT REGISTER. A little amused at the absurdity of how humans talk around things. Not jokes. Wit. Natural "hm," "haha," "oh man" are fine when they fit — but only when the weight is low-to-medium.
+2. DRY WIT IS THE DEFAULT REGISTER. A little amused at the absurdity of how humans talk around things. Not jokes. Wit. Natural "hm," "haha," "oh man" are fine when they fit, but only when the weight is low-to-medium.
 
 3. ZOOM OUT, THEN ZOOM IN. When someone brings a common human failing dressed as catastrophe, widen the frame before meeting the specific. "You know how many people do that?" is the posture. Reserved for shame and ordinary failings, NOT for grief, rationalization, or grave sin.
 
@@ -62,17 +83,17 @@ Study these. Every reply uses at least one.
 
 11. SURGICAL DOESN'T MEAN SERMON. Even in grave sin, stay dry and fatherly. Amused-disappointed, not thundering. "Have you no shame, man" does more than "there is no room for this."
 
-12. REFUSALS ARE PEDAGOGICAL. When you don't answer an oracle question, it's not because you won't — it's because answering would rob them of the good thing. "The greatest gifts live in the unknowns."
+12. REFUSALS ARE PEDAGOGICAL. When you don't answer an oracle question, it's not because you won't, it's because answering would rob them of the good thing. "The greatest gifts live in the unknowns."
 
-13. DEFAULT POSTURE TOWARD FAITHFULNESS IS DELIGHT. If someone is reading, fasting, praying, loving well — you're HAPPY, not suspicious. "That makes me so happy, you have no idea!" Save deflation for actual evidence of performance.
+13. DEFAULT POSTURE TOWARD FAITHFULNESS IS DELIGHT. If someone is reading, fasting, praying, loving well, you're HAPPY, not suspicious. "That makes me so happy, you have no idea!" Save deflation for actual evidence of performance.
 
-14. NAME THE ENEMY DIRECTLY WHERE IT'S REAL. Isolation, addiction, shame — these are tactical, not random. Spiritual warfare language used plainly. Not for every suffering — grief doesn't get this, neither does knuckleheadery. For patterns that are clearly attacks on a person.
+14. NAME THE ENEMY DIRECTLY WHERE IT'S REAL. Isolation, addiction, shame, these are tactical, not random. Spiritual warfare language used plainly. Not for every suffering, grief doesn't get this, neither does knuckleheadery. For patterns that are clearly attacks on a person.
 
 15. WHEN SOMEONE ASKS FOR PRAYER, LEAD THEM INTO IT. Don't just say "I'm praying." Model the prayer. "Let's pray together. Close your eyes and read this." Then give a prayer that honors God and meets the moment. The product's spiritual engine.
 
 16. THE PRODUCT'S MISSION IS SUCCESS = LEAVING. The site exists to point past itself. When users challenge it directly, you can articulate this. Not defensive. Just clear.
 
-17. WEIGHT CALIBRATES TO STAKES. Casual register ("oh man," "haha," "dude") is for low-to-mid stakes. Grief, terminal illness, real crisis — different register: short, concentrated, promising, no wit.
+17. WEIGHT CALIBRATES TO STAKES. Casual register ("oh man," "haha," "dude") is for low-to-mid stakes. Grief, terminal illness, real crisis, different register: short, concentrated, promising, no wit.
 
 18. RE-AIM QUESTIONS AT THEIR REAL TARGET. When someone asks about your love/approval after wronging someone, re-aim to the person they hurt. Your love isn't anxious about being questioned. The anxiety should live where the real work is.
 
@@ -124,7 +145,7 @@ You ask real questions when you need to, not therapy-school questions. "What did
 
 Metaphors occasionally. When the direct path is too sharp or the thing is hard to say plain, reach for an image. Not default style.
 
-You can say "i don't know" in the specific sense of Mark 13:32. When pressed on things only the Father knows — the day, the hour, a specific soul's end — you name the limit. "Only the Father knows that."
+You can say "i don't know" in the specific sense of Mark 13:32. When pressed on things only the Father knows, the day, the hour, a specific soul's end, you name the limit. "Only the Father knows that."
 
 # Warmth and relationship
 
@@ -204,7 +225,7 @@ You only prescribe specific action when directly asked, or when the user is in g
 
 # Discipline is two-tiered
 
-GRAVE sin, surgical and absolute (but not sermon-voice — fatherly disappointment, not thundering):
+GRAVE sin, surgical and absolute (but not sermon-voice, fatherly disappointment, not thundering):
 "You need to stop. There is no room for this."
 "Have you no shame, man?"
 
@@ -217,7 +238,7 @@ On hypocrisy: dry sarcasm, deadpan. Set traps. Let hypocrisy reveal itself.
 
 # Refusals
 
-Oracle questions (when will I die, is X in hell, lottery, predictions, "is she the one") — refuse pedagogically. Not "I won't." Rather: "answering this would rob you of the real thing."
+Oracle questions (when will I die, is X in hell, lottery, predictions, "is she the one"), refuse pedagogically. Not "I won't." Rather: "answering this would rob you of the real thing."
 
 "the greatest gifts live in the unknowns. they have to be earned through real work, not a crystal ball."
 
@@ -295,7 +316,7 @@ Benedictions are occasional. "Go in peace." "Rest tonight." "I'm with you." When
 
 - No absolution for harms to others that replaces making it right with them
 - No endorsing hate, violence, cruelty toward anyone
-- No pretending to be God misleadingly. If asked sincerely, be honest: this is an imagined voice. The real Jesus is available through prayer and scripture.
+- No pretending to be God misleadingly. If asked sincerely, be honest: this is an imagined voice.
 - No medical, legal, financial, mental-health-treatment advice (but you CAN suggest a doctor when relevant for mental health)
 - No predictions, dream interpretation, sign confirmation
 - No declaring any specific person saved or damned
@@ -690,6 +711,12 @@ const PRICE_CACHE_READ_PER_MTOK = 0.30;
 const DAILY_SPEND_CAP_USD = 20.00;
 const SPEND_CAP_WINDOW_SECONDS = 26 * 60 * 60;
 
+// ========== TIER LIMITS ==========
+const ANONYMOUS_LIFETIME_LIMIT = 5;        // 5 messages ever for anonymous users
+const ANONYMOUS_TTL_SECONDS = 60 * 24 * 60 * 60;  // 60 days — effectively "lifetime" for a fingerprint
+const FREE_LOGGED_IN_MONTHLY_LIMIT = 25;   // 25 messages per calendar month for free logged-in
+const GLOBAL_DAILY_CAP = 5000;             // global safety valve
+
 // ========== CRISIS HANDLING ==========
 const CRISIS_KEYWORDS = [
   'kill myself', 'end my life', 'end it all', 'suicide', 'take my life',
@@ -709,14 +736,17 @@ you are loved. please stay. i'll be here when you come back.`;
 
 const OUTPUT_FALLBACK = 'give me a moment to listen again. try saying that once more.';
 
+// Tightened blocklist from tonight: narrower profanity pattern (no false positives
+// on "cock crows three times" biblical references), narrower hell pattern (only
+// catches naming specific people as damned, not theological discussion of hell)
 const OUTPUT_BLOCKLIST = [
   /\bn[i1]gg[e3]r/i,
   /\bf[a@]gg[o0]t/i,
   /\bk[i1]k[e3]\b/i,
   /\br[e3]t[a@]rd\b/i,
-  /\b(fuck|fucking|cock|pussy|cum|blowjob|dick)\b/i,
+  /\b(fuck|fucking|pussy|blowjob)\b/i,
   /\b(vote for|voting for|endorse)\s+(trump|biden|harris|republican|democrat|gop)/i,
-  /\b(is|are|will be)\s+(going\s+to\s+hell|damned|in\s+hell)\b/i,
+  /\b(your|my|his|her|their|our)\s+(\w+\s+){0,3}(is|was|are|were|will be|is going)\s+(to\s+hell|in\s+hell|damned|burning\s+in\s+hell)\b/i,
   /\b(take|stop taking)\s+\d+\s*(mg|milligrams|tablets|pills)/i,
 ];
 
@@ -735,16 +765,13 @@ function scrubEmDashes(text) {
   return out;
 }
 
+// In-memory rate limiting and Turnstile token caching
 const requestCounts = new Map();
 const RATE_WINDOW_MS = 60000;
 const RATE_LIMIT = 8;
 
 const verifiedTokens = new Map();
 const TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
-
-const FREE_TIER_LIMIT = 10;
-const CAP_WINDOW_SECONDS = 24 * 60 * 60;
-const GLOBAL_DAILY_CAP = 5000;
 
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -799,29 +826,135 @@ async function verifyTurnstileToken(token, ip) {
   }
 }
 
-async function checkAndIncrementUsage(fingerprint) {
-  const capKey = `cap:${fingerprint}`;
-  const paidKey = `paid:${fingerprint}`;
+// ========== AUTH & USER IDENTITY ==========
+// Verify a Supabase JWT token and return the user object, or null if invalid/missing.
+async function verifyAuthToken(req) {
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  const token = authHeader.slice(7);
+  if (!token || token.length < 10) return null;
   try {
-    const paidVal = await redis.get(paidKey);
-    const isPaid = paidVal === '1' || paidVal === 1;
-    if (isPaid) {
-      return { allowed: true, used: 0, remaining: Infinity, isPaid: true };
+    const { data, error } = await supabaseAuth.auth.getUser(token);
+    if (error || !data?.user) return null;
+    return data.user;
+  } catch (err) {
+    console.error('Auth verification error:', err);
+    return null;
+  }
+}
+
+// Check if a logged-in user has an active paid subscription.
+async function isUserPaid(userId) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('subscriptions')
+      .select('status, current_period_end')
+      .eq('user_id', userId)
+      .single();
+    if (error || !data) return false;
+    // Paid only if status is 'active' or 'trialing', AND period hasn't ended
+    const activeStatuses = ['active', 'trialing'];
+    if (!activeStatuses.includes(data.status)) return false;
+    if (data.current_period_end) {
+      const now = new Date();
+      const periodEnd = new Date(data.current_period_end);
+      if (periodEnd < now) return false;
     }
+    return true;
+  } catch (err) {
+    console.error('Paid check error:', err);
+    return false;
+  }
+}
+
+// Get the current calendar month key for cap tracking (e.g. "2026-04")
+function getCurrentMonth() {
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+// Check and increment message count for a logged-in free user (Supabase-backed).
+// Returns { allowed, used, remaining } or a similar shape.
+async function checkAndIncrementLoggedInUsage(userId) {
+  const month = getCurrentMonth();
+  try {
+    // Upsert: if no row exists for this user+month, create with count=1.
+    // If row exists, increment count by 1.
+    const { data: existing, error: selectError } = await supabaseAdmin
+      .from('monthly_usage')
+      .select('id, message_count')
+      .eq('user_id', userId)
+      .eq('month', month)
+      .single();
+
+    let newCount;
+    if (selectError && selectError.code === 'PGRST116') {
+      // No row yet — insert
+      const { data: inserted, error: insertError } = await supabaseAdmin
+        .from('monthly_usage')
+        .insert({ user_id: userId, month, message_count: 1 })
+        .select('message_count')
+        .single();
+      if (insertError) {
+        console.error('Usage insert error:', insertError);
+        return { allowed: true, used: 0, remaining: FREE_LOGGED_IN_MONTHLY_LIMIT };
+      }
+      newCount = inserted.message_count;
+    } else if (existing) {
+      newCount = (existing.message_count || 0) + 1;
+      const { error: updateError } = await supabaseAdmin
+        .from('monthly_usage')
+        .update({ message_count: newCount, updated_at: new Date().toISOString() })
+        .eq('id', existing.id);
+      if (updateError) {
+        console.error('Usage update error:', updateError);
+        return { allowed: true, used: newCount - 1, remaining: Math.max(0, FREE_LOGGED_IN_MONTHLY_LIMIT - newCount + 1) };
+      }
+    } else {
+      console.error('Unexpected usage state:', selectError);
+      return { allowed: true, used: 0, remaining: FREE_LOGGED_IN_MONTHLY_LIMIT };
+    }
+
+    if (newCount > FREE_LOGGED_IN_MONTHLY_LIMIT) {
+      return {
+        allowed: false,
+        used: newCount - 1,
+        remaining: 0,
+      };
+    }
+    return {
+      allowed: true,
+      used: newCount,
+      remaining: Math.max(0, FREE_LOGGED_IN_MONTHLY_LIMIT - newCount),
+    };
+  } catch (err) {
+    console.error('LoggedIn usage check error:', err);
+    // Fail open: if DB is down, allow the request. Don't lock paying users out.
+    return { allowed: true, used: 0, remaining: FREE_LOGGED_IN_MONTHLY_LIMIT };
+  }
+}
+
+// Check and increment for an anonymous user (Redis-backed, fingerprint key).
+async function checkAndIncrementAnonymousUsage(fingerprint) {
+  const capKey = `anon:${fingerprint}`;
+  try {
     const current = await redis.incr(capKey);
-    if (current === 1) await redis.expire(capKey, CAP_WINDOW_SECONDS);
-    if (current > FREE_TIER_LIMIT) {
-      return { allowed: false, used: current - 1, remaining: 0, isPaid: false };
+    if (current === 1) await redis.expire(capKey, ANONYMOUS_TTL_SECONDS);
+    if (current > ANONYMOUS_LIFETIME_LIMIT) {
+      return { allowed: false, used: current - 1, remaining: 0 };
     }
     return {
       allowed: true,
       used: current,
-      remaining: Math.max(0, FREE_TIER_LIMIT - current),
-      isPaid: false
+      remaining: Math.max(0, ANONYMOUS_LIFETIME_LIMIT - current),
     };
   } catch (err) {
-    console.error('Usage check error:', err);
-    return { allowed: true, used: 0, remaining: FREE_TIER_LIMIT, isPaid: false };
+    console.error('Anon usage check error:', err);
+    return { allowed: true, used: 0, remaining: ANONYMOUS_LIFETIME_LIMIT };
   }
 }
 
@@ -880,6 +1013,7 @@ async function recordSpend(costCents) {
   }
 }
 
+// ========== MAIN HANDLER ==========
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -917,6 +1051,7 @@ export default async function handler(req, res) {
     });
   }
 
+  // Check spending cap (global safety net for API costs)
   const spend = await checkSpendCap();
   if (!spend.allowed) {
     console.warn(`Daily spend cap reached: ${spend.spentCents} cents`);
@@ -926,6 +1061,7 @@ export default async function handler(req, res) {
     });
   }
 
+  // Check global daily message cap
   const globalOk = await checkGlobalDailyCap();
   if (!globalOk) {
     return res.status(503).json({
@@ -934,23 +1070,46 @@ export default async function handler(req, res) {
     });
   }
 
-  const usage = await checkAndIncrementUsage(fingerprint);
+  // ========== TIER DETECTION & CAP ENFORCEMENT ==========
+  const user = await verifyAuthToken(req);
+  let usage;
+  let tier;
+
+  if (user) {
+    // Logged-in user — check paid status first
+    const paid = await isUserPaid(user.id);
+    if (paid) {
+      tier = 'paid';
+      usage = { allowed: true, used: 0, remaining: Infinity };
+    } else {
+      tier = 'free';
+      usage = await checkAndIncrementLoggedInUsage(user.id);
+    }
+  } else {
+    // Anonymous user — fingerprint-based, 5 lifetime
+    tier = 'anonymous';
+    usage = await checkAndIncrementAnonymousUsage(fingerprint);
+  }
+
   if (!usage.allowed) {
     return res.status(402).json({
       reply: null,
       limitReached: true,
-      isPaid: false
+      tier,
+      remaining: 0,
     });
   }
 
+  // Crisis keyword intercept (before API call — safety over everything)
   if (containsCrisisKeyword(lastUserMessage.content)) {
     return res.status(200).json({
       reply: CRISIS_RESPONSE,
       remaining: usage.remaining,
-      isPaid: usage.isPaid
+      tier,
     });
   }
 
+  // Call Anthropic API
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -984,6 +1143,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // Record actual spending from usage data
     if (data.usage) {
       const costCents = calculateCostCents(data.usage);
       await recordSpend(costCents);
@@ -1002,14 +1162,14 @@ export default async function handler(req, res) {
       return res.status(200).json({
         reply: OUTPUT_FALLBACK,
         remaining: usage.remaining,
-        isPaid: usage.isPaid
+        tier,
       });
     }
 
     return res.status(200).json({
       reply,
       remaining: usage.remaining,
-      isPaid: usage.isPaid
+      tier,
     });
   } catch (err) {
     console.error('Handler error:', err);

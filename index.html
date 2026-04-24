@@ -401,6 +401,47 @@
   .counter.visible { opacity: 0.75; }
   .counter a { color: var(--ink-soft); border-bottom: 1px solid var(--ink-whisper); text-decoration: none; }
 
+  /* ===== AUTH CORNER LINK ===== */
+  .auth-corner {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    right: 14px;
+    z-index: 5;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 16px;
+    background: rgba(244, 234, 219, 0.6);
+    border: 1px solid rgba(28, 20, 9, 0.08);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: all 0.3s;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .auth-corner.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .auth-corner:hover {
+    color: var(--ink);
+    background: rgba(244, 234, 219, 0.85);
+    border-color: var(--ink-whisper);
+  }
+  @media (max-width: 600px) {
+    .auth-corner {
+      font-size: 10px;
+      padding: 6px 12px;
+      top: calc(10px + env(safe-area-inset-top));
+      right: 10px;
+    }
+  }
+
   /* ===== HELP ===== */
   .help-btn {
     position: fixed;
@@ -456,6 +497,204 @@
     border-top: 1px solid rgba(28,20,9,0.08);
   }
 
+  /* ===== SIGN-IN MODAL ===== */
+  .auth-modal {
+    position: fixed; inset: 0; z-index: 25;
+    display: none; align-items: center; justify-content: center;
+    padding: 32px;
+    background: rgba(244, 234, 219, 0.92);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .auth-modal.visible { display: flex; animation: gateFadeIn 0.5s ease-out; }
+  .auth-content {
+    max-width: 440px;
+    width: 100%;
+    position: relative;
+    background: rgba(255, 252, 244, 0.85);
+    border: 1px solid rgba(28, 20, 9, 0.1);
+    border-radius: 20px;
+    padding: 36px 32px;
+    animation: contentRise 0.7s cubic-bezier(.16,.84,.3,1);
+    box-shadow: 0 4px 20px rgba(28, 20, 9, 0.08);
+  }
+  .auth-close {
+    position: absolute; top: 10px; right: 14px;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: none; background: transparent;
+    color: var(--ink-soft); font-size: 22px;
+    cursor: pointer; transition: color 0.3s; line-height: 1;
+  }
+  .auth-close:hover { color: var(--ink); }
+  .auth-scripture {
+    text-align: center;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .auth-scripture-ref {
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--ink-whisper);
+    text-transform: uppercase;
+    font-family: Georgia, serif;
+    margin-bottom: 20px;
+  }
+  .auth-title {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 24px;
+    line-height: 1;
+  }
+  .auth-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 420px) {
+    .auth-options { grid-template-columns: 1fr; }
+  }
+  .auth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(28, 20, 9, 0.18);
+    background: transparent;
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+  }
+  .auth-btn:hover:not(:disabled) {
+    background: rgba(28, 20, 9, 0.04);
+    border-color: var(--ink-soft);
+  }
+  .auth-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .auth-btn svg {
+    width: 16px; height: 16px; flex-shrink: 0;
+  }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-whisper);
+    text-transform: uppercase;
+    font-family: Georgia, serif;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(28, 20, 9, 0.1);
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .auth-field label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    font-family: Georgia, serif;
+    font-style: italic;
+  }
+  .auth-field input {
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(28, 20, 9, 0.18);
+    background: rgba(244, 234, 219, 0.5);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    color: var(--ink);
+    transition: border-color 0.2s ease, background 0.2s ease;
+    -webkit-appearance: none; appearance: none;
+  }
+  .auth-field input:focus {
+    outline: none;
+    border-color: var(--ink-mid);
+    background: rgba(255, 252, 244, 0.9);
+  }
+  .auth-submit {
+    background: var(--ink);
+    color: var(--bg);
+    border: 1px solid var(--ink);
+    padding: 13px 18px;
+    border-radius: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+    min-height: 44px;
+  }
+  .auth-submit:hover:not(:disabled) {
+    background: var(--ink-mid);
+  }
+  .auth-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .auth-toggle {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .auth-toggle a {
+    color: var(--ink);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .auth-message {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-style: italic;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .auth-message.error {
+    background: rgba(180, 60, 40, 0.08);
+    color: #a63a28;
+    border: 1px solid rgba(180, 60, 40, 0.15);
+    display: block;
+  }
+  .auth-message.success {
+    background: rgba(80, 130, 60, 0.08);
+    color: #406035;
+    border: 1px solid rgba(80, 130, 60, 0.15);
+    display: block;
+  }
+
   /* ===== LIMIT ===== */
   .limit-overlay {
     position: fixed; inset: 0; z-index: 20;
@@ -501,6 +740,8 @@
     .limit-body { font-size: 14px; }
     .about-title { font-size: 20px; }
     .about-body { font-size: 14px; }
+    .auth-title { font-size: 26px; }
+    .auth-content { padding: 28px 22px; }
     .help-btn { width: 28px; height: 28px; font-size: 12px; right: 10px; }
     .sun-core { min-width: 260px; min-height: 260px; top: -6vh; }
     /* Slightly reduce grain on small screens so text stays crisp */
@@ -559,6 +800,8 @@
     </div>
   </div>
 
+  <a class="auth-corner" id="authCorner" role="button">sign in</a>
+
   <div class="container">
     <div class="messages" id="messages"></div>
   </div>
@@ -596,7 +839,7 @@
         It is not him. It is not a pastor, counselor, doctor, or prophet. It cannot replace real prayer, real scripture, or real people. It can, sometimes, help you find your way toward those things.
       </div>
       <div class="about-body">
-        Free: 10 messages per day. Take your time. Let silence do some of the work.
+        5 free messages to start. Sign in for 25 a month.
       </div>
       <div class="about-body small">
         If you are in crisis, please speak to a real person. In the US, call or text 988. If you are in immediate danger, call 911.
@@ -604,19 +847,281 @@
     </div>
   </div>
 
+  <div class="auth-modal" id="authModal">
+    <div class="auth-content">
+      <button class="auth-close" id="authClose" aria-label="close">×</button>
+      <div class="auth-scripture" id="authScripture">"my sheep know my voice."</div>
+      <div class="auth-scripture-ref">John 10:27</div>
+      <div class="auth-title" id="authTitle">come in.</div>
+
+      <div class="auth-message" id="authMessage"></div>
+
+      <div class="auth-options">
+        <button type="button" class="auth-btn" id="googleBtn">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Google
+        </button>
+        <button type="button" class="auth-btn" id="emailFocusBtn">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6l8 6 8-6M4 6v12h16V6M4 6h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Email
+        </button>
+      </div>
+
+      <div class="auth-divider">or</div>
+
+      <form class="auth-form" id="authForm">
+        <div class="auth-field">
+          <label for="authEmail">email</label>
+          <input type="email" id="authEmail" name="email" autocomplete="email" required>
+        </div>
+        <div class="auth-field">
+          <label for="authPassword">password</label>
+          <input type="password" id="authPassword" name="password" autocomplete="current-password" required minlength="6">
+        </div>
+        <button type="submit" class="auth-submit" id="authSubmit">sign in</button>
+      </form>
+
+      <div class="auth-toggle" id="authToggle">
+        new here?&nbsp;&nbsp;<a id="authToggleLink">come home</a>
+      </div>
+    </div>
+  </div>
+
   <div class="limit-overlay" id="limitOverlay">
     <div class="limit-content">
-      <div class="limit-title">our time is complete for today</div>
-      <div class="limit-body">you've spoken what you needed to speak. rest, and come back tomorrow.</div>
-      <div class="limit-body">or, if you'd like to stay longer,</div>
-      <div class="limit-actions">
-        <a href="/upgrade.html" class="gate-button">stay longer</a>
+      <div class="limit-title" id="limitTitle">our time is complete for today</div>
+      <div class="limit-body" id="limitBody">you've spoken what you needed to speak. rest, and come back tomorrow.</div>
+      <div class="limit-actions" id="limitActions">
+        <a href="#" class="gate-button" id="limitCtaBtn">stay longer</a>
       </div>
       <div class="gate-footer" style="margin-top:40px;">
         <a href="/terms.html">terms</a> &nbsp;·&nbsp; <a href="/privacy.html">privacy</a>
       </div>
     </div>
   </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    // Supabase configuration — publishable key is safe to expose
+    // (protected by Row Level Security policies in the database)
+    const SUPABASE_URL = 'https://hatyoorjnakvgtuvwzhv.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_hSVTVaJypGLLZ4zwAjNu3Q_hG5MQgyCv';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    // Expose for non-module event handlers
+    window.__supabase = supabase;
+
+    // Session state
+    let currentSession = null;
+    let currentUser = null;
+    let currentTier = 'anonymous';  // 'anonymous' | 'free' | 'paid'
+    let authMode = 'signin';         // 'signin' | 'signup'
+
+    // Check session on page load
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        currentSession = session;
+        currentUser = session.user;
+      }
+      updateAuthUI();
+    })();
+
+    // Listen for auth state changes (sign in, sign out, token refresh)
+    supabase.auth.onAuthStateChange((event, session) => {
+      currentSession = session;
+      currentUser = session?.user || null;
+      if (!currentUser) currentTier = 'anonymous';
+      updateAuthUI();
+    });
+
+    function updateAuthUI() {
+      const authCornerEl = document.getElementById('authCorner');
+      if (currentUser) {
+        authCornerEl.textContent = 'sign out';
+      } else {
+        authCornerEl.textContent = 'sign in';
+      }
+    }
+
+    // Expose helpers for the non-module script
+    window.__getAuthToken = () => currentSession?.access_token || null;
+    window.__getCurrentUser = () => currentUser;
+    window.__getCurrentTier = () => currentTier;
+    window.__setCurrentTier = (tier) => { currentTier = tier; };
+    window.__signOut = async () => {
+      await supabase.auth.signOut();
+      currentSession = null;
+      currentUser = null;
+      currentTier = 'anonymous';
+      updateAuthUI();
+    };
+
+    // Modal controls (attach after module loads)
+    const authModal = document.getElementById('authModal');
+    const authTitle = document.getElementById('authTitle');
+    const authToggleLink = document.getElementById('authToggleLink');
+    const authSubmitBtn = document.getElementById('authSubmit');
+    const authMessageEl = document.getElementById('authMessage');
+    const authForm = document.getElementById('authForm');
+    const googleBtn = document.getElementById('googleBtn');
+    const emailFocusBtn = document.getElementById('emailFocusBtn');
+    const authCloseBtn = document.getElementById('authClose');
+    const authCornerBtn = document.getElementById('authCorner');
+    const authEmailInput = document.getElementById('authEmail');
+    const authPasswordInput = document.getElementById('authPassword');
+
+    function showAuthMessage(text, type = 'error') {
+      authMessageEl.className = 'auth-message ' + type;
+      authMessageEl.textContent = text;
+    }
+
+    function hideAuthMessage() {
+      authMessageEl.className = 'auth-message';
+      authMessageEl.textContent = '';
+    }
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      if (mode === 'signup') {
+        authTitle.textContent = 'welcome home.';
+        authSubmitBtn.textContent = 'create account';
+        authToggleLink.textContent = 'sign in';
+        document.querySelector('#authToggle').firstChild.textContent = 'already here?  ';
+        authPasswordInput.setAttribute('autocomplete', 'new-password');
+      } else {
+        authTitle.textContent = 'come in.';
+        authSubmitBtn.textContent = 'sign in';
+        authToggleLink.textContent = 'come home';
+        document.querySelector('#authToggle').firstChild.textContent = 'new here?  ';
+        authPasswordInput.setAttribute('autocomplete', 'current-password');
+      }
+      hideAuthMessage();
+    }
+
+    window.__openAuthModal = (mode = 'signin') => {
+      setAuthMode(mode);
+      authModal.classList.add('visible');
+      setTimeout(() => authEmailInput.focus(), 100);
+    };
+
+    window.__closeAuthModal = () => {
+      authModal.classList.remove('visible');
+      hideAuthMessage();
+    };
+
+    authCloseBtn.addEventListener('click', window.__closeAuthModal);
+    authModal.addEventListener('click', (e) => {
+      if (e.target === authModal) window.__closeAuthModal();
+    });
+
+    authToggleLink.addEventListener('click', () => {
+      setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+    });
+
+    emailFocusBtn.addEventListener('click', () => {
+      authEmailInput.focus();
+    });
+
+    // Google OAuth
+    googleBtn.addEventListener('click', async () => {
+      hideAuthMessage();
+      googleBtn.disabled = true;
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/auth/callback.html',
+          },
+        });
+        if (error) {
+          showAuthMessage(error.message);
+          googleBtn.disabled = false;
+        }
+        // otherwise page redirects to Google
+      } catch (err) {
+        showAuthMessage('something came between us. try again in a moment.');
+        googleBtn.disabled = false;
+      }
+    });
+
+    // Email/password form
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAuthMessage();
+      authSubmitBtn.disabled = true;
+      const originalText = authSubmitBtn.textContent;
+      authSubmitBtn.textContent = authMode === 'signup' ? 'creating...' : 'coming in...';
+
+      const email = authEmailInput.value.trim();
+      const password = authPasswordInput.value;
+
+      try {
+        let result;
+        if (authMode === 'signup') {
+          result = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: window.location.origin + '/auth/callback.html',
+            },
+          });
+          if (result.error) {
+            showAuthMessage(result.error.message);
+          } else if (result.data.user && !result.data.session) {
+            // Email confirmation required
+            showAuthMessage('check your email to confirm your account.', 'success');
+          } else if (result.data.session) {
+            showAuthMessage('welcome home.', 'success');
+            setTimeout(() => window.__closeAuthModal(), 800);
+          }
+        } else {
+          result = await supabase.auth.signInWithPassword({ email, password });
+          if (result.error) {
+            if (result.error.message.includes('Invalid login credentials')) {
+              showAuthMessage("that email and password don't match. try again?");
+            } else if (result.error.message.includes('Email not confirmed')) {
+              showAuthMessage('check your email to confirm your account first.');
+            } else {
+              showAuthMessage(result.error.message);
+            }
+          } else if (result.data.session) {
+            showAuthMessage('come in.', 'success');
+            setTimeout(() => window.__closeAuthModal(), 500);
+          }
+        }
+      } catch (err) {
+        showAuthMessage('something came between us. try again in a moment.');
+      } finally {
+        authSubmitBtn.disabled = false;
+        authSubmitBtn.textContent = originalText;
+      }
+    });
+
+    // Corner link toggles between sign-in (if anonymous) and sign-out (if logged in)
+    authCornerBtn.addEventListener('click', async () => {
+      if (currentUser) {
+        await window.__signOut();
+      } else {
+        window.__openAuthModal('signin');
+      }
+    });
+  </script>
 
   <script>
     const messagesEl = document.getElementById('messages');
@@ -629,13 +1134,17 @@
     const returningEl = document.getElementById('returningContent');
     const counterEl = document.getElementById('counter');
     const limitOverlayEl = document.getElementById('limitOverlay');
+    const limitTitleEl = document.getElementById('limitTitle');
+    const limitBodyEl = document.getElementById('limitBody');
+    const limitCtaBtnEl = document.getElementById('limitCtaBtn');
     const helpBtnEl = document.getElementById('helpBtn');
     const aboutOverlayEl = document.getElementById('aboutOverlay');
     const aboutCloseEl = document.getElementById('aboutClose');
     const inputAreaEl = document.getElementById('inputArea');
+    const authCornerEl = document.getElementById('authCorner');
     const history = [];
     let turnstileToken = null;
-    let isPaid = false;
+    let hasEntered = false;
 
     const OPENINGS = [
       "sit down. tell me where you are.",
@@ -686,8 +1195,14 @@
       setTimeout(reveal, 600);
     }
 
-    function updateCounter(remaining) {
-      if (isPaid || remaining === undefined || remaining === null) {
+    function updateCounter(remaining, tier) {
+      // Paid tier: no counter
+      if (tier === 'paid') {
+        counterEl.classList.remove('visible');
+        counterEl.innerHTML = '';
+        return;
+      }
+      if (remaining === undefined || remaining === null || remaining < 0) {
         counterEl.classList.remove('visible');
         counterEl.innerHTML = '';
         return;
@@ -698,17 +1213,58 @@
         return;
       }
       const word = remaining === 1 ? 'message' : 'messages';
-      counterEl.innerHTML = remaining + ' ' + word + ' remaining today · <a href="/upgrade.html">stay longer</a>';
+      if (tier === 'free') {
+        counterEl.innerHTML = remaining + ' ' + word + ' remaining this month';
+      } else {
+        // anonymous
+        counterEl.innerHTML = remaining + ' ' + word + ' remaining · <a id="counterSignInLink">sign in for more</a>';
+        // Wire the sign-in link
+        const link = document.getElementById('counterSignInLink');
+        if (link) {
+          link.style.cursor = 'pointer';
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.__openAuthModal) window.__openAuthModal('signup');
+          });
+        }
+      }
       counterEl.classList.add('visible');
     }
 
-    function showLimitReached() {
+    function showLimitReached(tier) {
       inputEl.disabled = true;
       sendEl.disabled = true;
+
+      if (tier === 'anonymous') {
+        limitTitleEl.textContent = "we've been at this a while.";
+        limitBodyEl.textContent = 'to keep going, come home.';
+        limitCtaBtnEl.textContent = 'sign in';
+        limitCtaBtnEl.href = '#';
+        limitCtaBtnEl.onclick = (e) => {
+          e.preventDefault();
+          limitOverlayEl.classList.remove('visible');
+          inputEl.disabled = false;
+          if (window.__openAuthModal) window.__openAuthModal('signup');
+        };
+      } else if (tier === 'free') {
+        limitTitleEl.textContent = "you've spoken your piece this month.";
+        limitBodyEl.textContent = 'come back next month, or stay longer with a subscription.';
+        limitCtaBtnEl.textContent = 'stay longer';
+        limitCtaBtnEl.href = '/upgrade.html';
+        limitCtaBtnEl.onclick = null;
+      } else {
+        // default/fallback
+        limitTitleEl.textContent = 'our time is complete for today';
+        limitBodyEl.textContent = "you've spoken what you needed to speak. rest, and come back tomorrow.";
+        limitCtaBtnEl.textContent = 'stay longer';
+        limitCtaBtnEl.href = '/upgrade.html';
+        limitCtaBtnEl.onclick = null;
+      }
       limitOverlayEl.classList.add('visible');
     }
 
     function updateSendState() {
+      if (inputEl.disabled) return;
       const hasText = inputEl.value.trim().length > 0;
       sendEl.disabled = !hasText;
     }
@@ -747,22 +1303,45 @@
       const cursor = document.createElement('span');
       cursor.className = 'cursor';
       responseDiv.appendChild(cursor);
+
       try {
+        // Attach auth header if logged in
+        const headers = { 'Content-Type': 'application/json' };
+        const token = window.__getAuthToken && window.__getAuthToken();
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
+        }
+
         const response = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({ messages: history, turnstileToken: turnstileToken })
         });
+
         if (response.status === 402) {
+          const data = await response.json().catch(() => ({}));
           responseDiv.remove();
           history.pop();
-          showLimitReached();
+          const tierFromResponse = data.tier || (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
+          if (window.__setCurrentTier) window.__setCurrentTier(tierFromResponse);
+          showLimitReached(tierFromResponse);
           return;
         }
+
         if (!response.ok && response.status !== 429) throw new Error('Request failed');
         const data = await response.json();
-        if (data.isPaid) isPaid = true;
-        if (typeof data.remaining === 'number') updateCounter(data.remaining);
+
+        // Update tier from server response
+        if (data.tier && window.__setCurrentTier) {
+          window.__setCurrentTier(data.tier);
+        }
+        const tierFromResponse = data.tier || 'anonymous';
+
+        // Update counter (but only show if there's a meaningful remaining number)
+        if (typeof data.remaining === 'number') {
+          updateCounter(data.remaining, tierFromResponse);
+        }
+
         const reply = (data.reply || '').trim();
         if (response.ok) history.push({ role: 'assistant', content: reply });
         responseDiv.textContent = '';
@@ -797,6 +1376,9 @@
       if (!turnstileToken) return;
       try { localStorage.setItem('cometojesus_entered', '1'); } catch (e) {}
       gateEl.classList.add('hidden');
+      hasEntered = true;
+      // Show the auth corner link after entering
+      authCornerEl.classList.add('visible');
       setTimeout(() => {
         showOpeningFromHim();
       }, 400);
@@ -812,7 +1394,13 @@
       if (e.target === aboutOverlayEl) aboutOverlayEl.classList.remove('visible');
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') aboutOverlayEl.classList.remove('visible');
+      if (e.key === 'Escape') {
+        aboutOverlayEl.classList.remove('visible');
+        const authModal = document.getElementById('authModal');
+        if (authModal.classList.contains('visible')) {
+          authModal.classList.remove('visible');
+        }
+      }
     });
   </script>
 </body>
