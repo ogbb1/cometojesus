@@ -350,28 +350,24 @@
      Each word of his reply arrives with a soft blur-in, paced by punctuation.
      The full text exists in the DOM from the start (for screen readers + copy),
      just with opacity 0 until its scheduled reveal.
+     Display: inline (not inline-block) so words wrap naturally like normal text.
   */
   .word {
-    display: inline-block;
+    display: inline;
     opacity: 0;
     filter: blur(5px);
-    transform: translateY(4px);
     transition:
       opacity 0.85s cubic-bezier(.2,.7,.2,1),
-      filter 0.85s cubic-bezier(.2,.7,.2,1),
-      transform 0.85s cubic-bezier(.2,.7,.2,1);
-    white-space: pre-wrap;
+      filter 0.85s cubic-bezier(.2,.7,.2,1);
   }
   .word.seen {
     opacity: 1;
     filter: blur(0);
-    transform: translateY(0);
   }
-  /* For users who prefer reduced motion, skip the blur/transform, just fade */
+  /* For users who prefer reduced motion, skip the blur, just fade */
   @media (prefers-reduced-motion: reduce) {
     .word {
       filter: none;
-      transform: none;
       transition: opacity 0.3s ease;
     }
   }
