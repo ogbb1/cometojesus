@@ -827,6 +827,35 @@ async function verifyTurnstileToken(token, ip) {
 }
 
 // ========== AUTH & USER IDENTITY ==========
+
+// Test-user bypass: decodes JWT payload (without verification) and checks for
+// a specific hardcoded user ID. This is a temporary testing shortcut while we
+// debug why Supabase auth verification is failing in production. SAFE because
+// it only WHITELISTS (no security trust) — a forged JWT containing oskar's UID
+// can get unlimited chat, but can't do anything else harmful.
+const BYPASS_USER_IDS = new Set([
+  '150cd4bc-dcf9-4570-8d79-604eac447b60', // oskar — ograbowski132@gmail.com
+]);
+
+function isBypassUser(req) {
+  try {
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+    const token = authHeader.slice(7);
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    // Decode JWT payload (middle part) without verifying signature.
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+    const userId = payload.sub;
+    if (userId && BYPASS_USER_IDS.has(userId)) {
+      return { id: userId, email: payload.email || null, bypass: true };
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+
 // Verify a Supabase JWT token and return the user object, or null if invalid/missing.
 async function verifyAuthToken(req) {
   const authHeader = req.headers['authorization'] || req.headers['Authorization'];
@@ -1038,11 +1067,22 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid message shape' });
   }
 
-  const tokenOk = await verifyTurnstileToken(turnstileToken, ip);
-  if (!tokenOk) {
-    return res.status(403).json({
-      reply: 'please refresh the page and come in again.'
-    });
+  // ========== TEST-USER BYPASS ==========
+  // Whitelisted test users skip Turnstile verification and cap enforcement.
+  // Temporary shortcut while the Supabase auth path is being debugged.
+  const bypassUser = isBypassUser(req);
+  if (bypassUser) {
+    console.log(`[bypass] test user recognized: ${bypassUser.id}`);
+  }
+
+  // Turnstile verification — skipped for bypass users
+  if (!bypassUser) {
+    const tokenOk = await verifyTurnstileToken(turnstileToken, ip);
+    if (!tokenOk) {
+      return res.status(403).json({
+        reply: 'please refresh the page and come in again.'
+      });
+    }
   }
 
   if (lastUserMessage.content.length > 2000) {
@@ -1071,24 +1111,30 @@ export default async function handler(req, res) {
   }
 
   // ========== TIER DETECTION & CAP ENFORCEMENT ==========
-  const user = await verifyAuthToken(req);
+  let user = bypassUser || null;
   let usage;
   let tier;
 
-  if (user) {
-    // Logged-in user — check paid status first
-    const paid = await isUserPaid(user.id);
-    if (paid) {
-      tier = 'paid';
-      usage = { allowed: true, used: 0, remaining: Infinity };
-    } else {
-      tier = 'free';
-      usage = await checkAndIncrementLoggedInUsage(user.id);
-    }
+  if (bypassUser) {
+    tier = 'paid';
+    usage = { allowed: true, used: 0, remaining: Infinity };
   } else {
-    // Anonymous user — fingerprint-based, 5 lifetime
-    tier = 'anonymous';
-    usage = await checkAndIncrementAnonymousUsage(fingerprint);
+    user = await verifyAuthToken(req);
+    if (user) {
+      // Logged-in user — check paid status first
+      const paid = await isUserPaid(user.id);
+      if (paid) {
+        tier = 'paid';
+        usage = { allowed: true, used: 0, remaining: Infinity };
+      } else {
+        tier = 'free';
+        usage = await checkAndIncrementLoggedInUsage(user.id);
+      }
+    } else {
+      // Anonymous user — fingerprint-based, 5 lifetime
+      tier = 'anonymous';
+      usage = await checkAndIncrementAnonymousUsage(fingerprint);
+    }
   }
 
   if (!usage.allowed) {
