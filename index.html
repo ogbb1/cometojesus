@@ -33,6 +33,9 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
+    /* Dynamic viewport sizing - updated by JS for iOS keyboard handling */
+    --app-height: 100dvh;
+    --composer-height: 132px;
     /* Warmer cream palette — paper/parchment feel */
     --bg: #f4eadb;
     --bg-deep: #ebdfca;
@@ -50,12 +53,13 @@
 
   html, body {
     height: 100%;
+    min-height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
   }
   body {
-    height: 100svh;
-    height: 100dvh;
+    min-height: var(--app-height);
+    height: var(--app-height);
     background: var(--bg);
     font-family: 'Cormorant Garamond', Georgia, serif;
     color: var(--ink);
@@ -67,20 +71,16 @@
   }
 
   /* ===== LIGHT / SUN =====
-     The sun is positioned so its bright center sits roughly at the top edge
-     of the viewport — the same origin point where the rays visibly converge.
-     The sun peeks down from above; we see roughly the bottom half of it.
-     Reacts to conversation state via body classes.
+     The sun's bright center sits at the top edge of the viewport — same origin
+     as the rays. We see roughly the bottom half like a sunrise.
+     Pure vw-based sizing so the math (top = -half-height) stays consistent.
+     Responsive breakpoints adjust the size per device class.
   */
   .sun-core {
     position: fixed;
-    /* Half the sun's height above the top edge → center at viewport top.
-       Sun width = 44vw → height = 44vw → center is 22vw from its own top. */
-    top: -22vw;
+    top: -20vw;
     left: 50%; transform: translateX(-50%);
-    width: 44vw; height: 44vw;
-    max-width: 480px; max-height: 480px;
-    min-width: 320px; min-height: 320px;
+    width: 40vw; height: 40vw;
     background: radial-gradient(circle at center,
       rgba(255, 255, 255, 1) 0%,
       rgba(255, 253, 245, 0.98) 4%,
@@ -95,12 +95,18 @@
     animation: breathe 8s ease-in-out infinite;
     transition: opacity 1.2s ease, filter 1.2s ease;
   }
-  /* Mobile override — sun stays proportional on narrow viewports */
+  /* On ultrawide desktop, cap the sun size proportionally */
+  @media (min-width: 1600px) {
+    .sun-core {
+      width: 640px; height: 640px;
+      top: -320px;
+    }
+  }
+  /* On mobile/tablet, make sun larger relative to narrow viewport */
   @media (max-width: 600px) {
     .sun-core {
-      width: 70vw; height: 70vw;
-      max-width: 420px; max-height: 420px;
-      top: -35vw;
+      width: 80vw; height: 80vw;
+      top: -40vw;
     }
   }
   body.typing .sun-core {
@@ -336,7 +342,8 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 20vh 0 48px;
+    padding: 20vh 0 calc(var(--composer-height) + 20px);
+    scroll-padding-bottom: calc(var(--composer-height) + 20px);
     display: flex; flex-direction: column; gap: 36px;
     scrollbar-width: thin; scrollbar-color: var(--ink-whisper) transparent;
   }
@@ -580,6 +587,15 @@
   }
   .help-btn:hover {
     background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+
+  /* When mobile keyboard is open, hide corner elements so they don't
+     clash with or obscure the composer at the bottom of the viewport. */
+  body.keyboard-open .help-btn,
+  body.keyboard-open .auth-corner,
+  body.keyboard-open .auth-menu {
+    opacity: 0;
+    pointer-events: none;
   }
   .about-overlay {
     position: fixed; inset: 0; z-index: 15;
@@ -1427,19 +1443,45 @@
         const next = Math.min(inputEl.scrollHeight, 160);
         inputEl.style.height = next + 'px';
         rafId = null;
+        syncComposerHeight();
       });
     }
 
-    function handleVisualViewport() {
-      if (!window.visualViewport) return;
+    // Update --app-height based on visualViewport so content sizes correctly
+    // when the iOS keyboard opens/closes. Also toggle keyboard-open body class
+    // so corner elements can hide.
+    function syncViewportHeight() {
       const vv = window.visualViewport;
-      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      inputAreaEl.style.transform = offset > 0 ? `translateY(-${offset}px)` : '';
+      const height = vv ? Math.round(vv.height) : window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', height + 'px');
+      const keyboardOpen = vv ? (window.innerHeight - vv.height) > 120 : false;
+      document.body.classList.toggle('keyboard-open', keyboardOpen);
     }
+
+    // Update --composer-height so messages container padding adjusts when
+    // the textarea grows (long user messages no longer get cut off).
+    function syncComposerHeight() {
+      const next = Math.ceil(inputAreaEl.getBoundingClientRect().height || 132);
+      document.documentElement.style.setProperty('--composer-height', next + 'px');
+    }
+
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleVisualViewport);
-      window.visualViewport.addEventListener('scroll', handleVisualViewport);
+      window.visualViewport.addEventListener('resize', syncViewportHeight);
+      window.visualViewport.addEventListener('scroll', syncViewportHeight);
     }
+    window.addEventListener('resize', syncViewportHeight);
+    window.addEventListener('orientationchange', () => setTimeout(syncViewportHeight, 100));
+    syncViewportHeight();
+
+    // Track composer height reactively via ResizeObserver
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(syncComposerHeight);
+      ro.observe(inputAreaEl);
+    } else {
+      // Fallback for old browsers
+      window.addEventListener('resize', syncComposerHeight);
+    }
+    syncComposerHeight();
 
     // ===== CONSIDERED WORD RENDERING =====
     // Detect if this looks like a crisis response (988 number mentioned) — bypass effect.
