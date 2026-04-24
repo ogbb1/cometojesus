@@ -67,39 +67,40 @@
   }
 
   /* ===== LIGHT / SUN =====
-     The sun sits at the origin of the rays (top-center) so the light source
-     is visibly present, not implied.
+     The sun sits at the origin of the rays (top-center), pulled down just
+     enough that its bright core is visibly present in the viewport.
      Reacts to conversation state via body classes.
   */
   .sun-core {
     position: fixed;
-    top: -18vh; left: 50%; transform: translateX(-50%);
-    width: 56vw; height: 56vw;
-    max-width: 640px; max-height: 640px;
-    min-width: 380px; min-height: 380px;
+    top: -12vh; left: 50%; transform: translateX(-50%);
+    width: 50vw; height: 50vw;
+    max-width: 560px; max-height: 560px;
+    min-width: 340px; min-height: 340px;
     background: radial-gradient(circle at center,
       rgba(255, 255, 255, 1) 0%,
-      rgba(255, 253, 245, 0.95) 6%,
-      rgba(var(--light-hot), 0.88) 14%,
-      rgba(var(--light), 0.65) 28%,
-      rgba(var(--light), 0.32) 48%,
-      rgba(var(--light), 0.1) 70%,
+      rgba(255, 253, 245, 0.98) 4%,
+      rgba(var(--light-hot), 0.92) 10%,
+      rgba(var(--light-hot), 0.72) 18%,
+      rgba(var(--light), 0.48) 32%,
+      rgba(var(--light), 0.22) 50%,
+      rgba(var(--light), 0.08) 70%,
       rgba(var(--light), 0) 90%);
-    filter: blur(1px);
+    filter: blur(0.5px);
     pointer-events: none; z-index: 0;
-    animation: breathe 10s ease-in-out infinite;
+    animation: breathe 8s ease-in-out infinite;
     transition: opacity 1.2s ease, filter 1.2s ease;
   }
   body.typing .sun-core {
-    animation: breathe 7s ease-in-out infinite;
+    animation: breathe 6s ease-in-out infinite;
   }
   body.thinking .sun-core {
-    opacity: 0.78;
-    filter: blur(2.5px);
-    animation: breathe 14s ease-in-out infinite;
+    opacity: 0.82;
+    filter: blur(2px);
+    animation: breathe 12s ease-in-out infinite;
   }
   body.speaking .sun-core {
-    animation: breathe-warm 4s ease-in-out infinite;
+    animation: breathe-warm 3.5s ease-in-out infinite;
   }
   .light-wash {
     position: fixed;
@@ -174,12 +175,12 @@
     animation: shimmer 14s ease-in-out infinite;
   }
   @keyframes breathe {
-    0%, 100% { opacity: 0.92; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.04); }
+    0%, 100% { opacity: 0.88; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.06); }
   }
   @keyframes breathe-warm {
-    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1.02); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.06); filter: blur(1.5px); }
+    0%, 100% { opacity: 0.95; transform: translateX(-50%) scale(1.03); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.09); filter: blur(1px); }
   }
   @keyframes shimmer {
     0%, 100% { opacity: 0.6; }
