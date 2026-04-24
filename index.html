@@ -342,8 +342,8 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 20vh 0 calc(var(--composer-height) + 20px);
-    scroll-padding-bottom: calc(var(--composer-height) + 20px);
+    padding: 20vh 0 calc(var(--composer-height) + 40px);
+    scroll-padding-bottom: calc(var(--composer-height) + 40px);
     display: flex; flex-direction: column; gap: 36px;
     scrollbar-width: thin; scrollbar-color: var(--ink-whisper) transparent;
   }
@@ -392,13 +392,28 @@
     }
   }
 
-  /* ===== COMPOSER ===== */
+  /* ===== COMPOSER =====
+     Fixed to bottom of viewport. iOS Safari correctly keeps fixed-bottom elements
+     above the keyboard when it opens, which is the behavior we want.
+     safe-area-inset-bottom handles the home indicator gap on notched iPhones.
+  */
   .input-area {
-    position: relative; z-index: 3;
-    flex-shrink: 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
     padding: 12px 20px calc(14px + env(safe-area-inset-bottom)) 20px;
-    width: 100%; max-width: 680px; margin: 0 auto;
-    background: linear-gradient(to top, rgba(244, 234, 219, 0.95) 70%, rgba(244, 234, 219, 0));
+    background: linear-gradient(to top, rgba(244, 234, 219, 0.98) 70%, rgba(244, 234, 219, 0));
+    pointer-events: none;
+  }
+  .input-area > * {
+    pointer-events: auto;
+  }
+  .input-area .input-shell,
+  .input-area .counter {
+    max-width: 680px;
+    margin: 0 auto;
   }
   .input-shell {
     display: flex; align-items: flex-end; gap: 10px;
@@ -872,7 +887,6 @@
     .auth-title { font-size: 26px; }
     .auth-content { padding: 28px 22px; }
     .help-btn { width: 28px; height: 28px; font-size: 12px; right: 10px; }
-    .sun-core { min-width: 260px; min-height: 260px; top: -6vh; }
     /* Slightly reduce grain on small screens so text stays crisp */
     .fiber-fine { opacity: 0.55; }
     .fiber-coarse { opacity: 0.5; }
