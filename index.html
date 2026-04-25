@@ -384,41 +384,10 @@
     opacity: 1;
     filter: blur(0);
   }
-
-  /* Letter-by-letter cinematic descent for considered replies.
-     Each letter blurs in from above, scaling down into place.
-     Words are wrapped in .word-wrap to keep them from breaking mid-word.
-  */
-  .word-wrap {
-    display: inline-block;
-    white-space: nowrap;
-  }
-  .letter {
-    display: inline-block;
-    opacity: 0;
-    filter: blur(18px);
-    transform: scale(1.4) translateY(-16px);
-    transition:
-      opacity 1.5s ease-out,
-      filter 1.7s ease-out,
-      transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-    will-change: opacity, filter, transform;
-  }
-  .letter.seen {
-    opacity: 1;
-    filter: blur(0);
-    transform: scale(1) translateY(0);
-  }
-
   /* For users who prefer reduced motion, skip the blur, just fade */
   @media (prefers-reduced-motion: reduce) {
     .word {
       filter: none;
-      transition: opacity 0.3s ease;
-    }
-    .letter {
-      filter: none;
-      transform: none;
       transition: opacity 0.3s ease;
     }
   }
@@ -2457,59 +2426,28 @@
     function renderConsideredReply(container, text, onDone) {
       container.innerHTML = '';
       const tokens = tokenizeWithTiming(text);
-      // Letters get staggered: within each token we stagger letters by a small ms,
-      // the next token still starts at the existing token-level delay.
-      // ~25ms per letter feels cinematic without being overwhelming.
-      const LETTER_STAGGER = 25;
       let cumulative = 0;
-      const allLetters = [];
-
+      const spans = [];
       tokens.forEach(({ text: t }) => {
-        // Each token may be a word or a space/punctuation. We treat whitespace tokens
-        // as plain text nodes (no animation needed) so spacing stays natural.
-        if (/^\s+$/.test(t)) {
-          container.appendChild(document.createTextNode(t));
-          return;
-        }
-        // Wrap word in .word-wrap to prevent breaking mid-word
-        const wordWrap = document.createElement('span');
-        wordWrap.className = 'word-wrap';
-        for (const ch of t) {
-          const letter = document.createElement('span');
-          letter.className = 'letter';
-          letter.textContent = ch;
-          wordWrap.appendChild(letter);
-          allLetters.push(letter);
-        }
-        container.appendChild(wordWrap);
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = t;
+        container.appendChild(span);
+        spans.push(span);
       });
-
+      // Scroll the container into view at the start
       scrollToLatest();
-
-      // Reveal letters in cumulative order. Each token's start uses its delay,
-      // and within the token, each letter reveals at LETTER_STAGGER intervals.
-      let letterIdx = 0;
-      tokens.forEach(({ text: t, delay }) => {
-        if (/^\s+$/.test(t)) return;
+      tokens.forEach(({ delay }, i) => {
         cumulative += delay;
-        const startOfWord = cumulative;
-        for (let j = 0; j < t.length; j++) {
-          const letter = allLetters[letterIdx];
-          const isLast = (letterIdx === allLetters.length - 1);
-          setTimeout(() => {
-            letter.classList.add('seen');
-            scrollToLatest();
-            if (isLast && typeof onDone === 'function') {
-              setTimeout(onDone, 300);
-            }
-          }, startOfWord + (j * LETTER_STAGGER));
-          letterIdx++;
-        }
-        // After the word, advance cumulative by the letter-stagger length so
-        // the next word starts after this one's letters have begun arriving.
-        cumulative += t.length * LETTER_STAGGER * 0.6;
+        setTimeout(() => {
+          spans[i].classList.add('seen');
+          // Scroll on every word so as the text grows, the view follows
+          scrollToLatest();
+          if (i === tokens.length - 1 && typeof onDone === 'function') {
+            setTimeout(onDone, 200);
+          }
+        }, cumulative);
       });
-
       return cumulative;
     }
 
