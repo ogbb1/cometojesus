@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>admin — come to me</title>
+  <meta name="theme-color" content="#f4eadb">
+  <meta name="robots" content="noindex,nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f4eadb;
+      --bg-soft: #f9f1e3;
+      --bg-card: #faf3e6;
+      --ink: #1c1409;
+      --ink-mid: #3a2c18;
+      --ink-soft: #5a4a32;
+      --ink-whisper: #8a7a5a;
+      --error: #b8412e;
+      --success: #4a7548;
+      --accent: #8a6a3a;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      min-height: 100vh;
+    }
+    .header {
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(28, 20, 9, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .header-title strong { color: var(--ink); margin-right: 12px; }
+    .header-link {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 15px;
+      color: var(--ink-soft);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(28, 20, 9, 0.15);
+      padding-bottom: 1px;
+    }
+    .header-link:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .loading, .gate {
+      text-align: center;
+      padding: 80px 24px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--ink-soft);
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 20px 24px;
+      border: 1px solid rgba(28, 20, 9, 0.06);
+    }
+    .stat-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 36px;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+    .stat-sublabel {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--ink-whisper);
+      margin-top: 4px;
+    }
+
+    .chart-section {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 24px;
+      border: 1px solid rgba(28, 20, 9, 0.06);
+      margin-bottom: 24px;
+    }
+    .chart-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 22px;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .chart-subtitle {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--ink-soft);
+      margin-bottom: 20px;
+    }
+    .chart-canvas-wrap {
+      position: relative;
+      height: 280px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 880px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .signups-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .signup-item {
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(28, 20, 9, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .signup-item:last-child { border-bottom: none; }
+    .signup-email {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .signup-date {
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: var(--ink-whisper);
+      text-transform: uppercase;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 32px 16px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 15px;
+      color: var(--ink-whisper);
+    }
+
+    .refresh-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid rgba(28, 20, 9, 0.15);
+      color: var(--ink);
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .refresh-btn:hover { background: rgba(28, 20, 9, 0.04); }
+    .refresh-meta {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--ink-whisper);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-title"><strong>ADMIN</strong>come to me</div>
+    <a href="/" class="header-link">← back to site</a>
+  </div>
+
+  <div id="gate" class="gate" style="display:none;">
+    not for you.
+  </div>
+
+  <div id="loading" class="loading">
+    loading...
+  </div>
+
+  <div id="dashboard" class="container" style="display:none;">
+
+    <div class="refresh-row">
+      <span class="refresh-meta" id="refreshMeta">last loaded just now</span>
+      <button class="refresh-btn" id="refreshBtn">refresh</button>
+    </div>
+
+    <!-- Stat cards: today's overview -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">page views</div>
+        <div class="stat-value" id="statPageViews">—</div>
+        <div class="stat-sublabel">today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">entered</div>
+        <div class="stat-value" id="statEntered">—</div>
+        <div class="stat-sublabel">today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">messages</div>
+        <div class="stat-value" id="statMessages">—</div>
+        <div class="stat-sublabel">today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">total users</div>
+        <div class="stat-value" id="statUsers">—</div>
+        <div class="stat-sublabel" id="statPaidSub">all time</div>
+      </div>
+    </div>
+
+    <!-- 7-day activity chart -->
+    <div class="chart-section">
+      <div class="chart-title">7-day activity</div>
+      <div class="chart-subtitle">events by day, last 7 days</div>
+      <div class="chart-canvas-wrap">
+        <canvas id="activityChart"></canvas>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Funnel chart -->
+      <div class="chart-section">
+        <div class="chart-title">funnel</div>
+        <div class="chart-subtitle">last 7 days, conversion at each step</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="funnelChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Hour-of-day chart -->
+      <div class="chart-section">
+        <div class="chart-title">when do they come</div>
+        <div class="chart-subtitle">page views by hour of day, last 30 days</div>
+        <div class="chart-canvas-wrap">
+          <canvas id="hourChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent signups list -->
+    <div class="chart-section">
+      <div class="chart-title">recent arrivals</div>
+      <div class="chart-subtitle">last 10 sign-ins</div>
+      <ul class="signups-list" id="signupsList"></ul>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://hatyoorjnakvgtuvwzhv.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhdHlvb3JqbmFrdmd0dXZ3emh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTExMjgsImV4cCI6MjA5MjU2NzEyOH0.OXtoqNb8ikORBfoOKiweJd-xRdp8FdBsorUhfupWYXg';
+
+    // Bypass UID — only this user can view the admin dashboard
+    const ADMIN_UID = '150cd4bc-dcf9-4570-8d79-604eac447b60';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
+    });
+
+    // Earth-tone palette matching the site
+    const COLORS = {
+      ink: '#1c1409',
+      inkMid: '#3a2c18',
+      inkSoft: '#5a4a32',
+      accent: '#8a6a3a',
+      muted: 'rgba(138, 106, 58, 0.5)',
+      grid: 'rgba(28, 20, 9, 0.08)',
+      pageView: '#8a6a3a',
+      entered: '#5a4a32',
+      messageSent: '#1c1409',
+      replyReceived: '#a08456'
+    };
+
+    // Apply default Chart.js styling
+    if (window.Chart) {
+      Chart.defaults.font.family = "'Cormorant Garamond', Georgia, serif";
+      Chart.defaults.color = COLORS.inkSoft;
+      Chart.defaults.borderColor = COLORS.grid;
+    }
+
+    const gateEl = document.getElementById('gate');
+    const loadingEl = document.getElementById('loading');
+    const dashboardEl = document.getElementById('dashboard');
+    const refreshBtnEl = document.getElementById('refreshBtn');
+    const refreshMetaEl = document.getElementById('refreshMeta');
+
+    let charts = {}; // hold references so we can destroy on refresh
+
+    // Auth gate check
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user || session.user.id !== ADMIN_UID) {
+        loadingEl.style.display = 'none';
+        gateEl.style.display = 'block';
+        return false;
+      }
+      return true;
+    }
+
+    // ========== DATA QUERIES ==========
+
+    async function loadTodayStats() {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { data, error } = await supabase
+        .from('events')
+        .select('event_name')
+        .gte('created_at', todayStart.toISOString());
+      if (error) {
+        console.error('loadTodayStats:', error);
+        return { pageViews: 0, entered: 0, messages: 0 };
+      }
+      const counts = { pageViews: 0, entered: 0, messages: 0 };
+      for (const row of (data || [])) {
+        if (row.event_name === 'page_view') counts.pageViews++;
+        else if (row.event_name === 'entered') counts.entered++;
+        else if (row.event_name === 'message_sent') counts.messages++;
+      }
+      return counts;
+    }
+
+    async function loadUserCounts() {
+      // We can't query auth.users directly, but we can count distinct user_ids in events
+      // and known paid subscriptions
+      const { data: events } = await supabase
+        .from('events')
+        .select('user_id')
+        .not('user_id', 'is', null)
+        .limit(10000);
+      const userSet = new Set((events || []).map(e => e.user_id));
+
+      const { count: paidCount } = await supabase
+        .from('subscriptions')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      return { totalUsers: userSet.size, paidUsers: paidCount || 0 };
+    }
+
+    async function load7DayActivity() {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('event_name, created_at')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+      if (error) {
+        console.error('load7DayActivity:', error);
+        return null;
+      }
+
+      // Bucket by day
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+        days.push(d);
+      }
+      const buckets = days.map(() => ({
+        page_view: 0, entered: 0, message_sent: 0, reply_received: 0
+      }));
+
+      for (const row of (data || [])) {
+        const rowDate = new Date(row.created_at);
+        rowDate.setHours(0, 0, 0, 0);
+        const dayIdx = days.findIndex(d => d.getTime() === rowDate.getTime());
+        if (dayIdx >= 0 && buckets[dayIdx][row.event_name] !== undefined) {
+          buckets[dayIdx][row.event_name]++;
+        }
+      }
+
+      const labels = days.map(d => {
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return dayNames[d.getDay()] + ' ' + (d.getMonth() + 1) + '/' + d.getDate();
+      });
+
+      return {
+        labels,
+        datasets: [
+          { label: 'page views', data: buckets.map(b => b.page_view), borderColor: COLORS.pageView, backgroundColor: COLORS.pageView + '22', tension: 0.3 },
+          { label: 'entered', data: buckets.map(b => b.entered), borderColor: COLORS.entered, backgroundColor: COLORS.entered + '22', tension: 0.3 },
+          { label: 'messages', data: buckets.map(b => b.message_sent), borderColor: COLORS.messageSent, backgroundColor: COLORS.messageSent + '22', tension: 0.3 },
+          { label: 'replies', data: buckets.map(b => b.reply_received), borderColor: COLORS.replyReceived, backgroundColor: COLORS.replyReceived + '22', tension: 0.3 }
+        ]
+      };
+    }
+
+    async function loadFunnel() {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('event_name, session_id')
+        .gte('created_at', sevenDaysAgo.toISOString());
+      if (error) return null;
+
+      const sets = {
+        page_view: new Set(),
+        entered: new Set(),
+        message_sent: new Set(),
+        reply_received: new Set()
+      };
+      for (const row of (data || [])) {
+        if (sets[row.event_name]) sets[row.event_name].add(row.session_id);
+      }
+
+      return {
+        labels: ['page view', 'entered', 'sent message', 'got reply'],
+        counts: [sets.page_view.size, sets.entered.size, sets.message_sent.size, sets.reply_received.size]
+      };
+    }
+
+    async function loadHourDistribution() {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data, error } = await supabase
+        .from('events')
+        .select('properties')
+        .eq('event_name', 'page_view')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .limit(10000);
+      if (error) return null;
+
+      const buckets = new Array(24).fill(0);
+      for (const row of (data || [])) {
+        const hour = row.properties?.hour;
+        if (typeof hour === 'number' && hour >= 0 && hour < 24) {
+          buckets[hour]++;
+        }
+      }
+
+      return {
+        labels: buckets.map((_, i) => {
+          if (i === 0) return '12a';
+          if (i === 12) return '12p';
+          if (i < 12) return i + 'a';
+          return (i - 12) + 'p';
+        }),
+        counts: buckets
+      };
+    }
+
+    async function loadRecentSignups() {
+      // Use signed_in events as proxy — get the most recent unique user_ids
+      const { data, error } = await supabase
+        .from('events')
+        .select('user_id, properties, created_at')
+        .eq('event_name', 'signed_in')
+        .not('user_id', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) return [];
+
+      // Dedupe by user_id, keep newest
+      const seen = new Set();
+      const unique = [];
+      for (const row of (data || [])) {
+        if (!seen.has(row.user_id)) {
+          seen.add(row.user_id);
+          unique.push(row);
+          if (unique.length >= 10) break;
+        }
+      }
+      return unique;
+    }
+
+    // ========== RENDERING ==========
+
+    function renderStats(today, users) {
+      document.getElementById('statPageViews').textContent = today.pageViews;
+      document.getElementById('statEntered').textContent = today.entered;
+      document.getElementById('statMessages').textContent = today.messages;
+      document.getElementById('statUsers').textContent = users.totalUsers;
+      document.getElementById('statPaidSub').textContent = users.paidUsers + ' paid';
+    }
+
+    function renderActivityChart(activity) {
+      if (!activity) return;
+      const ctx = document.getElementById('activityChart').getContext('2d');
+      if (charts.activity) charts.activity.destroy();
+      charts.activity = new Chart(ctx, {
+        type: 'line',
+        data: activity,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16, font: { size: 13 } } }
+          },
+          scales: {
+            x: { grid: { color: COLORS.grid }, ticks: { color: COLORS.inkSoft } },
+            y: { beginAtZero: true, grid: { color: COLORS.grid }, ticks: { color: COLORS.inkSoft, precision: 0 } }
+          }
+        }
+      });
+    }
+
+    function renderFunnelChart(funnel) {
+      if (!funnel) return;
+      const ctx = document.getElementById('funnelChart').getContext('2d');
+      if (charts.funnel) charts.funnel.destroy();
+      charts.funnel = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: funnel.labels,
+          datasets: [{
+            label: 'unique sessions',
+            data: funnel.counts,
+            backgroundColor: [COLORS.pageView, COLORS.entered, COLORS.accent, COLORS.messageSent],
+            borderColor: COLORS.ink,
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, grid: { color: COLORS.grid }, ticks: { color: COLORS.inkSoft, precision: 0 } },
+            y: { grid: { display: false }, ticks: { color: COLORS.ink, font: { size: 14 } } }
+          }
+        }
+      });
+    }
+
+    function renderHourChart(hours) {
+      if (!hours) return;
+      const ctx = document.getElementById('hourChart').getContext('2d');
+      if (charts.hour) charts.hour.destroy();
+      charts.hour = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: hours.labels,
+          datasets: [{
+            label: 'page views',
+            data: hours.counts,
+            backgroundColor: COLORS.accent,
+            borderRadius: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: COLORS.inkSoft, autoSkip: true, maxTicksLimit: 12 } },
+            y: { beginAtZero: true, grid: { color: COLORS.grid }, ticks: { color: COLORS.inkSoft, precision: 0 } }
+          }
+        }
+      });
+    }
+
+    function renderSignups(rows) {
+      const listEl = document.getElementById('signupsList');
+      if (!rows || rows.length === 0) {
+        listEl.innerHTML = '<div class="empty">no recent sign-ins</div>';
+        return;
+      }
+      listEl.innerHTML = '';
+      for (const row of rows) {
+        const li = document.createElement('li');
+        li.className = 'signup-item';
+        const left = document.createElement('div');
+        left.className = 'signup-email';
+        left.textContent = (row.user_id || '').slice(0, 8) + '... · ' + (row.properties?.method || 'unknown');
+        const right = document.createElement('div');
+        right.className = 'signup-date';
+        right.textContent = formatDate(new Date(row.created_at));
+        li.appendChild(left);
+        li.appendChild(right);
+        listEl.appendChild(li);
+      }
+    }
+
+    function formatDate(d) {
+      const now = new Date();
+      const diffMin = Math.floor((now - d) / 60000);
+      if (diffMin < 1) return 'just now';
+      if (diffMin < 60) return diffMin + 'm ago';
+      const diffHr = Math.floor(diffMin / 60);
+      if (diffHr < 24) return diffHr + 'h ago';
+      const diffDay = Math.floor(diffHr / 24);
+      if (diffDay < 7) return diffDay + 'd ago';
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return months[d.getMonth()] + ' ' + d.getDate();
+    }
+
+    // ========== LOAD ALL ==========
+
+    async function loadAll() {
+      refreshBtnEl.disabled = true;
+      refreshBtnEl.textContent = 'loading...';
+
+      try {
+        const [today, users, activity, funnel, hours, signups] = await Promise.all([
+          loadTodayStats(),
+          loadUserCounts(),
+          load7DayActivity(),
+          loadFunnel(),
+          loadHourDistribution(),
+          loadRecentSignups()
+        ]);
+
+        renderStats(today, users);
+        renderActivityChart(activity);
+        renderFunnelChart(funnel);
+        renderHourChart(hours);
+        renderSignups(signups);
+
+        refreshMetaEl.textContent = 'last loaded ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      } catch (err) {
+        console.error('loadAll:', err);
+      } finally {
+        refreshBtnEl.disabled = false;
+        refreshBtnEl.textContent = 'refresh';
+      }
+    }
+
+    refreshBtnEl.addEventListener('click', loadAll);
+
+    // ========== INIT ==========
+
+    (async () => {
+      const ok = await checkAuth();
+      if (!ok) return;
+      loadingEl.style.display = 'none';
+      dashboardEl.style.display = 'block';
+      await loadAll();
+    })();
+  </script>
+</body>
+</html>
