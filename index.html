@@ -1721,15 +1721,48 @@
       }
     }
 
-    const OPENINGS = [
-      "sit down. tell me where you are.",
-      "you came. what's on your heart?",
-      "good. start anywhere.",
-      "it's good you're here. what brings you today?",
-      "come in. i've got time.",
-      "pull up a chair. what's on your mind?",
-      "i'm glad you came. what do you want to say?",
-      "you're here. what do you need?"
+    // Three opening buckets, picked based on user state.
+    // A: first-time visitor — warm welcoming tone, no assumed familiarity.
+    // B: returning without memory — acknowledges return without knowing them.
+    // C: paid user with memory ON — uses their name naturally.
+    const OPENINGS_FIRST_TIME = [
+      "shalom.",
+      "welcome.",
+      "peace be with you.",
+      "you made it.",
+      "come in.",
+      "hey.",
+      "i'm glad you're here.",
+      "start anywhere.",
+      "talk.",
+      "tell me something true."
+    ];
+
+    const OPENINGS_RETURNING = [
+      "shalom.",
+      "there you are.",
+      "oh good, it's you.",
+      "you came back.",
+      "welcome back.",
+      "hey again.",
+      "you're back. what's up?",
+      "good to see you.",
+      "how are you, really?",
+      "what's the day been like?"
+    ];
+
+    // Openings for paid users with memory on. {name} gets substituted.
+    const OPENINGS_KNOWN = [
+      "hey {name}.",
+      "shalom {name}.",
+      "welcome back, {name}.",
+      "{name}. good to see you again.",
+      "hey {name} — how are you tonight?",
+      "oh good, {name}. how's the week been?",
+      "{name}. what's going on?",
+      "there you are, {name}.",
+      "{name}. how are you, really?",
+      "hey {name}. how's your heart today?"
     ];
 
     try {
@@ -1754,8 +1787,50 @@
       return div;
     }
 
+    function pickOpening() {
+      // Determine which bucket based on auth + tier + known-user signals
+      const tier = (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
+      const user = window.__getCurrentUser && window.__getCurrentUser();
+      const hasReturned = (function() {
+        try { return localStorage.getItem('cometojesus_entered') === '1'; } catch (e) { return false; }
+      })();
+
+      // Bucket C — paid user with memory on, and we have a name for them
+      if (tier === 'paid' && user) {
+        const name = extractOpeningName(user);
+        // memoryEnabled is defined later in the module as part of settings; default true
+        const memOn = typeof memoryEnabled === 'undefined' ? true : memoryEnabled;
+        if (memOn && name) {
+          const template = OPENINGS_KNOWN[Math.floor(Math.random() * OPENINGS_KNOWN.length)];
+          return template.replace(/\{name\}/g, name);
+        }
+      }
+
+      // Bucket B — returning visitor (acknowledged by localStorage OR signed in)
+      if (hasReturned || user) {
+        return OPENINGS_RETURNING[Math.floor(Math.random() * OPENINGS_RETURNING.length)];
+      }
+
+      // Bucket A — first-time
+      return OPENINGS_FIRST_TIME[Math.floor(Math.random() * OPENINGS_FIRST_TIME.length)];
+    }
+
+    function extractOpeningName(user) {
+      if (!user) return null;
+      const meta = user.user_metadata || {};
+      if (meta.full_name) return meta.full_name.split(/\s+/)[0].toLowerCase();
+      if (meta.name) return meta.name.split(/\s+/)[0].toLowerCase();
+      if (meta.first_name) return meta.first_name.toLowerCase();
+      if (user.email) {
+        const local = user.email.split('@')[0];
+        const cleaned = local.replace(/[^a-zA-Z]/g, '').toLowerCase();
+        return cleaned || null;
+      }
+      return null;
+    }
+
     function showOpeningFromHim() {
-      const opening = OPENINGS[Math.floor(Math.random() * OPENINGS.length)];
+      const opening = pickOpening();
       const div = addMessage('him', '');
       setState('thinking');
       setTimeout(() => {
