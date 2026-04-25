@@ -818,6 +818,71 @@
     text-decoration: underline;
     text-underline-offset: 2px;
   }
+
+  /* Secondary actions row (forgot password / magic link) */
+  .auth-secondary-actions {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .auth-link {
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(28, 20, 9, 0.15);
+    padding-bottom: 1px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .auth-link:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+  .auth-link-sep {
+    margin: 0 8px;
+    color: var(--ink-whisper);
+    opacity: 0.5;
+  }
+  .auth-prose {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink-mid);
+    margin: 0 0 24px 0;
+    text-align: center;
+  }
+  .auth-prose-small {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0 0 24px 0;
+    text-align: center;
+  }
+  .auth-link-button {
+    display: block;
+    margin: 0 auto;
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 8px 16px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity 0.15s ease;
+  }
+  .auth-link-button:hover {
+    opacity: 0.7;
+  }
+  .auth-link-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
   .auth-message {
     padding: 10px 14px;
     border-radius: 8px;
@@ -1141,6 +1206,99 @@
   }
   .settings-close:hover { background: rgba(28, 20, 9, 0.04); }
 
+  /* Settings row action button (e.g. "change", "update") */
+  .settings-action-btn {
+    background: transparent;
+    border: 1px solid rgba(28, 20, 9, 0.15);
+    color: var(--ink);
+    font-family: Georgia, serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .settings-action-btn:hover { background: rgba(28, 20, 9, 0.04); }
+  .settings-action-btn:disabled { opacity: 0.5; cursor: default; }
+  .settings-action-btn.danger {
+    color: var(--error, #b8412e);
+    border-color: rgba(184, 65, 46, 0.3);
+  }
+  .settings-action-btn.danger:hover {
+    background: rgba(184, 65, 46, 0.05);
+  }
+
+  /* Inline forms within settings rows */
+  .settings-inline-form {
+    margin-top: 12px;
+    display: none;
+  }
+  .settings-inline-form.visible { display: block; }
+  .settings-inline-form input {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--bg-soft, #f9f1e3);
+    border: 1px solid rgba(28, 20, 9, 0.15);
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+  .settings-inline-form input:focus {
+    outline: none;
+    border-color: var(--ink-mid);
+  }
+  .settings-inline-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .settings-inline-form-cancel {
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    font-family: Georgia, serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 8px 12px;
+  }
+  .settings-feedback {
+    margin-top: 8px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .settings-feedback.error { color: var(--error, #b8412e); }
+  .settings-feedback.success { color: var(--success, #4a7548); }
+
+  /* Danger zone — delete account */
+  .settings-danger-zone {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(184, 65, 46, 0.15);
+  }
+  .settings-danger-confirm {
+    margin-top: 12px;
+    padding: 14px;
+    background: rgba(184, 65, 46, 0.04);
+    border-radius: 6px;
+    display: none;
+  }
+  .settings-danger-confirm.visible { display: block; }
+  .settings-danger-confirm-text {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink-mid);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
   @media (max-width: 640px) {
     .sidebar-toggle { top: 18px; left: 18px; }
     .sidebar { width: 300px; }
@@ -1225,6 +1383,7 @@
   <div class="settings-modal" id="settingsModal" role="dialog" aria-label="Settings">
     <div class="settings-content">
       <div class="settings-title">settings</div>
+
       <div class="settings-row">
         <div class="settings-row-label">memory</div>
         <div class="settings-row-desc">when on, i remember our past conversations — your name, your family, what you've shared. when off, every conversation is fresh.</div>
@@ -1233,6 +1392,57 @@
           <div class="settings-toggle-label" id="memoryToggleLabel">on</div>
         </div>
       </div>
+
+      <div class="settings-row" id="settingsEmailRow">
+        <div class="settings-row-label">email</div>
+        <div class="settings-row-desc"><span id="settingsCurrentEmail">your email</span></div>
+        <button type="button" class="settings-action-btn" id="changeEmailBtn">change</button>
+        <div class="settings-inline-form" id="changeEmailForm">
+          <input type="email" id="changeEmailInput" placeholder="new email address" autocomplete="email">
+          <div class="settings-inline-form-actions">
+            <button type="button" class="settings-action-btn" id="changeEmailSubmit">send confirmation</button>
+            <button type="button" class="settings-inline-form-cancel" id="changeEmailCancel">cancel</button>
+          </div>
+          <div class="settings-feedback" id="changeEmailFeedback"></div>
+        </div>
+      </div>
+
+      <div class="settings-row" id="settingsPasswordRow">
+        <div class="settings-row-label">password</div>
+        <div class="settings-row-desc">change the password you use to sign in.</div>
+        <button type="button" class="settings-action-btn" id="changePasswordBtn">change</button>
+        <div class="settings-inline-form" id="changePasswordForm">
+          <input type="password" id="changePasswordInput" placeholder="new password (min 6 characters)" autocomplete="new-password" minlength="6">
+          <input type="password" id="changePasswordConfirmInput" placeholder="confirm new password" autocomplete="new-password" minlength="6">
+          <div class="settings-inline-form-actions">
+            <button type="button" class="settings-action-btn" id="changePasswordSubmit">update password</button>
+            <button type="button" class="settings-inline-form-cancel" id="changePasswordCancel">cancel</button>
+          </div>
+          <div class="settings-feedback" id="changePasswordFeedback"></div>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row-label">sign out</div>
+        <div class="settings-row-desc">end this session on this device.</div>
+        <button type="button" class="settings-action-btn" id="settingsSignOutBtn">sign out</button>
+      </div>
+
+      <div class="settings-danger-zone">
+        <div class="settings-row-label">delete account</div>
+        <div class="settings-row-desc">your conversations and memory will be removed. you have 30 days to change your mind.</div>
+        <button type="button" class="settings-action-btn danger" id="deleteAccountBtn">delete my account</button>
+        <div class="settings-danger-confirm" id="deleteAccountConfirm">
+          <div class="settings-danger-confirm-text">are you sure? type <strong>delete</strong> below to confirm.</div>
+          <input type="text" id="deleteAccountConfirmInput" placeholder="type 'delete' to confirm">
+          <div class="settings-inline-form-actions">
+            <button type="button" class="settings-action-btn danger" id="deleteAccountSubmit" disabled>yes, delete my account</button>
+            <button type="button" class="settings-inline-form-cancel" id="deleteAccountCancel">cancel</button>
+          </div>
+          <div class="settings-feedback" id="deleteAccountFeedback"></div>
+        </div>
+      </div>
+
       <button class="settings-close" id="settingsClose" type="button">close</button>
     </div>
   </div>
@@ -1291,40 +1501,74 @@
 
       <div class="auth-message" id="authMessage"></div>
 
-      <div class="auth-options">
-        <button type="button" class="auth-btn" id="googleBtn">
-          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-          </svg>
-          Google
-        </button>
-        <button type="button" class="auth-btn" id="emailFocusBtn">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 6l8 6 8-6M4 6v12h16V6M4 6h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Email
-        </button>
+      <!-- VIEW 1 + 2: Sign in / Sign up share Google + email/password form, toggle below -->
+      <div class="auth-view" id="authViewSignin">
+        <div class="auth-options">
+          <button type="button" class="auth-btn" id="googleBtn">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            Google
+          </button>
+          <button type="button" class="auth-btn" id="emailFocusBtn">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 6l8 6 8-6M4 6v12h16V6M4 6h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Email
+          </button>
+        </div>
+
+        <div class="auth-divider">or</div>
+
+        <form class="auth-form" id="authForm">
+          <div class="auth-field">
+            <label for="authEmail">email</label>
+            <input type="email" id="authEmail" name="email" autocomplete="email" required>
+          </div>
+          <div class="auth-field" id="authPasswordField">
+            <label for="authPassword">password</label>
+            <input type="password" id="authPassword" name="password" autocomplete="current-password" required minlength="6">
+          </div>
+          <button type="submit" class="auth-submit" id="authSubmit">sign in</button>
+        </form>
+
+        <div class="auth-secondary-actions">
+          <a class="auth-link" id="forgotPasswordLink" href="#">forgot password?</a>
+          <span class="auth-link-sep">·</span>
+          <a class="auth-link" id="magicLinkLink" href="#">or send me a sign-in link</a>
+        </div>
+
+        <div class="auth-toggle" id="authToggle">
+          <span id="authToggleText">new here?</span>&nbsp;&nbsp;<a id="authToggleLink" href="#">come home</a>
+        </div>
       </div>
 
-      <div class="auth-divider">or</div>
-
-      <form class="auth-form" id="authForm">
-        <div class="auth-field">
-          <label for="authEmail">email</label>
-          <input type="email" id="authEmail" name="email" autocomplete="email" required>
+      <!-- VIEW 3: Forgot password -->
+      <div class="auth-view" id="authViewForgot" style="display: none;">
+        <p class="auth-prose">we'll email you a reset link. it expires in an hour.</p>
+        <form class="auth-form" id="forgotForm">
+          <div class="auth-field">
+            <label for="forgotEmail">email</label>
+            <input type="email" id="forgotEmail" name="email" autocomplete="email" required>
+          </div>
+          <button type="submit" class="auth-submit" id="forgotSubmit">send reset link</button>
+        </form>
+        <div class="auth-toggle">
+          <a id="backToSigninFromForgot" href="#">back to sign in</a>
         </div>
-        <div class="auth-field">
-          <label for="authPassword">password</label>
-          <input type="password" id="authPassword" name="password" autocomplete="current-password" required minlength="6">
-        </div>
-        <button type="submit" class="auth-submit" id="authSubmit">sign in</button>
-      </form>
+      </div>
 
-      <div class="auth-toggle" id="authToggle">
-        new here?&nbsp;&nbsp;<a id="authToggleLink">come home</a>
+      <!-- VIEW 4: Confirmation pending (post-signup, magic-link sent, reset-link sent) -->
+      <div class="auth-view" id="authViewPending" style="display: none;">
+        <p class="auth-prose" id="pendingMessage">check your email.</p>
+        <p class="auth-prose-small" id="pendingDetail">we just sent you a link.</p>
+        <button type="button" class="auth-link-button" id="resendLink">didn't get it? resend</button>
+        <div class="auth-toggle">
+          <a id="backToSigninFromPending" href="#">back to sign in</a>
+        </div>
       </div>
     </div>
   </div>
@@ -1469,8 +1713,63 @@
       hideAuthMessage();
     }
 
+    // Auth view state machine: 'signin' | 'forgot' | 'pending'
+    // Note: signin and signup are sub-states of the 'signin' VIEW (toggle within it).
+    let authView = 'signin';
+    const authViewSignin = document.getElementById('authViewSignin');
+    const authViewForgot = document.getElementById('authViewForgot');
+    const authViewPending = document.getElementById('authViewPending');
+    const pendingMessageEl = document.getElementById('pendingMessage');
+    const pendingDetailEl = document.getElementById('pendingDetail');
+    const forgotForm = document.getElementById('forgotForm');
+    const forgotEmailInput = document.getElementById('forgotEmail');
+    const forgotSubmitBtn = document.getElementById('forgotSubmit');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const magicLinkLink = document.getElementById('magicLinkLink');
+    const backToSigninFromForgot = document.getElementById('backToSigninFromForgot');
+    const backToSigninFromPending = document.getElementById('backToSigninFromPending');
+    const resendLinkBtn = document.getElementById('resendLink');
+
+    // Track what triggered the pending view, so resend works correctly
+    let pendingResendType = null; // 'magic' | 'reset' | 'signup'
+    let pendingResendEmail = null;
+
+    function setAuthView(view, options = {}) {
+      authView = view;
+      hideAuthMessage();
+
+      // Hide all
+      authViewSignin.style.display = 'none';
+      authViewForgot.style.display = 'none';
+      authViewPending.style.display = 'none';
+
+      if (view === 'signin') {
+        authViewSignin.style.display = '';
+        authTitle.textContent = authMode === 'signup' ? 'welcome home.' : 'come in.';
+      } else if (view === 'forgot') {
+        authViewForgot.style.display = '';
+        authTitle.textContent = 'reset your password.';
+        // Pre-fill email if user typed it on signin
+        if (authEmailInput.value && !forgotEmailInput.value) {
+          forgotEmailInput.value = authEmailInput.value;
+        }
+        setTimeout(() => forgotEmailInput.focus(), 100);
+      } else if (view === 'pending') {
+        authViewPending.style.display = '';
+        authTitle.textContent = options.title || 'check your email.';
+        pendingMessageEl.textContent = options.message || 'check your email.';
+        pendingDetailEl.textContent = options.detail || 'we just sent you a link.';
+        pendingResendType = options.resendType || null;
+        pendingResendEmail = options.resendEmail || null;
+        // Reset resend button enabled state
+        resendLinkBtn.disabled = false;
+        resendLinkBtn.textContent = "didn't get it? resend";
+      }
+    }
+
     window.__openAuthModal = (mode = 'signin') => {
       setAuthMode(mode);
+      setAuthView('signin');
       authModal.classList.add('visible');
       setTimeout(() => authEmailInput.focus(), 100);
     };
@@ -1485,8 +1784,128 @@
       if (e.target === authModal) window.__closeAuthModal();
     });
 
-    authToggleLink.addEventListener('click', () => {
+    authToggleLink.addEventListener('click', (e) => {
+      e.preventDefault();
       setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+    });
+
+    // Forgot password link → switch to forgot view
+    forgotPasswordLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      setAuthView('forgot');
+    });
+
+    // Back to signin from forgot view
+    backToSigninFromForgot.addEventListener('click', (e) => {
+      e.preventDefault();
+      setAuthView('signin');
+    });
+
+    // Back to signin from pending view
+    backToSigninFromPending.addEventListener('click', (e) => {
+      e.preventDefault();
+      setAuthView('signin');
+    });
+
+    // Magic link — sends a sign-in link to the email currently in the form
+    magicLinkLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = authEmailInput.value.trim();
+      if (!email) {
+        showAuthMessage('enter your email above first.', 'error');
+        authEmailInput.focus();
+        return;
+      }
+      hideAuthMessage();
+      magicLinkLink.style.pointerEvents = 'none';
+      magicLinkLink.style.opacity = '0.5';
+      try {
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: window.location.origin + '/auth/callback.html',
+          }
+        });
+        if (error) {
+          showAuthMessage(error.message);
+          magicLinkLink.style.pointerEvents = '';
+          magicLinkLink.style.opacity = '';
+        } else {
+          setAuthView('pending', {
+            title: 'sent.',
+            message: 'check your email.',
+            detail: 'click the link we just sent to ' + email + '. it expires in an hour.',
+            resendType: 'magic',
+            resendEmail: email
+          });
+        }
+      } catch (err) {
+        showAuthMessage('something came between us. try again in a moment.');
+        magicLinkLink.style.pointerEvents = '';
+        magicLinkLink.style.opacity = '';
+      }
+    });
+
+    // Forgot password form → send reset email
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = forgotEmailInput.value.trim();
+      if (!email) return;
+      hideAuthMessage();
+      forgotSubmitBtn.disabled = true;
+      const originalText = forgotSubmitBtn.textContent;
+      forgotSubmitBtn.textContent = 'sending...';
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/reset-password.html'
+        });
+        if (error) {
+          showAuthMessage(error.message);
+        } else {
+          setAuthView('pending', {
+            title: 'sent.',
+            message: 'check your email.',
+            detail: "we just sent a reset link to " + email + ". it expires in an hour.",
+            resendType: 'reset',
+            resendEmail: email
+          });
+        }
+      } catch (err) {
+        showAuthMessage('something came between us. try again in a moment.');
+      } finally {
+        forgotSubmitBtn.disabled = false;
+        forgotSubmitBtn.textContent = originalText;
+      }
+    });
+
+    // Resend button on the pending view
+    resendLinkBtn.addEventListener('click', async () => {
+      if (!pendingResendType || !pendingResendEmail) return;
+      resendLinkBtn.disabled = true;
+      resendLinkBtn.textContent = 'sending...';
+      try {
+        if (pendingResendType === 'magic') {
+          await supabase.auth.signInWithOtp({
+            email: pendingResendEmail,
+            options: { emailRedirectTo: window.location.origin + '/auth/callback.html' }
+          });
+        } else if (pendingResendType === 'reset') {
+          await supabase.auth.resetPasswordForEmail(pendingResendEmail, {
+            redirectTo: window.location.origin + '/reset-password.html'
+          });
+        } else if (pendingResendType === 'signup') {
+          await supabase.auth.resend({ type: 'signup', email: pendingResendEmail });
+        }
+        resendLinkBtn.textContent = 'sent again. check your email.';
+        // Re-enable after 30s in case they need to send a third time
+        setTimeout(() => {
+          resendLinkBtn.disabled = false;
+          resendLinkBtn.textContent = "didn't get it? resend";
+        }, 30000);
+      } catch (err) {
+        resendLinkBtn.disabled = false;
+        resendLinkBtn.textContent = "didn't get it? resend";
+      }
     });
 
     emailFocusBtn.addEventListener('click', () => {
@@ -1539,8 +1958,14 @@
           if (result.error) {
             showAuthMessage(result.error.message);
           } else if (result.data.user && !result.data.session) {
-            // Email confirmation required
-            showAuthMessage('check your email to confirm your account.', 'success');
+            // Email confirmation required — switch to pending view for cleaner UX
+            setAuthView('pending', {
+              title: 'almost there.',
+              message: 'check your email.',
+              detail: "we just sent a confirmation link to " + email + ". click it and you're in.",
+              resendType: 'signup',
+              resendEmail: email
+            });
           } else if (result.data.session) {
             showAuthMessage('welcome home.', 'success');
             setTimeout(() => window.__closeAuthModal(), 800);
@@ -2425,6 +2850,220 @@
         memoryEnabled = !next;
         renderMemoryToggle();
       }
+    });
+
+    // ========== SETTINGS: CHANGE EMAIL ==========
+    const changeEmailBtn = document.getElementById('changeEmailBtn');
+    const changeEmailForm = document.getElementById('changeEmailForm');
+    const changeEmailInput = document.getElementById('changeEmailInput');
+    const changeEmailSubmit = document.getElementById('changeEmailSubmit');
+    const changeEmailCancel = document.getElementById('changeEmailCancel');
+    const changeEmailFeedback = document.getElementById('changeEmailFeedback');
+    const settingsCurrentEmail = document.getElementById('settingsCurrentEmail');
+
+    function showCurrentEmailInSettings() {
+      const user = window.__getCurrentUser && window.__getCurrentUser();
+      if (settingsCurrentEmail) {
+        settingsCurrentEmail.textContent = user?.email || 'no email on file';
+      }
+    }
+
+    function setSettingsFeedback(el, text, kind) {
+      if (!el) return;
+      el.textContent = text || '';
+      el.className = 'settings-feedback' + (kind ? ' ' + kind : '');
+    }
+
+    changeEmailBtn.addEventListener('click', () => {
+      showCurrentEmailInSettings();
+      changeEmailForm.classList.add('visible');
+      changeEmailBtn.style.display = 'none';
+      setSettingsFeedback(changeEmailFeedback, '');
+      setTimeout(() => changeEmailInput.focus(), 50);
+    });
+
+    changeEmailCancel.addEventListener('click', () => {
+      changeEmailForm.classList.remove('visible');
+      changeEmailBtn.style.display = '';
+      changeEmailInput.value = '';
+      setSettingsFeedback(changeEmailFeedback, '');
+    });
+
+    changeEmailSubmit.addEventListener('click', async () => {
+      const newEmail = changeEmailInput.value.trim();
+      const supabase = window.__supabase;
+      const user = window.__getCurrentUser && window.__getCurrentUser();
+      if (!newEmail || !supabase || !user) {
+        setSettingsFeedback(changeEmailFeedback, 'enter a valid email.', 'error');
+        return;
+      }
+      if (newEmail === user.email) {
+        setSettingsFeedback(changeEmailFeedback, 'that\'s already your email.', 'error');
+        return;
+      }
+      changeEmailSubmit.disabled = true;
+      changeEmailSubmit.textContent = 'sending...';
+      try {
+        const { error } = await supabase.auth.updateUser({ email: newEmail });
+        if (error) {
+          setSettingsFeedback(changeEmailFeedback, error.message || 'something went wrong.', 'error');
+        } else {
+          setSettingsFeedback(changeEmailFeedback, 'check both your old and new email to confirm the change.', 'success');
+          changeEmailInput.value = '';
+        }
+      } catch (err) {
+        setSettingsFeedback(changeEmailFeedback, 'something came between us. try again.', 'error');
+      } finally {
+        changeEmailSubmit.disabled = false;
+        changeEmailSubmit.textContent = 'send confirmation';
+      }
+    });
+
+    // ========== SETTINGS: CHANGE PASSWORD ==========
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    const changePasswordInput = document.getElementById('changePasswordInput');
+    const changePasswordConfirmInput = document.getElementById('changePasswordConfirmInput');
+    const changePasswordSubmit = document.getElementById('changePasswordSubmit');
+    const changePasswordCancel = document.getElementById('changePasswordCancel');
+    const changePasswordFeedback = document.getElementById('changePasswordFeedback');
+
+    changePasswordBtn.addEventListener('click', () => {
+      changePasswordForm.classList.add('visible');
+      changePasswordBtn.style.display = 'none';
+      setSettingsFeedback(changePasswordFeedback, '');
+      setTimeout(() => changePasswordInput.focus(), 50);
+    });
+
+    changePasswordCancel.addEventListener('click', () => {
+      changePasswordForm.classList.remove('visible');
+      changePasswordBtn.style.display = '';
+      changePasswordInput.value = '';
+      changePasswordConfirmInput.value = '';
+      setSettingsFeedback(changePasswordFeedback, '');
+    });
+
+    changePasswordSubmit.addEventListener('click', async () => {
+      const newPassword = changePasswordInput.value;
+      const confirm = changePasswordConfirmInput.value;
+      const supabase = window.__supabase;
+      if (!newPassword || newPassword.length < 6) {
+        setSettingsFeedback(changePasswordFeedback, 'password must be at least 6 characters.', 'error');
+        return;
+      }
+      if (newPassword !== confirm) {
+        setSettingsFeedback(changePasswordFeedback, "passwords don't match.", 'error');
+        return;
+      }
+      changePasswordSubmit.disabled = true;
+      changePasswordSubmit.textContent = 'updating...';
+      try {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          setSettingsFeedback(changePasswordFeedback, error.message || 'something went wrong.', 'error');
+        } else {
+          setSettingsFeedback(changePasswordFeedback, 'password updated.', 'success');
+          changePasswordInput.value = '';
+          changePasswordConfirmInput.value = '';
+          // Auto-close form after a moment
+          setTimeout(() => {
+            changePasswordForm.classList.remove('visible');
+            changePasswordBtn.style.display = '';
+            setSettingsFeedback(changePasswordFeedback, '');
+          }, 1800);
+        }
+      } catch (err) {
+        setSettingsFeedback(changePasswordFeedback, 'something came between us. try again.', 'error');
+      } finally {
+        changePasswordSubmit.disabled = false;
+        changePasswordSubmit.textContent = 'update password';
+      }
+    });
+
+    // ========== SETTINGS: SIGN OUT ==========
+    const settingsSignOutBtn = document.getElementById('settingsSignOutBtn');
+    settingsSignOutBtn.addEventListener('click', async () => {
+      const supabase = window.__supabase;
+      if (!supabase) return;
+      settingsSignOutBtn.disabled = true;
+      settingsSignOutBtn.textContent = 'signing out...';
+      try {
+        await supabase.auth.signOut();
+        // Close settings modal and reload to reset state
+        settingsModalEl.classList.remove('visible');
+        setTimeout(() => window.location.reload(), 300);
+      } catch (err) {
+        settingsSignOutBtn.disabled = false;
+        settingsSignOutBtn.textContent = 'sign out';
+      }
+    });
+
+    // ========== SETTINGS: DELETE ACCOUNT (soft delete) ==========
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    const deleteAccountConfirm = document.getElementById('deleteAccountConfirm');
+    const deleteAccountConfirmInput = document.getElementById('deleteAccountConfirmInput');
+    const deleteAccountSubmit = document.getElementById('deleteAccountSubmit');
+    const deleteAccountCancel = document.getElementById('deleteAccountCancel');
+    const deleteAccountFeedback = document.getElementById('deleteAccountFeedback');
+
+    deleteAccountBtn.addEventListener('click', () => {
+      deleteAccountConfirm.classList.add('visible');
+      deleteAccountBtn.style.display = 'none';
+      setSettingsFeedback(deleteAccountFeedback, '');
+      setTimeout(() => deleteAccountConfirmInput.focus(), 50);
+    });
+
+    deleteAccountCancel.addEventListener('click', () => {
+      deleteAccountConfirm.classList.remove('visible');
+      deleteAccountBtn.style.display = '';
+      deleteAccountConfirmInput.value = '';
+      deleteAccountSubmit.disabled = true;
+      setSettingsFeedback(deleteAccountFeedback, '');
+    });
+
+    // Enable delete button only when user types "delete"
+    deleteAccountConfirmInput.addEventListener('input', () => {
+      const value = deleteAccountConfirmInput.value.trim().toLowerCase();
+      deleteAccountSubmit.disabled = value !== 'delete';
+    });
+
+    deleteAccountSubmit.addEventListener('click', async () => {
+      const supabase = window.__supabase;
+      const user = window.__getCurrentUser && window.__getCurrentUser();
+      if (!supabase || !user) return;
+      deleteAccountSubmit.disabled = true;
+      deleteAccountSubmit.textContent = 'deleting...';
+      try {
+        // Call the soft_delete_user database function
+        const { data, error } = await supabase.rpc('soft_delete_user', {
+          uid: user.id,
+          reason: null
+        });
+        if (error) {
+          setSettingsFeedback(deleteAccountFeedback, error.message || 'something went wrong.', 'error');
+          deleteAccountSubmit.disabled = false;
+          deleteAccountSubmit.textContent = 'yes, delete my account';
+          return;
+        }
+        // Sign out and redirect to a goodbye page (use home for now)
+        setSettingsFeedback(deleteAccountFeedback, 'your account has been deleted. you can return within 30 days.', 'success');
+        await supabase.auth.signOut();
+        setTimeout(() => {
+          // Clear local state
+          try { localStorage.removeItem('cometojesus_entered'); } catch (e) {}
+          try { localStorage.removeItem('cometojesus_current_convo'); } catch (e) {}
+          window.location.href = '/';
+        }, 1800);
+      } catch (err) {
+        setSettingsFeedback(deleteAccountFeedback, 'something came between us. try again.', 'error');
+        deleteAccountSubmit.disabled = false;
+        deleteAccountSubmit.textContent = 'yes, delete my account';
+      }
+    });
+
+    // When settings modal opens, populate current email display
+    sidebarSettingsEl.addEventListener('click', () => {
+      showCurrentEmailInSettings();
     });
 
     // Initial data loads (once auth has settled — poll briefly)

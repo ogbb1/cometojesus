@@ -1,55 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>come in · cometojesus</title>
-<meta name="theme-color" content="#f4eadb">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    min-height: 100vh;
-    background: #f4eadb;
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    color: #1c1409;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-font-smoothing: antialiased;
-  }
-  .page {
-    text-align: center;
-    padding: 32px;
-  }
-  .message {
-    font-size: 22px;
-    font-style: italic;
-    color: #605242;
-    animation: fade 1.5s ease-in-out infinite alternate;
-  }
-  .error {
-    color: #a63a28;
-    font-size: 18px;
-    font-style: italic;
-    margin-top: 16px;
-  }
-  .error a {
-    color: #1c1409;
-    text-decoration: underline;
-  }
-  @keyframes fade {
-    from { opacity: 0.5; }
-    to { opacity: 1; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>signing you in — come to me</title>
+  <meta name="theme-color" content="#f4eadb">
+  <meta name="robots" content="noindex,nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f4eadb;
+      --ink: #1c1409;
+      --ink-soft: #5a4a32;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      min-height: 100vh;
+    }
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      flex-direction: column;
+    }
+    .title {
+      font-style: italic;
+      font-size: 32px;
+      letter-spacing: -0.005em;
+      margin: 0 0 12px 0;
+      text-align: center;
+    }
+    .subtitle {
+      font-style: italic;
+      font-size: 17px;
+      color: var(--ink-soft);
+      text-align: center;
+      max-width: 360px;
+      line-height: 1.5;
+    }
+    .home-link {
+      margin-top: 28px;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--ink-soft);
+    }
+    .home-link a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(28, 20, 9, 0.2);
+      padding-bottom: 1px;
+    }
+  </style>
 </head>
 <body>
   <div class="page">
-    <div class="message" id="message">coming in...</div>
-    <div class="error" id="error" style="display:none;"></div>
+    <h1 class="title" id="title">just a moment.</h1>
+    <p class="subtitle" id="subtitle">signing you in...</p>
+    <div class="home-link" id="homeLink" style="display: none;">
+      <a href="/">back to come to me</a>
+    </div>
   </div>
 
   <script type="module">
@@ -59,45 +79,57 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhdHlvb3JqbmFrdmd0dXZ3emh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTExMjgsImV4cCI6MjA5MjU2NzEyOH0.OXtoqNb8ikORBfoOKiweJd-xRdp8FdBsorUhfupWYXg';
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
+      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
     });
 
-    const messageEl = document.getElementById('message');
-    const errorEl = document.getElementById('error');
+    const titleEl = document.getElementById('title');
+    const subtitleEl = document.getElementById('subtitle');
+    const homeLinkEl = document.getElementById('homeLink');
 
-    function showError(text) {
-      messageEl.style.display = 'none';
-      errorEl.style.display = 'block';
-      errorEl.innerHTML = text;
+    function showError(title, subtitle) {
+      titleEl.textContent = title;
+      subtitleEl.textContent = subtitle;
+      homeLinkEl.style.display = 'block';
     }
 
-    (async () => {
-      try {
-        // detectSessionInUrl in the createClient config handles the hash fragment.
-        // Wait a moment for it to complete, then check session.
-        await new Promise(r => setTimeout(r, 300));
-        const { data: { session }, error } = await supabase.auth.getSession();
+    const hash = window.location.hash || '';
+    const params = new URLSearchParams(hash.replace(/^#/, ''));
+    const type = params.get('type');
+    const errorCode = params.get('error_code') || params.get('error');
 
-        if (error) {
-          showError('something came between us. <a href="/">try again</a>');
-          return;
-        }
-
-        if (session) {
-          // Success — redirect to main page
-          window.location.href = '/';
-        } else {
-          // No session found — show error with link back
-          showError('we couldn\'t find you. <a href="/">try again</a>');
-        }
-      } catch (err) {
-        showError('something came between us. <a href="/">try again</a>');
+    if (errorCode) {
+      const description = params.get('error_description') || params.get('error');
+      if (errorCode === 'access_denied') {
+        showError("that didn't work.", 'you may have cancelled, or the link expired. try again.');
+      } else if (errorCode.includes('expired')) {
+        showError('this link expired.', 'request a new one and try again.');
+      } else {
+        showError('something went wrong.', description || 'try signing in again.');
       }
-    })();
+    } else if (type === 'recovery') {
+      window.location.replace('/reset-password.html' + window.location.hash);
+    } else if (type === 'email_change') {
+      titleEl.textContent = 'email updated.';
+      subtitleEl.textContent = 'taking you home...';
+      setTimeout(() => window.location.replace('/'), 1500);
+    } else {
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          titleEl.textContent = 'come in.';
+          subtitleEl.textContent = 'taking you home...';
+          setTimeout(() => window.location.replace('/'), 800);
+        }
+      });
+
+      setTimeout(async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          window.location.replace('/');
+        } else {
+          showError("couldn't complete sign-in.", 'try opening cometojesus.co directly.');
+        }
+      }, 4000);
+    }
   </script>
 </body>
 </html>
