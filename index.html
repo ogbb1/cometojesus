@@ -1628,7 +1628,8 @@
 
     function track(eventName, properties) {
       try {
-        const userId = (currentUser && currentUser.id) || null;
+        // Use typeof check to safely access currentUser before it might be declared
+        const userId = (typeof currentUser !== 'undefined' && currentUser && currentUser.id) || null;
         const payload = {
           user_id: userId,
           session_id: __sessionId,
@@ -1647,17 +1648,18 @@
 
     window.__track = track;
 
-    track('page_view', {
-      path: window.location.pathname,
-      referrer: document.referrer || null,
-      hour: new Date().getHours()
-    });
-
     // Session state
     let currentSession = null;
     let currentUser = null;
     let currentTier = 'anonymous';  // 'anonymous' | 'free' | 'paid'
     let authMode = 'signin';         // 'signin' | 'signup'
+
+    // Fire page_view AFTER currentUser is declared (temporal dead zone safety)
+    track('page_view', {
+      path: window.location.pathname,
+      referrer: document.referrer || null,
+      hour: new Date().getHours()
+    });
 
     // Check session on page load
     (async () => {
