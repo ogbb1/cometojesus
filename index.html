@@ -2257,6 +2257,9 @@
     function showOpeningFromHim() {
       const opening = pickOpening();
       const div = addMessage('him', '');
+      // Push opening into history so subsequent turns know Jesus said this.
+      // Otherwise the model receives only the user's reply with no context.
+      history.push({ role: 'assistant', content: opening });
       setState('thinking');
       setTimeout(() => {
         setState('speaking');
