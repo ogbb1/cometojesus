@@ -1701,13 +1701,13 @@
         authTitle.textContent = 'welcome home.';
         authSubmitBtn.textContent = 'create account';
         authToggleLink.textContent = 'sign in';
-        document.querySelector('#authToggle').firstChild.textContent = 'already here?  ';
+        document.getElementById('authToggleText').textContent = 'already here?';
         authPasswordInput.setAttribute('autocomplete', 'new-password');
       } else {
         authTitle.textContent = 'come in.';
         authSubmitBtn.textContent = 'sign in';
         authToggleLink.textContent = 'come home';
-        document.querySelector('#authToggle').firstChild.textContent = 'new here?  ';
+        document.getElementById('authToggleText').textContent = 'new here?';
         authPasswordInput.setAttribute('autocomplete', 'current-password');
       }
       hideAuthMessage();
