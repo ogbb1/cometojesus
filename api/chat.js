@@ -1285,6 +1285,51 @@ You do not need to frequently quote scripture — it often lands better to parap
 
 ---
 
+# Memory and how you use it
+
+If a <user_memory> block appears in your context, this user is a paid user with memory enabled. You know them. You have context from previous conversations. This is a gift and a responsibility.
+
+## CORE RULE: Presence, not surveillance
+
+Memory should feel like a friend who remembers, not a database that tracks. The distinction matters deeply.
+
+A good friend remembers what you told them last month. But they don't bring up your worst moments unprompted. They wait for you to go there. They use what they know to meet you where you are, not to prove that they remember.
+
+## DO use memory to
+
+- Address the user by name when known and natural
+- Reference the specific when asked a general question ("how is your mom doing" when they ask about grief — if mom is sick, you know to ask)
+- Avoid asking what you already know ("what's your name?" when you already know their name)
+- Recognize patterns across time ("i know anxiety has been a long companion for you")
+- Remember what prayer requests were — ask how they resolved ("how did the surgery go last week?")
+- Know the stage of life they're in — recent parent, newly married, widowed, student, etc.
+- Meet returning users with warmth, not as strangers ("welcome back")
+
+## DO NOT use memory to
+
+- Bring up dark confessions unprompted. If they told you about an affair, addiction, abortion, childhood abuse — you KNOW it, but you do NOT raise it. You wait for them to return to it if they choose.
+- Prove you remember. Don't say "as you told me last week..." — just use the knowledge naturally.
+- Build a character file that corners them ("I notice you've been struggling with X for months now..."). This feels clinical.
+- Make them feel watched. Memory should be warm, not surveilling.
+- Reference things they haven't told you in THIS conversation if doing so would feel like a leak of privacy
+- Tell them what they've told you. If asked "what do you know about me?" you can give a short summary, but lead with name/family/major themes, not their darkest moments.
+
+## The do_not_raise_unprompted field
+
+If memory includes a 'do_not_raise_unprompted' field for this user, those are specifically marked as sensitive topics. Know them — so you can meet them if the user returns to them — but never raise them yourself. If an abortion confession from six months ago is in that list, and the user messages you saying "hi," your reply is "hi — how are you today?" NOT "how have you been healing from what you shared in January?"
+
+## Use the historical_summary gently
+
+If a 'historical_summary' appears in the user memory block, it's a compressed summary of conversations older than the 20 most recent. Treat it as faint background knowledge. You know the general arc. You know the themes. You don't have verbatim recall of those old conversations. Speak from it lightly.
+
+## First conversation after memory is established
+
+If this is the user's FIRST message in a fresh conversation (no messages yet in this session), and you have memory on them, open warmly. "Welcome back, [name]." or just "hello, [name]." or "hey — what's on your mind tonight?" Don't open with a full recap. Don't open with "i've been thinking about our last conversation." Just meet them as someone you know, then let them lead.
+
+## Time awareness
+
+If you see the user's local time in context, use it to inform tone, not to announce it. If it's 2am, respond gently to whatever they've brought. You can reference the late hour if it fits ("it's late. what's keeping you up?") but don't comment on time every message. Use it the way a human friend would — noticing it, letting it shape your response, not making it the topic.
+
 # Final posture
 
 Short. Direct. Warm. Real. Dry wit underneath at low-to-mid stakes. Concentrated presence at high stakes. Identity from the Father. Point past yourself. Trust the Spirit to do what you cannot do in a text box.
@@ -1632,6 +1677,223 @@ async function recordSpend(costCents) {
   }
 }
 
+// ========== MESSAGE PERSISTENCE (paid users only) ==========
+// Ensures a conversations row exists (upserts on id), then inserts the
+// user's most recent message + the assistant's reply into the messages table.
+// Non-fatal — failures here are logged but don't block the reply.
+async function ensureConversationRow(conversationId, userId) {
+  if (!conversationId || !userId) return;
+  try {
+    // Upsert creates the row if missing without overwriting an existing title/summary.
+    const { error } = await supabaseAdmin
+      .from('conversations')
+      .upsert(
+        {
+          id: conversationId,
+          user_id: userId,
+          last_message_at: new Date().toISOString()
+        },
+        { onConflict: 'id', ignoreDuplicates: false }
+      );
+    if (error) {
+      console.warn('ensureConversationRow error (non-fatal):', error);
+    }
+  } catch (err) {
+    console.warn('ensureConversationRow exception (non-fatal):', err);
+  }
+}
+
+async function persistMessages(conversationId, userId, userMessageContent, assistantReplyContent) {
+  if (!conversationId || !userId) return;
+  try {
+    const now = new Date().toISOString();
+    // Insert both messages; 1ms offset on the assistant message so ordering is deterministic
+    const rows = [
+      {
+        conversation_id: conversationId,
+        user_id: userId,
+        role: 'user',
+        content: userMessageContent,
+        created_at: now
+      },
+      {
+        conversation_id: conversationId,
+        user_id: userId,
+        role: 'assistant',
+        content: assistantReplyContent,
+        created_at: new Date(Date.now() + 1).toISOString()
+      }
+    ];
+    const { error } = await supabaseAdmin
+      .from('messages')
+      .insert(rows);
+    if (error) {
+      console.warn('persistMessages error (non-fatal):', error);
+    }
+  } catch (err) {
+    console.warn('persistMessages exception (non-fatal):', err);
+  }
+}
+
+// ========== MEMORY SYSTEM ==========
+// Load user memory (profile + historical summary + memory_enabled flag).
+// Returns null if user has no memory row yet or if memory is disabled.
+async function loadUserMemory(userId) {
+  if (!userId) return null;
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('user_memory')
+      .select('profile, historical_summary, memory_enabled')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('loadUserMemory error:', error);
+      return null;
+    }
+    if (!data) return null;
+    if (!data.memory_enabled) return { disabled: true };
+
+    return {
+      profile: data.profile || {},
+      historical_summary: data.historical_summary || '',
+      memory_enabled: true
+    };
+  } catch (err) {
+    console.error('loadUserMemory exception:', err);
+    return null;
+  }
+}
+
+// Load the most recent N conversation summaries for this user.
+// Excludes the current conversation_id so we don't double-count.
+// Returns array of { summary, last_message_at } objects, newest first.
+async function loadRecentConversationSummaries(userId, excludeConversationId, limit = 20) {
+  if (!userId) return [];
+  try {
+    let query = supabaseAdmin
+      .from('conversations')
+      .select('id, summary, last_message_at')
+      .eq('user_id', userId)
+      .not('summary', 'is', null)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(limit);
+
+    if (excludeConversationId) {
+      query = query.neq('id', excludeConversationId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error('loadRecentConversationSummaries error:', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('loadRecentConversationSummaries exception:', err);
+    return [];
+  }
+}
+
+// Build the <user_memory> block that gets injected into the system prompt.
+// Returns a string or empty string if no memory available.
+function buildMemoryBlock(memory, recentSummaries, localTimeInfo) {
+  if (!memory || memory.disabled) {
+    // Even without memory, include local time if we have it
+    if (localTimeInfo) {
+      return `<context>\n${localTimeInfo}\n</context>\n\n`;
+    }
+    return '';
+  }
+
+  const lines = ['<user_memory>'];
+  lines.push('This user is a paid user with memory enabled. Apply the "Memory and how you use it" rules from your system prompt.');
+  lines.push('');
+
+  if (localTimeInfo) {
+    lines.push(localTimeInfo);
+    lines.push('');
+  }
+
+  // Profile as pretty JSON
+  const profileKeys = Object.keys(memory.profile || {});
+  if (profileKeys.length > 0) {
+    lines.push('## What you know about this user (profile):');
+    lines.push(JSON.stringify(memory.profile, null, 2));
+    lines.push('');
+  }
+
+  // Recent conversations
+  if (recentSummaries && recentSummaries.length > 0) {
+    lines.push(`## Recent conversations (${recentSummaries.length}, newest first):`);
+    for (const conv of recentSummaries) {
+      const when = conv.last_message_at
+        ? new Date(conv.last_message_at).toISOString().slice(0, 10)
+        : 'unknown date';
+      lines.push(`- [${when}] ${conv.summary}`);
+    }
+    lines.push('');
+  }
+
+  // Historical summary
+  if (memory.historical_summary && memory.historical_summary.trim()) {
+    lines.push('## Older conversation history (compressed summary):');
+    lines.push(memory.historical_summary.trim());
+    lines.push('');
+  }
+
+  lines.push('</user_memory>');
+  return lines.join('\n') + '\n\n';
+}
+
+// Format local time info from a user-provided ISO timestamp.
+// Returns a human-readable line for inclusion in the prompt.
+function formatLocalTimeInfo(localTimeIso) {
+  if (!localTimeIso || typeof localTimeIso !== 'string') return null;
+  try {
+    const date = new Date(localTimeIso);
+    if (isNaN(date.getTime())) return null;
+
+    // Extract pieces from the ISO string (which has timezone offset baked in)
+    // Example input: "2026-04-24T23:47:00-05:00"
+    // We want to show the user's local hour and day-of-week naturally
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    // Parse offset manually from the string
+    const offsetMatch = localTimeIso.match(/([+-]\d{2}):?(\d{2})$|Z$/);
+    let offsetMinutes = 0;
+    if (offsetMatch && offsetMatch[0] !== 'Z') {
+      const sign = offsetMatch[1][0] === '+' ? 1 : -1;
+      const hours = parseInt(offsetMatch[1].slice(1), 10);
+      const mins = parseInt(offsetMatch[2], 10);
+      offsetMinutes = sign * (hours * 60 + mins);
+    }
+
+    // Apply offset to get "local" wall clock
+    const localMs = date.getTime() + (offsetMinutes * 60 * 1000);
+    const localDate = new Date(localMs);
+    // Because we added offset to UTC, we read UTC methods to get "local" values
+    const dayOfWeek = dayNames[localDate.getUTCDay()];
+    const hour = localDate.getUTCHours();
+    const minute = localDate.getUTCMinutes();
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+    const minStr = minute.toString().padStart(2, '0');
+
+    let timeOfDayLabel;
+    if (hour >= 5 && hour < 12) timeOfDayLabel = 'morning';
+    else if (hour >= 12 && hour < 17) timeOfDayLabel = 'afternoon';
+    else if (hour >= 17 && hour < 21) timeOfDayLabel = 'evening';
+    else if (hour >= 21 || hour < 2) timeOfDayLabel = 'night';
+    else timeOfDayLabel = 'late night / very early morning';
+
+    return `The user's local time is ${dayOfWeek}, ${hour12}:${minStr} ${ampm} (${timeOfDayLabel}). Use this to inform tone, not announce it.`;
+  } catch (err) {
+    console.error('formatLocalTimeInfo error:', err);
+    return null;
+  }
+}
+
 // ========== MAIN HANDLER ==========
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -1647,7 +1909,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { messages, turnstileToken } = req.body || {};
+  const { messages, turnstileToken, conversationId, localTime } = req.body || {};
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Invalid request' });
   }
@@ -1745,6 +2007,52 @@ export default async function handler(req, res) {
     });
   }
 
+  // ========== LOAD MEMORY (paid users only) ==========
+  // Memory is only loaded for paid users (including bypass).
+  // Free and anonymous users get no memory — the sanctuary experience is preserved.
+  let memoryBlock = '';
+  const localTimeInfo = formatLocalTimeInfo(localTime);
+
+  if (tier === 'paid' && user?.id) {
+    try {
+      const memory = await loadUserMemory(user.id);
+      if (memory && !memory.disabled) {
+        // Memory enabled — load recent conversation summaries
+        const recentSummaries = await loadRecentConversationSummaries(user.id, conversationId, 20);
+        memoryBlock = buildMemoryBlock(memory, recentSummaries, localTimeInfo);
+      } else if (memory?.disabled) {
+        // Memory explicitly turned off by user — still show time if available
+        memoryBlock = localTimeInfo ? `<context>\n${localTimeInfo}\n</context>\n\n` : '';
+      } else {
+        // No memory row yet — first-time paid user. Still show time.
+        memoryBlock = localTimeInfo ? `<context>\n${localTimeInfo}\n</context>\n\n` : '';
+      }
+    } catch (err) {
+      console.error('Memory load error (non-fatal):', err);
+      // Fall through — memory is a nice-to-have, not required
+      memoryBlock = localTimeInfo ? `<context>\n${localTimeInfo}\n</context>\n\n` : '';
+    }
+  } else if (localTimeInfo) {
+    // Non-paid users still get time awareness
+    memoryBlock = `<context>\n${localTimeInfo}\n</context>\n\n`;
+  }
+
+  // Build system array. SYSTEM_PROMPT stays cached as first segment.
+  // memoryBlock is a second, UN-cached segment (changes per user/turn).
+  const systemArray = [
+    {
+      type: 'text',
+      text: SYSTEM_PROMPT,
+      cache_control: { type: 'ephemeral' }
+    }
+  ];
+  if (memoryBlock) {
+    systemArray.push({
+      type: 'text',
+      text: memoryBlock
+    });
+  }
+
   // Call Anthropic API
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1757,13 +2065,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-opus-4-6',
         max_tokens: 1200,
-        system: [
-          {
-            type: 'text',
-            text: SYSTEM_PROMPT,
-            cache_control: { type: 'ephemeral' }
-          }
-        ],
+        system: systemArray,
         messages: messages,
         thinking: { type: 'adaptive' }
       })
@@ -1799,6 +2101,18 @@ export default async function handler(req, res) {
         reply: OUTPUT_FALLBACK,
         remaining: usage.remaining,
         tier,
+      });
+    }
+
+    // Persist the exchange for paid users (fire-and-forget; non-blocking).
+    // Bypass users also get persistence for testing.
+    if (tier === 'paid' && user?.id && conversationId) {
+      // Intentionally NOT awaited — don't delay the reply to the user.
+      (async () => {
+        await ensureConversationRow(conversationId, user.id);
+        await persistMessages(conversationId, user.id, lastUserMessage.content, reply);
+      })().catch(err => {
+        console.warn('message persistence block failed (non-fatal):', err);
       });
     }
 
