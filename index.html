@@ -1605,54 +1605,6 @@
     // Expose for non-module event handlers
     window.__supabase = supabase;
 
-    // ========== ANALYTICS (privacy-respecting custom event tracking) ==========
-    // Events are written directly to Supabase. No third-party trackers, no cookies,
-    // no IP addresses stored. Anonymous session_id persists in localStorage so we
-    // can track funnels without identifying anyone.
-    function getOrCreateSessionId() {
-      try {
-        let sid = localStorage.getItem('cometojesus_session_id');
-        if (!sid) {
-          sid = (window.crypto && window.crypto.randomUUID)
-            ? window.crypto.randomUUID()
-            : 'sid-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11);
-          localStorage.setItem('cometojesus_session_id', sid);
-        }
-        return sid;
-      } catch (e) {
-        return 'sid-fallback-' + Date.now();
-      }
-    }
-
-    const __sessionId = getOrCreateSessionId();
-
-    function track(eventName, properties) {
-      try {
-        const userId = (currentUser && currentUser.id) || null;
-        const payload = {
-          user_id: userId,
-          session_id: __sessionId,
-          event_name: eventName,
-          properties: properties || {}
-        };
-        supabase.from('events').insert(payload).then(({ error }) => {
-          if (error) {
-            console.debug('analytics insert failed:', error.message);
-          }
-        }).catch(() => { /* swallow */ });
-      } catch (err) {
-        // Silently fail
-      }
-    }
-
-    window.__track = track;
-
-    track('page_view', {
-      path: window.location.pathname,
-      referrer: document.referrer || null,
-      hour: new Date().getHours()
-    });
-
     // Session state
     let currentSession = null;
     let currentUser = null;
@@ -1675,12 +1627,6 @@
       currentUser = session?.user || null;
       if (!currentUser) currentTier = 'anonymous';
       updateAuthUI();
-      // Track auth events (lightweight, no PII)
-      if (event === 'SIGNED_IN') {
-        track('signed_in', { method: session?.user?.app_metadata?.provider || 'unknown' });
-      } else if (event === 'SIGNED_OUT') {
-        track('signed_out');
-      }
     });
 
     function updateAuthUI() {
@@ -2555,13 +2501,6 @@
       addMessage('user', text);
       history.push({ role: 'user', content: text });
 
-      // Track message sent (length only, never content)
-      track('message_sent', {
-        message_length: text.length,
-        history_length: history.length,
-        tier: currentTier
-      });
-
       // Enter thinking state — sun dims, holds. Brief reverent pause.
       setState('thinking');
 
@@ -2615,15 +2554,6 @@
         const reply = (data.reply || '').trim();
         if (response.ok) history.push({ role: 'assistant', content: reply });
 
-        // Track reply received (no content, just metadata)
-        track('reply_received', {
-          response_status: response.status,
-          reply_length: reply.length,
-          is_crisis: isCrisisResponse(reply),
-          tier: currentTier,
-          history_length: history.length
-        });
-
         // Transition from thinking to speaking — sun warms up.
         setState('speaking');
 
@@ -2665,14 +2595,9 @@
     });
     enterEl.addEventListener('click', () => {
       if (!turnstileToken) return;
-      const isReturning = (function() {
-        try { return localStorage.getItem('cometojesus_entered') === '1'; } catch (e) { return false; }
-      })();
       try { localStorage.setItem('cometojesus_entered', '1'); } catch (e) {}
       gateEl.classList.add('hidden');
       hasEntered = true;
-      // Track gate entry — the moment they actually start the experience
-      track('entered', { returning: isReturning });
       // Show the auth corner link after entering
       authCornerEl.classList.add('visible');
       setTimeout(() => {
