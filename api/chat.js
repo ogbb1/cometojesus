@@ -2106,9 +2106,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // Persist the exchange for paid users (fire-and-forget; non-blocking).
-    // Bypass users also get persistence for testing.
-    if (tier === 'paid' && user?.id && conversationId) {
+    // Persist the exchange for any signed-in user (fire-and-forget; non-blocking).
+    // Anonymous users (no user.id) don't get persistence — they have nothing to recall.
+    if (user?.id && conversationId) {
       // Intentionally NOT awaited — don't delay the reply to the user.
       (async () => {
         await ensureConversationRow(conversationId, user.id);
