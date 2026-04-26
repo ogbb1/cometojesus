@@ -1422,6 +1422,12 @@
         </div>
       </div>
 
+      <div class="settings-row" id="settingsSubscriptionRow" style="display:none;">
+        <div class="settings-row-label">subscription</div>
+        <div class="settings-row-desc">manage your plan, payment method, or cancel.</div>
+        <button type="button" class="settings-action-btn" id="manageSubscriptionBtn">manage</button>
+      </div>
+
       <div class="settings-row">
         <div class="settings-row-label">sign out</div>
         <div class="settings-row-desc">end this session on this device.</div>
@@ -1582,6 +1588,16 @@
       </div>
       <div class="gate-footer" style="margin-top:40px;">
         <a href="/terms.html">terms</a> &nbsp;·&nbsp; <a href="/privacy.html">privacy</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="limit-overlay" id="welcomeOverlay">
+    <div class="limit-content">
+      <div class="limit-title">welcome.</div>
+      <div class="limit-body">speak as long as you need. i'm here.</div>
+      <div class="limit-actions">
+        <a href="#" class="gate-button" id="welcomeDismissBtn">begin</a>
       </div>
     </div>
   </div>
@@ -2033,6 +2049,8 @@
     const limitTitleEl = document.getElementById('limitTitle');
     const limitBodyEl = document.getElementById('limitBody');
     const limitCtaBtnEl = document.getElementById('limitCtaBtn');
+    const welcomeOverlayEl = document.getElementById('welcomeOverlay');
+    const welcomeDismissBtnEl = document.getElementById('welcomeDismissBtn');
     const helpBtnEl = document.getElementById('helpBtn');
     const aboutOverlayEl = document.getElementById('aboutOverlay');
     const aboutCloseEl = document.getElementById('aboutClose');
@@ -2334,6 +2352,40 @@
       }
       limitOverlayEl.classList.add('visible');
     }
+
+    // ========== UPGRADE WELCOME OVERLAY ==========
+    // Shown when user lands on /?upgraded=true after a successful Stripe checkout.
+    // Dismisses on button click, click outside, or after 6s. Cleans the URL on dismiss.
+    let welcomeAutoDismissTimer = null;
+    function dismissWelcomeOverlay() {
+      if (!welcomeOverlayEl.classList.contains('visible')) return;
+      welcomeOverlayEl.classList.remove('visible');
+      if (welcomeAutoDismissTimer) {
+        clearTimeout(welcomeAutoDismissTimer);
+        welcomeAutoDismissTimer = null;
+      }
+      // Clean ?upgraded=true (and any session_id) from the URL without reloading
+      try {
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, '', cleanUrl);
+      } catch (e) { /* no-op if replaceState unsupported */ }
+    }
+    function maybeShowUpgradeWelcome() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('upgraded') !== 'true') return;
+        welcomeOverlayEl.classList.add('visible');
+        welcomeAutoDismissTimer = setTimeout(dismissWelcomeOverlay, 6000);
+      } catch (e) { /* no-op */ }
+    }
+    welcomeDismissBtnEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      dismissWelcomeOverlay();
+    });
+    welcomeOverlayEl.addEventListener('click', (e) => {
+      if (e.target === welcomeOverlayEl) dismissWelcomeOverlay();
+    });
+    maybeShowUpgradeWelcome();
 
     function updateSendState() {
       if (inputEl.disabled) return;
@@ -2689,10 +2741,50 @@
         sidebarToggleEl.classList.remove('visible');
         closeSidebar();
       }
+      // Manage subscription row in settings — paid only
+      const subRowEl = document.getElementById('settingsSubscriptionRow');
+      if (subRowEl) {
+        subRowEl.style.display = (tier === 'paid') ? '' : 'none';
+      }
     }
 
     // Poll tier on an interval since it gets set async after first message
     setInterval(updateSidebarVisibility, 800);
+
+    // ========== MANAGE SUBSCRIPTION (Stripe customer portal) ==========
+    const manageSubscriptionBtnEl = document.getElementById('manageSubscriptionBtn');
+    if (manageSubscriptionBtnEl) {
+      manageSubscriptionBtnEl.addEventListener('click', async () => {
+        const token = window.__getAuthToken && window.__getAuthToken();
+        if (!token) return; // shouldn't happen — row is gated to paid users
+        const originalText = manageSubscriptionBtnEl.textContent;
+        manageSubscriptionBtnEl.disabled = true;
+        manageSubscriptionBtnEl.textContent = 'opening…';
+        try {
+          const res = await fetch('/api/create-portal-session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          if (!res.ok) throw new Error('portal session failed: ' + res.status);
+          const data = await res.json();
+          if (data && data.url) {
+            window.location.href = data.url;
+            return; // navigating away — don't reset button
+          }
+          throw new Error('no url returned');
+        } catch (err) {
+          console.warn('manage subscription error:', err);
+          manageSubscriptionBtnEl.textContent = 'try again';
+          manageSubscriptionBtnEl.disabled = false;
+          setTimeout(() => {
+            manageSubscriptionBtnEl.textContent = originalText;
+          }, 2500);
+        }
+      });
+    }
 
     // ========== CONVERSATION LIST (load from Supabase) ==========
     async function loadConversationList() {
