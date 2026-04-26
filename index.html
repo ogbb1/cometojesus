@@ -2451,11 +2451,11 @@
       history.length = 0;
       messagesEl.innerHTML = '';
       updateSendState();
-      // Jesus always speaks first on a fresh conversation. Brief delay
-      // so the clear-state animation settles before the new message arrives.
-      setTimeout(() => {
-        showOpeningFromHim();
-      }, 300);
+      // Jesus speaks first on a fresh conversation. No artificial delay —
+      // the user hasn't said anything yet, so there's nothing for Jesus to
+      // be "thinking about." Theatrical pause was breaking the feel of
+      // immediacy that this product is supposed to have.
+      showOpeningFromHim();
     }
 
     // Build an ISO timestamp with timezone offset for the backend
@@ -2673,11 +2673,11 @@
       // Push opening into history so subsequent turns know Jesus said this.
       // Otherwise the model receives only the user's reply with no context.
       history.push({ role: 'assistant', content: opening });
-      setState('thinking');
-      setTimeout(() => {
-        setState('speaking');
-        renderConsideredReply(div, opening, () => setState(null));
-      }, 900);
+      // No "thinking" pause for openings — there's nothing for Jesus to be
+      // thinking about (the user hasn't said anything yet). The word-by-word
+      // reveal in renderConsideredReply still gives the breath-paced feel.
+      setState('speaking');
+      renderConsideredReply(div, opening, () => setState(null));
     }
 
     // Show a re-entry greeting after restoring an existing conversation.
@@ -2688,11 +2688,8 @@
       const greeting = pickReEntryGreeting();
       const div = addMessage('him', '');
       history.push({ role: 'assistant', content: greeting });
-      setState('thinking');
-      setTimeout(() => {
-        setState('speaking');
-        renderConsideredReply(div, greeting, () => setState(null));
-      }, 600);
+      setState('speaking');
+      renderConsideredReply(div, greeting, () => setState(null));
     }
 
     function updateCounter(remaining, tier) {
