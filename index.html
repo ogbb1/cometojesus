@@ -373,13 +373,13 @@
      Display: inline-block (not inline) so the blur filter's paint region
      includes italic descenders (g, y, p, j, q) — inline elements with CSS
      filters compute their paint box from the text-only inline box, which
-     clips characters that extend below the baseline. Each word includes its
-     trailing whitespace (see tokenizeWithTiming) so wrapping behaves the
-     same as inline.
+     clips characters that extend below the baseline. Whitespace between
+     words is rendered as sibling text nodes (not inside the spans) so the
+     browser's normal whitespace collapsing handles spacing and paragraph
+     breaks the way it would in any prose.
   */
   .word {
     display: inline-block;
-    white-space: pre-wrap;
     opacity: 0;
     filter: blur(2.5px);
     transition:
@@ -2487,7 +2487,7 @@
         const word = parts[i];
         const trailing = parts[i + 1] || '';
         if (!word) continue;
-        tokens.push({ text: word + trailing, delay: wordDelay(word) });
+        tokens.push({ word: word, trailing: trailing, delay: wordDelay(word) });
       }
       return tokens;
     }
@@ -2511,11 +2511,12 @@
       const tokens = tokenizeWithTiming(text);
       let cumulative = 0;
       const spans = [];
-      tokens.forEach(({ text: t }) => {
+      tokens.forEach(({ word, trailing }) => {
         const span = document.createElement('span');
         span.className = 'word';
-        span.textContent = t;
+        span.textContent = word;
         container.appendChild(span);
+        if (trailing) container.appendChild(document.createTextNode(trailing));
         spans.push(span);
       });
       // Scroll the container into view at the start
@@ -2539,11 +2540,12 @@
     function renderInstantReply(container, text, onDone) {
       container.innerHTML = '';
       const tokens = tokenizeWithTiming(text);
-      tokens.forEach(({ text: t }) => {
+      tokens.forEach(({ word, trailing }) => {
         const span = document.createElement('span');
         span.className = 'word seen';
-        span.textContent = t;
+        span.textContent = word;
         container.appendChild(span);
+        if (trailing) container.appendChild(document.createTextNode(trailing));
       });
       scrollToLatest();
       if (typeof onDone === 'function') setTimeout(onDone, 100);
