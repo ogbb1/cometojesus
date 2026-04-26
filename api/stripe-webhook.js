@@ -95,14 +95,21 @@ async function upsertSubscription({ userId, subscription }) {
   const priceId = subscription.items?.data?.[0]?.price?.id;
   const planType = planTypeFromPriceId(priceId);
 
+  // current_period_end was at the subscription root in older Stripe API versions,
+  // but in newer versions (2026+) it lives on the subscription item. Read both.
+  const periodEnd =
+    subscription.current_period_end ||
+    subscription.items?.data?.[0]?.current_period_end ||
+    null;
+
   const row = {
     user_id: userId,
     stripe_customer_id: subscription.customer,
     stripe_subscription_id: subscription.id,
     status: subscription.status,
     plan_type: planType,
-    current_period_end: subscription.current_period_end
-      ? new Date(subscription.current_period_end * 1000).toISOString()
+    current_period_end: periodEnd
+      ? new Date(periodEnd * 1000).toISOString()
       : null,
     cancel_at_period_end: !!subscription.cancel_at_period_end,
     canceled_at: subscription.canceled_at
