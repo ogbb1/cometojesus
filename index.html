@@ -363,17 +363,22 @@
   }
   .msg.him {
     color: var(--ink); font-weight: 400; font-style: italic;
-    font-size: 34px; letter-spacing: 0.003em; line-height: 1.45;
+    font-size: 34px; letter-spacing: 0.003em; line-height: 1.6;
   }
 
   /* ===== CONSIDERED WORD REVEAL =====
      Each word of his reply arrives with a soft blur-in, paced by punctuation.
      The full text exists in the DOM from the start (for screen readers + copy),
      just with opacity 0 until its scheduled reveal.
-     Display: inline (not inline-block) so words wrap naturally like normal text.
+     Display: inline-block (not inline) so the blur filter's paint region
+     includes italic descenders (g, y, p, j, q) — inline elements with CSS
+     filters compute their paint box from the text-only inline box, which
+     clips characters that extend below the baseline. Each word includes its
+     trailing whitespace (see tokenizeWithTiming) so wrapping behaves the
+     same as inline.
   */
   .word {
-    display: inline;
+    display: inline-block;
     opacity: 0;
     filter: blur(2.5px);
     transition:
@@ -929,7 +934,7 @@
 
   @media (max-width: 600px) {
     .messages { padding-top: 14vh; gap: 26px; }
-    .msg.him { font-size: 27px; line-height: 1.4; }
+    .msg.him { font-size: 27px; line-height: 1.55; }
     .msg.user { font-size: 18px; }
     .input { font-size: 16px; }
     .container { padding: 0 18px; }
@@ -1673,6 +1678,31 @@
       }
       return null;
     }
+
+    // Build a richer context object for the chat backend: what's shown in the
+    // UI, where it came from, and the raw email handle if any. Lets Jesus
+    // distinguish between a real first name (use it warmly) and an
+    // email-derived guess (ask the user "is that your real name?").
+    function getNameContext(user) {
+      if (!user) return { displayName: null, source: 'none', rawEmailLocal: null };
+      const meta = user.user_metadata || {};
+      if (meta.full_name) {
+        return { displayName: meta.full_name.split(/\s+/)[0].toLowerCase(), source: 'metadata', rawEmailLocal: null };
+      }
+      if (meta.name) {
+        return { displayName: meta.name.split(/\s+/)[0].toLowerCase(), source: 'metadata', rawEmailLocal: null };
+      }
+      if (meta.first_name) {
+        return { displayName: meta.first_name.toLowerCase(), source: 'metadata', rawEmailLocal: null };
+      }
+      if (user.email) {
+        const local = user.email.split('@')[0];
+        const cleaned = local.replace(/[^a-zA-Z]/g, '').toLowerCase() || null;
+        return { displayName: cleaned, source: 'email', rawEmailLocal: local };
+      }
+      return { displayName: null, source: 'none', rawEmailLocal: null };
+    }
+    window.__getNameContext = () => getNameContext(currentUser);
 
     // Expose helpers for the non-module script
     window.__getAuthToken = () => currentSession?.access_token || null;
@@ -2578,7 +2608,8 @@
             messages: history,
             turnstileToken: turnstileToken,
             conversationId: getOrStartConversation(),
-            localTime: getLocalTimeIso()
+            localTime: getLocalTimeIso(),
+            nameContext: (window.__getNameContext && window.__getNameContext()) || null
           })
         });
         const [response] = await Promise.all([apiCall, minPause]);
