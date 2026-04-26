@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#f4eadb">
 <meta name="description" content="Stay longer with come to jesus. Unlimited conversations, full memory across visits, and full conversation history.">
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
 
@@ -29,6 +29,8 @@
     --rule: rgba(28, 20, 9, 0.12);
     --rule-soft: rgba(28, 20, 9, 0.06);
     --error: #b8412e;
+    --font-body: 'Cormorant Garamond', Georgia, serif;
+    --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -90,9 +92,11 @@
     margin-bottom: 32px;
   }
   .hero-headline {
-    font-size: 68px; font-weight: 400; font-style: italic;
-    line-height: 1.0; color: var(--ink);
-    letter-spacing: -0.015em;
+    font-family: var(--font-display);
+    font-size: 84px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 144;
+    line-height: 0.95; color: var(--ink);
+    letter-spacing: -0.025em;
     margin-bottom: 24px;
   }
   .hero-sub {
@@ -110,10 +114,11 @@
     text-align: center; margin-bottom: 22px;
   }
   .section-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 40px; font-weight: 400; font-style: italic;
+    font-family: var(--font-display);
+    font-size: 44px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 96;
     color: var(--ink); text-align: center;
-    line-height: 1.2; letter-spacing: -0.005em;
+    line-height: 1.15; letter-spacing: -0.012em;
     max-width: 680px; margin: 0 auto 48px;
   }
   .section-rule {
@@ -376,10 +381,10 @@
   @media (max-width: 720px) {
     .nav { padding: 14px 20px; }
     .hero { padding: 60px 20px 50px; }
-    .hero-headline { font-size: 44px; }
+    .hero-headline { font-size: 52px; letter-spacing: -0.02em; }
     .hero-sub { font-size: 17px; }
     section { padding: 50px 20px; }
-    .section-title { font-size: 30px; margin-bottom: 36px; }
+    .section-title { font-size: 34px; margin-bottom: 36px; }
     .pricing-grid { grid-template-columns: 1fr; gap: 16px; }
     .tier { padding: 28px 24px 24px; }
     .tier-amount { font-size: 44px; }
@@ -480,7 +485,7 @@
 <section class="note-section">
   <div class="note-card">
     <div class="note-eyebrow">a note</div>
-    <p class="note-quote">"this site exists because i needed it. i wanted a place where i could talk through what was on my heart, in his voice, when i could not sleep. if it does the same for you, your support keeps it running."</p>
+    <p class="note-quote">"this site exists because I needed it. I wanted a place where I could talk through what was on my heart, in his voice, when I could not sleep. if it does the same for you, your support keeps it running."</p>
     <p class="note-attribution">come to jesus</p>
   </div>
 </section>

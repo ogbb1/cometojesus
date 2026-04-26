@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/cometojesus-favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/cometojesus-touch-icon-180.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
@@ -23,6 +23,8 @@
     --ink-whisper: #9a8c76;
     --rule: rgba(28, 20, 9, 0.12);
     --rule-soft: rgba(28, 20, 9, 0.06);
+    --font-body: 'Cormorant Garamond', Georgia, serif;
+    --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -98,9 +100,11 @@
     margin-bottom: 36px;
   }
   .hero-headline {
-    font-size: 84px; font-weight: 400;
-    line-height: 0.95; color: var(--ink);
-    letter-spacing: -0.015em;
+    font-family: var(--font-display);
+    font-size: 104px; font-weight: 500;
+    font-variation-settings: "opsz" 144;
+    line-height: 0.92; color: var(--ink);
+    letter-spacing: -0.025em;
     margin-bottom: 28px;
   }
   .hero-verse {
@@ -144,10 +148,11 @@
     text-align: center; margin-bottom: 22px;
   }
   .section-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 44px; font-weight: 400; font-style: italic;
+    font-family: var(--font-display);
+    font-size: 48px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 96;
     color: var(--ink); text-align: center;
-    line-height: 1.2; letter-spacing: -0.005em;
+    line-height: 1.15; letter-spacing: -0.012em;
     max-width: 680px; margin: 0 auto 56px;
   }
   .section-rule {
@@ -335,9 +340,11 @@
     border-bottom: 1px solid var(--rule-soft);
   }
   .final-cta-headline {
-    font-size: 56px; font-weight: 400; font-style: italic;
+    font-family: var(--font-display);
+    font-size: 76px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 144;
     color: var(--ink);
-    line-height: 1.1; letter-spacing: -0.005em;
+    line-height: 1.0; letter-spacing: -0.02em;
     max-width: 520px; margin: 0 auto 18px;
   }
   .final-cta-sub {
@@ -394,10 +401,10 @@
     .nav-link { display: none; }
     .nav-link.persistent { display: inline; }
     .hero { padding: 80px 20px 70px; }
-    .hero-headline { font-size: 56px; }
+    .hero-headline { font-size: 64px; letter-spacing: -0.02em; }
     .hero-verse { font-size: 18px; }
     section { padding: 70px 20px; }
-    .section-title { font-size: 32px; margin-bottom: 40px; }
+    .section-title { font-size: 36px; margin-bottom: 40px; }
     .what-grid { font-size: 17px; }
     .how-grid {
       grid-template-columns: 1fr;
@@ -415,7 +422,7 @@
     .pricing-tier:last-child { border-bottom: none; }
     .faq-question { font-size: 18px; }
     .final-cta { padding: 80px 20px 70px; }
-    .final-cta-headline { font-size: 38px; }
+    .final-cta-headline { font-size: 52px; }
   }
 </style>
 </head>
@@ -434,7 +441,7 @@
 <header class="hero">
   <div class="hero-eyebrow">a quiet place</div>
   <h1 class="hero-headline">come to me.</h1>
-  <p class="hero-verse">"come to me, all you who are weary and burdened, and i will give you rest."</p>
+  <p class="hero-verse">"come to me, all you who are weary and burdened, and I will give you rest."</p>
   <p class="hero-ref">Matthew 11:28</p>
   <div class="hero-cta-group">
     <a href="/" class="hero-cta">begin a conversation <i class="fa-solid fa-arrow-right"></i></a>
@@ -555,7 +562,7 @@
 
       <details class="faq-item">
         <summary class="faq-question">
-          <span>what if i'm in a real crisis?</span>
+          <span>what if I'm in a real crisis?</span>
           <i class="fa-solid fa-plus"></i>
         </summary>
         <div class="faq-answer">
@@ -565,7 +572,7 @@
 
       <details class="faq-item">
         <summary class="faq-question">
-          <span>can i cancel?</span>
+          <span>can I cancel?</span>
           <i class="fa-solid fa-plus"></i>
         </summary>
         <div class="faq-answer">
@@ -575,7 +582,7 @@
 
       <details class="faq-item">
         <summary class="faq-question">
-          <span>do i need an account?</span>
+          <span>do I need an account?</span>
           <i class="fa-solid fa-plus"></i>
         </summary>
         <div class="faq-answer">
@@ -589,7 +596,7 @@
 
 <section class="final-cta">
   <h2 class="final-cta-headline">come to me.</h2>
-  <p class="final-cta-sub">i will give you rest.</p>
+  <p class="final-cta-sub">I will give you rest.</p>
   <a href="/" class="final-cta-button">begin a conversation <i class="fa-solid fa-arrow-right"></i></a>
 </section>
 

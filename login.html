@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/cometojesus-touch-icon-180.png">
 <meta name="theme-color" content="#f4eadb">
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
@@ -27,6 +27,8 @@
     --rule-soft: rgba(28, 20, 9, 0.06);
     --error: #b8412e;
     --success: #4a7548;
+    --font-body: 'Cormorant Garamond', Georgia, serif;
+    --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -94,9 +96,11 @@
     margin-bottom: 28px;
   }
   .hero-headline {
-    font-size: 64px; font-weight: 400; font-style: italic;
-    line-height: 1.0; color: var(--ink);
-    letter-spacing: -0.015em;
+    font-family: var(--font-display);
+    font-size: 78px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 144;
+    line-height: 0.95; color: var(--ink);
+    letter-spacing: -0.025em;
     margin-bottom: 32px;
   }
   .hero-scripture {
@@ -137,8 +141,11 @@
     padding: 44px 40px 36px;
   }
   .card-title {
-    font-size: 32px; font-weight: 400; font-style: italic;
+    font-family: var(--font-display);
+    font-size: 36px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 72;
     color: var(--ink);
+    letter-spacing: -0.012em;
     margin-bottom: 28px;
     text-align: center;
   }
@@ -281,7 +288,7 @@
     .hero-side {
       text-align: center;
     }
-    .hero-headline { font-size: 48px; }
+    .hero-headline { font-size: 56px; letter-spacing: -0.02em; }
     .hero-scripture {
       max-width: none;
       margin-left: auto; margin-right: auto;
@@ -296,7 +303,7 @@
   @media (max-width: 480px) {
     .card { padding: 36px 28px 28px; }
     .card-title { font-size: 26px; }
-    .hero-headline { font-size: 40px; }
+    .hero-headline { font-size: 48px; }
   }
 </style>
 </head>
@@ -312,7 +319,7 @@
   <div class="hero-side">
     <div class="hero-eyebrow">a quiet place</div>
     <h1 class="hero-headline" id="heroHeadline">welcome back.</h1>
-    <p class="hero-scripture">"my sheep know my voice. they listen to me, and i know them, and they follow me."</p>
+    <p class="hero-scripture">"my sheep know my voice. they listen to me, and I know them, and they follow me."</p>
     <p class="hero-scripture-ref">John 10:27</p>
     <div class="hero-rule"></div>
     <p class="hero-note">an account saves your conversations and lets you return to them anytime. for paid users, he also remembers what you have shared, the way a friend would.</p>
