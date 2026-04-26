@@ -2905,19 +2905,28 @@
         if (trailing) container.appendChild(document.createTextNode(trailing));
         spans.push(span);
       });
-      // Scroll the container into view at the start
+      // Reveal first word synchronously — the bubble shouldn't sit empty
+      // for any visible beat. Subsequent words follow normal cadence.
+      if (spans.length > 0) {
+        spans[0].classList.add('seen');
+      }
       scrollToLatest();
-      tokens.forEach(({ delay }, i) => {
-        cumulative += delay;
+      // Schedule remaining words starting from index 1.
+      for (let i = 1; i < tokens.length; i++) {
+        cumulative += tokens[i].delay;
+        const idx = i;
         setTimeout(() => {
-          spans[i].classList.add('seen');
-          // Scroll on every word so as the text grows, the view follows
+          spans[idx].classList.add('seen');
           scrollToLatest();
-          if (i === tokens.length - 1 && typeof onDone === 'function') {
+          if (idx === tokens.length - 1 && typeof onDone === 'function') {
             setTimeout(onDone, 200);
           }
         }, cumulative);
-      });
+      }
+      // If there was only one word (or none), still call onDone
+      if (tokens.length <= 1 && typeof onDone === 'function') {
+        setTimeout(onDone, 200);
+      }
       return cumulative;
     }
 
@@ -3692,38 +3701,54 @@
       showCurrentEmailInSettings();
     });
 
-    // Initial data loads (once auth has settled — poll briefly)
-    let _memoryInitAttempts = 0;
-    const _memoryInitInterval = setInterval(() => {
-      _memoryInitAttempts++;
-      const user = window.__getCurrentUser && window.__getCurrentUser();
-      if (user) {
-        clearInterval(_memoryInitInterval);
-        loadMemorySetting();
-        loadConversationList();
-        // If we have a saved conversation ID from a previous session and the
-        // user just refreshed (or came back), restore those messages so they
-        // land back in the conversation they were in. Falls through silently
-        // if the convo has no messages or fails to load.
-        try {
-          const savedConvoId = localStorage.getItem('cometojesus_current_convo');
-          if (savedConvoId && hasEntered && messagesEl.children.length === 0) {
-            loadConversation(savedConvoId);
-          } else if (hasEntered && messagesEl.children.length === 0) {
-            // Signed-in returning user, no saved convo — fire fresh opening
-            // so they don't land on silence.
+    // Initial data loads. We need to fire the opening greeting as fast as
+    // possible — the previous polling waited up to 6 seconds for auth to
+    // resolve, which left anonymous users staring at silence on refresh.
+    //
+    // Strategy: do a single getSession() check first. If there's no session,
+    // they're anonymous and we can fire the opening NOW. If there IS a
+    // session, we still need to wait briefly for currentUser to populate
+    // (it's set async by the auth code above), but we poll faster.
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          // Anonymous user — no auth to wait for. Fire opening immediately
+          // if they've entered the gate and the conversation is empty.
+          if (hasEntered && messagesEl.children.length === 0) {
             showOpeningFromHim();
           }
-        } catch (e) { /* no-op */ }
-      } else if (_memoryInitAttempts > 20) {
-        clearInterval(_memoryInitInterval);
-        // Auth never settled — anonymous returning user who skipped the gate.
-        // Fire fresh opening so Jesus is always speaking on entry.
-        if (hasEntered && messagesEl.children.length === 0) {
-          showOpeningFromHim();
+          return;
         }
-      }
-    }, 300);
+      } catch (e) { /* fall through to polling */ }
+
+      // Signed-in user: poll briefly for currentUser/loaders to be ready.
+      // Tighter loop: 100ms intervals, 12 attempts = 1.2s max wait.
+      let _attempts = 0;
+      const _interval = setInterval(() => {
+        _attempts++;
+        const user = window.__getCurrentUser && window.__getCurrentUser();
+        if (user) {
+          clearInterval(_interval);
+          loadMemorySetting();
+          loadConversationList();
+          try {
+            const savedConvoId = localStorage.getItem('cometojesus_current_convo');
+            if (savedConvoId && hasEntered && messagesEl.children.length === 0) {
+              loadConversation(savedConvoId);
+            } else if (hasEntered && messagesEl.children.length === 0) {
+              showOpeningFromHim();
+            }
+          } catch (e) { /* no-op */ }
+        } else if (_attempts > 12) {
+          clearInterval(_interval);
+          // Auth never settled — fire opening so user doesn't land on silence.
+          if (hasEntered && messagesEl.children.length === 0) {
+            showOpeningFromHim();
+          }
+        }
+      }, 100);
+    })();
 
     // Browser back/forward navigation. When the user navigates to a URL
     // pointing at a different conversation, load that conversation instead
