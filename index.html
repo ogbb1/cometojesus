@@ -241,6 +241,17 @@
     overflow-y: auto;
   }
   .gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  /* When the gate is hidden (entered flag set, returning user), keep the
+     turnstile widget rendering off-screen so it can still issue tokens for
+     /api/chat. visibility:hidden on the parent would otherwise prevent the
+     Cloudflare iframe from initializing. */
+  .gate.hidden .turnstile-wrapper {
+    visibility: visible;
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    pointer-events: none;
+  }
   @keyframes gateFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
   .gate-content {
@@ -2156,7 +2167,7 @@
 
     // Track message count since last memory update so we don't thrash the endpoint
     let messagesSinceLastMemoryUpdate = 0;
-    const MEMORY_UPDATE_THRESHOLD = 3; // trigger after every 3 back-and-forth exchanges
+    const MEMORY_UPDATE_THRESHOLD = 2; // trigger after every 2 back-and-forth exchanges
 
     async function triggerMemoryUpdate() {
       // Only for paid users (bypass included — backend decides)
@@ -2244,6 +2255,13 @@
         firstTimeEl.style.display = 'none';
         returningEl.style.display = 'block';
         gateContentEl.classList.add('returning');
+        // Returning user: skip the gate entirely. The turnstile widget stays
+        // mounted (off-screen via .gate.hidden .turnstile-wrapper) so it can
+        // still issue tokens for sends. The actual conversation messages are
+        // restored further down once auth settles (see _memoryInitInterval).
+        gateEl.classList.add('hidden');
+        hasEntered = true;
+        authCornerEl.classList.add('visible');
       }
     } catch (e) {}
 
@@ -3204,6 +3222,16 @@
         clearInterval(_memoryInitInterval);
         loadMemorySetting();
         loadConversationList();
+        // If we have a saved conversation ID from a previous session and the
+        // user just refreshed (or came back), restore those messages so they
+        // land back in the conversation they were in. Falls through silently
+        // if the convo has no messages or fails to load.
+        try {
+          const savedConvoId = localStorage.getItem('cometojesus_current_convo');
+          if (savedConvoId && hasEntered && messagesEl.children.length === 0) {
+            loadConversation(savedConvoId);
+          }
+        } catch (e) { /* no-op */ }
       } else if (_memoryInitAttempts > 20) {
         clearInterval(_memoryInitInterval);
       }
