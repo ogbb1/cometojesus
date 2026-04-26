@@ -582,6 +582,11 @@
     color: var(--ink);
     background: rgba(28, 20, 9, 0.04);
   }
+  .auth-menu-divider {
+    height: 1px;
+    background: rgba(28, 20, 9, 0.08);
+    margin: 6px 8px;
+  }
   @media (max-width: 600px) {
     .auth-corner {
       font-size: 16px;
@@ -623,6 +628,15 @@
   body.keyboard-open .auth-corner,
   body.keyboard-open .auth-menu {
     opacity: 0;
+    pointer-events: none;
+  }
+
+  /* While we're still resolving the user's tier (page just loaded, supabase
+     auth + subscriptions query hasn't completed), suppress paid-gated UI so
+     a returning paid user doesn't see the toggle vanish-then-reappear. The
+     class is removed once tier is set. ~50–500ms typical. */
+  body.tier-resolving .sidebar-toggle {
+    opacity: 0 !important;
     pointer-events: none;
   }
   .about-overlay {
@@ -1404,9 +1418,6 @@
           If you are in crisis, please speak to a real person. A pastor, a friend, or call or text 988.
         </div>
       </div>
-      <div id="returningContent" style="display:none;">
-        <div class="gate-title" style="margin-top: 8px;">welcome back</div>
-      </div>
       <div class="turnstile-wrapper">
         <div class="cf-turnstile"
              data-sitekey="0x4AAAAAADA2i5EmVkeDR0ho"
@@ -1422,6 +1433,9 @@
 
   <button class="auth-corner" id="authCorner" type="button">come home.</button>
   <div class="auth-menu" id="authMenu">
+    <button type="button" id="authMenuSettings">settings</button>
+    <button type="button" id="authMenuSubscription" style="display:none;">subscription</button>
+    <div class="auth-menu-divider"></div>
     <button type="button" id="authMenuSignOut">sign out</button>
   </div>
 
@@ -1459,6 +1473,11 @@
           <div class="settings-toggle-switch"></div>
           <div class="settings-toggle-label" id="memoryToggleLabel">on</div>
         </div>
+      </div>
+
+      <div class="settings-row" id="settingsPlanRow">
+        <div class="settings-row-label">your plan</div>
+        <div class="settings-row-desc" id="settingsPlanDesc">free.</div>
       </div>
 
       <div class="settings-row" id="settingsEmailRow">
@@ -1733,6 +1752,10 @@
 
     // Check session on page load
     (async () => {
+      // Mark page as "resolving tier" so paid-gated UI (sidebar toggle, etc)
+      // stays hidden until we know what to show. Removed below once tier is set.
+      // Anonymous users get the class removed too — they just have nothing to gate.
+      document.body.classList.add('tier-resolving');
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         currentSession = session;
@@ -1779,6 +1802,8 @@
           if (typeof loadMemorySetting === 'function') loadMemorySetting();
         } catch (e) { /* loaders defined later in script — polling will catch it */ }
       }
+      // Tier resolved (paid/free) or no user — either way, reveal UI
+      document.body.classList.remove('tier-resolving');
     })();
 
     // Listen for auth state changes (sign in, sign out, token refresh)
@@ -1849,11 +1874,25 @@
     window.__getCurrentTier = () => currentTier;
     window.__setCurrentTier = (tier) => { currentTier = tier; };
     window.__signOut = async () => {
-      await supabase.auth.signOut();
+      // Single canonical sign-out path. All three entry points (auth menu,
+      // settings modal, delete account) call this so behavior is consistent.
+      // We intentionally KEEP the cometojesus_entered flag — they've been here
+      // before, no need to show first-time gate copy again. We CLEAR the
+      // saved conversation ID so the next sign-in starts fresh rather than
+      // restoring someone else's chat (in case a different account signs in
+      // on the same browser).
+      try {
+        await supabase.auth.signOut();
+      } catch (e) { /* even if signOut fails server-side, continue cleanup */ }
       currentSession = null;
       currentUser = null;
       currentTier = 'anonymous';
-      updateAuthUI();
+      try { localStorage.removeItem('cometojesus_current_convo'); } catch (e) {}
+      // Hard navigation to root — the chat surface is built around having a
+      // user, so a soft state-clear leaves visible artifacts (orphaned
+      // messages, sidebar toggle vanishing mid-page, etc). Cleanest is
+      // to land on a fresh page state.
+      window.location.href = '/';
     };
 
     // Modal controls (attach after module loads)
@@ -2195,6 +2234,44 @@
       await window.__signOut();
     });
 
+    // Menu: settings handler — opens the settings modal
+    document.getElementById('authMenuSettings').addEventListener('click', () => {
+      document.getElementById('authMenu').classList.remove('visible');
+      const settingsModal = document.getElementById('settingsModal');
+      if (settingsModal) {
+        settingsModal.classList.add('visible');
+        // Trigger the same email-display refresh that the sidebar settings does
+        const event = new Event('click');
+        const sidebarSettings = document.getElementById('sidebarSettings');
+        // Don't actually re-toggle; settings modal is already shown above.
+        // Just call the handler logic.
+        if (typeof showCurrentEmailInSettings === 'function') {
+          try { showCurrentEmailInSettings(); } catch (e) {}
+        }
+      }
+    });
+
+    // Menu: subscription handler — opens Stripe customer portal (paid only)
+    document.getElementById('authMenuSubscription').addEventListener('click', async () => {
+      document.getElementById('authMenu').classList.remove('visible');
+      const token = window.__getAuthToken && window.__getAuthToken();
+      if (!token) return;
+      try {
+        const res = await fetch('/api/create-portal-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          }
+        });
+        if (!res.ok) throw new Error('portal session failed: ' + res.status);
+        const data = await res.json();
+        if (data && data.url) window.location.href = data.url;
+      } catch (err) {
+        console.warn('subscription menu error:', err);
+      }
+    });
+
     // Close menu if user clicks outside it
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('authMenu');
@@ -2212,7 +2289,6 @@
     const enterEl = document.getElementById('enter');
     const gateContentEl = document.getElementById('gateContent');
     const firstTimeEl = document.getElementById('firstTimeContent');
-    const returningEl = document.getElementById('returningContent');
     const counterEl = document.getElementById('counter');
     const limitOverlayEl = document.getElementById('limitOverlay');
     const limitTitleEl = document.getElementById('limitTitle');
@@ -2251,9 +2327,17 @@
 
     function getOrStartConversation() {
       if (conversationId) return conversationId;
-      // Try to resume the most recent conversation from localStorage
-      // (paid users with memory may want to continue mid-conversation after reload)
+      // Try to resume the most recent conversation, in priority order:
+      //   1) URL ?c=<id> — user followed a link or did a back/forward
+      //   2) localStorage — user just refreshed mid-conversation
       try {
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = params.get('c');
+        if (fromUrl) {
+          conversationId = fromUrl;
+          try { localStorage.setItem('cometojesus_current_convo', fromUrl); } catch (e) {}
+          return conversationId;
+        }
         const saved = localStorage.getItem('cometojesus_current_convo');
         if (saved) {
           conversationId = saved;
@@ -2272,6 +2356,11 @@
       conversationId = generateConversationId();
       try {
         localStorage.setItem('cometojesus_current_convo', conversationId);
+      } catch (e) {}
+      // Push URL state — back button returns to the previous conversation
+      try {
+        const newUrl = window.location.pathname + '?c=' + conversationId + window.location.hash;
+        window.history.pushState({ conversationId: conversationId }, '', newUrl);
       } catch (e) {}
       history.length = 0;
       messagesEl.innerHTML = '';
@@ -2408,7 +2497,6 @@
     try {
       if (localStorage.getItem('cometojesus_entered') === '1') {
         firstTimeEl.style.display = 'none';
-        returningEl.style.display = 'block';
         gateContentEl.classList.add('returning');
         // Returning user: skip the gate entirely. The turnstile widget stays
         // mounted (off-screen via .gate.hidden .turnstile-wrapper) so it can
@@ -2574,8 +2662,13 @@
         };
       } else if (tier === 'free') {
         if (reason === 'daily') {
+          // Daily caps reset at UTC midnight. Show the user the local-time
+          // equivalent so "tomorrow" is concrete, not vague.
+          const next = new Date();
+          next.setUTCHours(24, 0, 0, 0); // next UTC midnight
+          const resetTime = next.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
           limitTitleEl.textContent = "rest now.";
-          limitBodyEl.textContent = "you've spoken your piece for today. come back tomorrow, or stay longer with a subscription.";
+          limitBodyEl.textContent = `you've spoken your piece for today. you'll have new messages at ${resetTime}, or stay longer with a subscription.`;
         } else {
           limitTitleEl.textContent = "you've spoken your piece this month.";
           limitBodyEl.textContent = 'come back next month, or stay longer with a subscription.';
@@ -3003,6 +3096,66 @@
     });
 
     // Show the sidebar toggle only for paid users
+    // Cache subscription details so we don't query the DB on every poll.
+    // Cleared on sign-in/sign-out.
+    let _planRowCache = null;
+    let _planRowFetching = false;
+    async function updatePlanRow(tier) {
+      const descEl = document.getElementById('settingsPlanDesc');
+      if (!descEl) return;
+      if (tier === 'anonymous') {
+        descEl.textContent = 'not signed in.';
+        return;
+      }
+      if (tier === 'free') {
+        descEl.textContent = 'free. 10 messages a day, 25 a month.';
+        return;
+      }
+      // Paid — show plan + renewal date if we have it cached
+      if (_planRowCache) {
+        descEl.textContent = _planRowCache;
+        return;
+      }
+      if (_planRowFetching) return; // already fetching
+      _planRowFetching = true;
+      try {
+        const supabase = window.__supabase;
+        const user = window.__getCurrentUser && window.__getCurrentUser();
+        if (!supabase || !user) {
+          descEl.textContent = 'paid.';
+          _planRowFetching = false;
+          return;
+        }
+        const { data } = await supabase
+          .from('subscriptions')
+          .select('plan_type, current_period_end, cancel_at_period_end')
+          .eq('user_id', user.id)
+          .in('status', ['active', 'trialing'])
+          .maybeSingle();
+        let label = 'paid.';
+        if (data) {
+          const planLabel = data.plan_type === 'annual' ? 'annual' : 'monthly';
+          if (data.current_period_end) {
+            const dt = new Date(data.current_period_end);
+            const fmt = dt.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+            if (data.cancel_at_period_end) {
+              label = `${planLabel}. ends ${fmt}.`;
+            } else {
+              label = `${planLabel}. renews ${fmt}.`;
+            }
+          } else {
+            label = `${planLabel}.`;
+          }
+        }
+        _planRowCache = label;
+        descEl.textContent = label;
+      } catch (e) {
+        descEl.textContent = 'paid.';
+      } finally {
+        _planRowFetching = false;
+      }
+    }
+
     function updateSidebarVisibility() {
       const tier = (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
       // Sidebar toggle: shown to any signed-in user (paid OR free). Both
@@ -3019,6 +3172,13 @@
       if (subRowEl) {
         subRowEl.style.display = (tier === 'paid') ? '' : 'none';
       }
+      // Auth-menu subscription item — paid only
+      const subMenuEl = document.getElementById('authMenuSubscription');
+      if (subMenuEl) {
+        subMenuEl.style.display = (tier === 'paid') ? '' : 'none';
+      }
+      // Plan row in settings — show + label based on tier
+      updatePlanRow(tier);
     }
 
     // Poll tier on an interval since it gets set async after first message
@@ -3140,6 +3300,17 @@
         // Switch to this conversation
         conversationId = id;
         try { localStorage.setItem('cometojesus_current_convo', id); } catch (e) {}
+        // Update URL to reflect the active conversation. Uses pushState so
+        // the browser back button takes you to the previous conversation
+        // instead of leaving the site. Skip if URL already matches.
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('c') !== id) {
+            params.set('c', id);
+            const newUrl = window.location.pathname + '?' + params.toString() + window.location.hash;
+            window.history.pushState({ conversationId: id }, '', newUrl);
+          }
+        } catch (e) { /* no-op */ }
         history.length = 0;
         messagesEl.innerHTML = '';
         for (const m of (data || [])) {
@@ -3356,15 +3527,12 @@
     // ========== SETTINGS: SIGN OUT ==========
     const settingsSignOutBtn = document.getElementById('settingsSignOutBtn');
     settingsSignOutBtn.addEventListener('click', async () => {
-      const supabase = window.__supabase;
-      if (!supabase) return;
       settingsSignOutBtn.disabled = true;
       settingsSignOutBtn.textContent = 'signing out...';
+      // Delegate to the canonical sign-out path so behavior matches the
+      // auth-corner menu and the delete-account flow.
       try {
-        await supabase.auth.signOut();
-        // Close settings modal and reload to reset state
-        settingsModalEl.classList.remove('visible');
-        setTimeout(() => window.location.reload(), 300);
+        await window.__signOut();
       } catch (err) {
         settingsSignOutBtn.disabled = false;
         settingsSignOutBtn.textContent = 'sign out';
@@ -3471,6 +3639,20 @@
         }
       }
     }, 300);
+
+    // Browser back/forward navigation. When the user navigates to a URL
+    // pointing at a different conversation, load that conversation instead
+    // of leaving the site. Only acts on signed-in users (anon has no convos).
+    window.addEventListener('popstate', (event) => {
+      const params = new URLSearchParams(window.location.search);
+      const targetId = params.get('c');
+      const user = window.__getCurrentUser && window.__getCurrentUser();
+      if (!user || !targetId) return;
+      if (targetId === conversationId) return;
+      // Switch via the same loader the sidebar uses, which handles all the
+      // state cleanup (history clear, DOM swap, sidebar refresh).
+      loadConversation(targetId);
+    });
   </script>
 </body>
 </html>
