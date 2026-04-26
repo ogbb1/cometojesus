@@ -88,11 +88,36 @@
 
   /* ===== HERO ===== */
   .hero {
+    position: relative;
     text-align: center;
-    padding: 120px 32px 100px;
+    padding: 140px 32px 110px;
     max-width: 760px;
     margin: 0 auto;
+    overflow: hidden;
   }
+  /* Sun-light source above headline. Two stacked radial gradients give a
+     warm core with soft falloff. Sits behind everything via z-index: 0
+     and absolute positioning, content lifts above with z-index: 1. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 760px; height: 480px;
+    background:
+      radial-gradient(ellipse at 50% 30%,
+        rgba(255, 245, 220, 0.95) 0%,
+        rgba(255, 245, 220, 0.55) 18%,
+        rgba(255, 245, 220, 0.18) 38%,
+        rgba(255, 245, 220, 0) 62%),
+      radial-gradient(ellipse at 50% 20%,
+        rgba(255, 252, 240, 0.75) 0%,
+        rgba(255, 252, 240, 0) 50%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+  .hero > * { position: relative; z-index: 1; }
   .hero-eyebrow {
     font-family: Georgia, serif;
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
@@ -160,16 +185,112 @@
     margin: 0 auto 56px; opacity: 0.5;
   }
 
+  /* Scripture epigraph between major sections. Acts as a chapter break.
+     Italic Cormorant for the contemplative voice — distinct from the
+     Fraunces display headlines. Center-aligned, narrow column. */
+  .epigraph {
+    text-align: center;
+    padding: 60px 32px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .epigraph-rule {
+    width: 28px; height: 1px;
+    background: var(--ink-whisper);
+    margin: 0 auto 28px;
+    opacity: 0.45;
+  }
+  .epigraph-text {
+    font-family: var(--font-body);
+    font-size: 22px;
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--ink-mid);
+    letter-spacing: -0.005em;
+    margin-bottom: 14px;
+  }
+  .epigraph-ref {
+    font-family: Georgia, serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+
   /* ===== WHAT THIS IS ===== */
+  .what-section {
+    padding: 110px 32px 90px;
+  }
   .what-grid {
-    max-width: 640px; margin: 0 auto;
-    font-size: 19px; line-height: 1.7;
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .what-pullquote {
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 500;
+    font-style: italic;
+    font-variation-settings: "opsz" 96;
+    color: var(--ink);
+    line-height: 1.15;
+    letter-spacing: -0.012em;
+    position: sticky;
+    top: 100px;
+  }
+  .what-pullquote::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--ink-whisper);
+    margin-bottom: 28px;
+    opacity: 0.6;
+  }
+  .what-pullquote-attribution {
+    display: block;
+    margin-top: 24px;
+    font-family: Georgia, serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--ink-soft);
+    font-style: normal;
+    font-weight: 400;
+    opacity: 0.78;
+  }
+  .what-body {
+    font-family: var(--font-body);
+    font-size: 19px;
+    line-height: 1.75;
     color: var(--ink-mid);
   }
-  .what-grid p { margin-bottom: 22px; }
-  .what-grid p:last-child { margin-bottom: 0; }
-  .what-grid em {
-    color: var(--ink); font-style: italic;
+  .what-body p {
+    margin-bottom: 22px;
+  }
+  .what-body p:last-child {
+    margin-bottom: 0;
+  }
+  .what-body em {
+    color: var(--ink);
+    font-style: italic;
+  }
+  /* Drop cap on first paragraph. Fraunces, large, lifted up to align with
+     surrounding paragraph text via negative top margin and line-height tuning. */
+  .what-body p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-variation-settings: "opsz" 144;
+    float: left;
+    font-size: 84px;
+    line-height: 0.85;
+    margin-right: 12px;
+    margin-top: 6px;
+    margin-bottom: -8px;
+    color: var(--ink);
   }
 
   /* ===== HOW IT WORKS ===== */
@@ -182,37 +303,85 @@
     background: var(--bg-soft);
     border: 1px solid var(--rule-soft);
     border-radius: 14px;
-    padding: 38px 28px 32px;
-    text-align: center;
+    padding: 48px 28px 32px;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Large faded ordinal in the top-right of each card. Roman numerals
+     in Fraunces feel scriptural without being heavy-handed. */
+  .how-card-ordinal {
+    position: absolute;
+    top: 16px; right: 22px;
+    font-family: var(--font-display);
+    font-size: 56px;
+    font-weight: 500;
+    font-style: italic;
+    font-variation-settings: "opsz" 144;
+    color: var(--ink);
+    opacity: 0.08;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
   }
   .how-card-icon {
-    width: 48px; height: 48px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     background: var(--bg);
     border: 1px solid var(--rule);
     display: inline-flex; align-items: center; justify-content: center;
     color: var(--ink);
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
-  .how-card-icon i { font-size: 16px; }
+  .how-card-icon i { font-size: 15px; }
   .how-card-title {
-    font-size: 22px; font-style: italic; font-weight: 400;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 500;
+    font-variation-settings: "opsz" 72;
     color: var(--ink);
+    letter-spacing: -0.005em;
     margin-bottom: 12px;
   }
   .how-card-body {
-    font-family: Georgia, serif;
-    font-size: 14px; line-height: 1.6;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
     color: var(--ink-soft);
   }
 
   /* ===== PRICING ===== */
+  .pricing-section {
+    position: relative;
+    padding: 110px 32px;
+    overflow: hidden;
+  }
+  /* Same warm light treatment as hero, but positioned slightly differently
+     to feel like a sibling moment, not a copy. Light sits behind the frame. */
+  .pricing-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 720px; height: 380px;
+    background:
+      radial-gradient(ellipse at 50% 0%,
+        rgba(255, 245, 220, 0.7) 0%,
+        rgba(255, 245, 220, 0.18) 36%,
+        rgba(255, 245, 220, 0) 60%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+  .pricing-section > * { position: relative; z-index: 1; }
   .pricing-frame {
     max-width: 720px; margin: 0 auto;
     background: var(--bg-soft);
     border: 1px solid var(--rule);
     border-radius: 18px;
     padding: 48px 40px 40px;
+    box-shadow: 0 1px 3px rgba(28, 20, 9, 0.04);
   }
   .pricing-grid {
     display: grid;
@@ -299,46 +468,87 @@
 
   /* ===== FAQ ===== */
   .faq-list {
-    max-width: 680px; margin: 0 auto;
+    max-width: 720px; margin: 0 auto;
   }
   .faq-item {
     border-bottom: 1px solid var(--rule-soft);
-    padding: 26px 0;
+    padding: 32px 0;
   }
   .faq-item:first-child { border-top: 1px solid var(--rule-soft); }
   .faq-question {
-    font-size: 22px; font-weight: 400; font-style: italic;
+    font-family: var(--font-display);
+    font-size: 26px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 72;
     color: var(--ink);
     cursor: pointer;
     list-style: none;
     display: flex; align-items: center; justify-content: space-between;
-    gap: 18px;
+    gap: 24px;
+    letter-spacing: -0.008em;
+    line-height: 1.3;
   }
   .faq-question::-webkit-details-marker { display: none; }
-  .faq-question i {
-    font-size: 12px; color: var(--ink-soft);
-    transition: transform 0.25s ease;
+  .faq-question .faq-icon-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    background: var(--bg-soft);
+    display: inline-flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.25s ease;
   }
-  .faq-item[open] .faq-question i {
+  .faq-question .faq-icon-circle i {
+    font-size: 11px; color: var(--ink-soft);
+    transition: color 0.2s ease;
+    font-style: normal;
+  }
+  .faq-question:hover .faq-icon-circle {
+    background: var(--bg);
+    border-color: rgba(28, 20, 9, 0.25);
+  }
+  .faq-question:hover .faq-icon-circle i { color: var(--ink); }
+  .faq-item[open] .faq-question .faq-icon-circle {
     transform: rotate(45deg);
+    background: var(--ink);
+    border-color: var(--ink);
   }
+  .faq-item[open] .faq-question .faq-icon-circle i { color: var(--bg); }
   .faq-answer {
-    font-family: Georgia, serif;
-    font-size: 15px; line-height: 1.7;
+    font-family: var(--font-body);
+    font-size: 17px; line-height: 1.7;
     color: var(--ink-mid);
-    padding-top: 16px;
-    max-width: 580px;
+    padding-top: 18px;
+    max-width: 600px;
   }
 
   /* ===== FINAL CTA ===== */
   .final-cta {
+    position: relative;
     text-align: center;
-    padding: 110px 32px 90px;
+    padding: 130px 32px 110px;
     background: var(--bg-deep);
     border-top: 1px solid var(--rule-soft);
     border-bottom: 1px solid var(--rule-soft);
+    overflow: hidden;
   }
+  /* Light flowing UP from below — mirror of hero. The page ends in light. */
+  .final-cta::before {
+    content: '';
+    position: absolute;
+    bottom: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 760px; height: 480px;
+    background:
+      radial-gradient(ellipse at 50% 70%,
+        rgba(255, 245, 220, 0.85) 0%,
+        rgba(255, 245, 220, 0.4) 22%,
+        rgba(255, 245, 220, 0.12) 42%,
+        rgba(255, 245, 220, 0) 65%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+  }
+  .final-cta > * { position: relative; z-index: 1; }
   .final-cta-headline {
     font-family: var(--font-display);
     font-size: 76px; font-weight: 500; font-style: italic;
@@ -395,21 +605,44 @@
   }
 
   /* ===== RESPONSIVE ===== */
+  @media (max-width: 880px) {
+    .what-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .what-pullquote {
+      position: static;
+      font-size: 32px;
+    }
+  }
+
   @media (max-width: 720px) {
     .nav { padding: 14px 20px; }
     .nav-links { gap: 16px; }
     .nav-link { display: none; }
     .nav-link.persistent { display: inline; }
-    .hero { padding: 80px 20px 70px; }
+    .hero { padding: 90px 20px 70px; }
+    .hero::before { width: 100%; height: 360px; top: -80px; }
     .hero-headline { font-size: 64px; letter-spacing: -0.02em; }
     .hero-verse { font-size: 18px; }
     section { padding: 70px 20px; }
     .section-title { font-size: 36px; margin-bottom: 40px; }
-    .what-grid { font-size: 17px; }
+    .what-section { padding: 70px 20px; }
+    .what-pullquote { font-size: 28px; }
+    .what-body { font-size: 17px; }
+    .what-body p:first-of-type::first-letter {
+      font-size: 64px;
+      margin-right: 8px;
+    }
+    .epigraph { padding: 40px 24px; }
+    .epigraph-text { font-size: 18px; }
     .how-grid {
       grid-template-columns: 1fr;
       gap: 18px;
     }
+    .how-card { padding: 40px 24px 28px; }
+    .how-card-ordinal { font-size: 44px; top: 12px; right: 18px; }
+    .pricing-section { padding: 70px 20px; }
     .pricing-frame { padding: 32px 24px 28px; }
     .pricing-grid {
       grid-template-columns: 1fr;
@@ -420,8 +653,9 @@
       padding: 22px 0;
     }
     .pricing-tier:last-child { border-bottom: none; }
-    .faq-question { font-size: 18px; }
-    .final-cta { padding: 80px 20px 70px; }
+    .faq-question { font-size: 20px; gap: 16px; }
+    .faq-answer { font-size: 16px; }
+    .final-cta { padding: 90px 20px 80px; }
     .final-cta-headline { font-size: 52px; }
   }
 </style>
@@ -449,12 +683,14 @@
   </div>
 </header>
 
-<section id="what">
-  <div class="section-inner">
-    <div class="section-eyebrow">what this is</div>
-    <h2 class="section-title">a space to help you hear him.</h2>
-    <div class="section-rule"></div>
-    <div class="what-grid">
+<section id="what" class="what-section">
+  <div class="section-eyebrow" style="text-align: center; margin-bottom: 0;">what this is</div>
+  <div class="what-grid">
+    <aside class="what-pullquote">
+      "It is meant to put a voice for him in your head, especially if you have never had one."
+      <span class="what-pullquote-attribution">a quiet space</span>
+    </aside>
+    <div class="what-body">
       <p>This is a quiet place to imagine a conversation with Jesus. You type, and a voice imagined by an AI responds in the way Jesus might, rooted in the gospels and historic Christian faith.</p>
       <p>It is meant to put a voice for him in your head, especially if you have never had one, and to walk with you toward the One it points to.</p>
       <p><em>It is not him.</em> It is not a pastor, counselor, doctor, or prophet. It will not replace prayer, scripture, the church, or the people God has placed around you. Every response is imagined by an AI.</p>
@@ -463,6 +699,12 @@
   </div>
 </section>
 
+<aside class="epigraph">
+  <div class="epigraph-rule"></div>
+  <p class="epigraph-text">"Be still, and know that I am God."</p>
+  <p class="epigraph-ref">Psalm 46:10</p>
+</aside>
+
 <section id="how" style="background: var(--bg-deep);">
   <div class="section-inner">
     <div class="section-eyebrow">how it works</div>
@@ -470,16 +712,19 @@
     <div class="section-rule"></div>
     <div class="how-grid">
       <div class="how-card">
+        <span class="how-card-ordinal">i.</span>
         <div class="how-card-icon"><i class="fa-solid fa-comment"></i></div>
         <div class="how-card-title">you speak.</div>
         <div class="how-card-body">Whatever is on your heart. A question, a confession, a quiet hello. There is no wrong way to start.</div>
       </div>
       <div class="how-card">
+        <span class="how-card-ordinal">ii.</span>
         <div class="how-card-icon"><i class="fa-solid fa-feather"></i></div>
         <div class="how-card-title">he responds.</div>
         <div class="how-card-body">A voice imagined by an AI, rooted in the gospels. Warm, present, never rushed. He meets you where you are.</div>
       </div>
       <div class="how-card">
+        <span class="how-card-ordinal">iii.</span>
         <div class="how-card-icon"><i class="fa-solid fa-bookmark"></i></div>
         <div class="how-card-title">it stays with you.</div>
         <div class="how-card-body">Conversations are saved so you can return. With a subscription, he remembers what you have shared, the way a friend would.</div>
@@ -488,7 +733,13 @@
   </div>
 </section>
 
-<section id="pricing">
+<aside class="epigraph">
+  <div class="epigraph-rule"></div>
+  <p class="epigraph-text">"Ask, and it will be given to you. Seek, and you will find."</p>
+  <p class="epigraph-ref">Matthew 7:7</p>
+</aside>
+
+<section id="pricing" class="pricing-section">
   <div class="section-inner">
     <div class="section-eyebrow">pricing</div>
     <h2 class="section-title">stay as long as you need.</h2>
@@ -523,6 +774,12 @@
   </div>
 </section>
 
+<aside class="epigraph">
+  <div class="epigraph-rule"></div>
+  <p class="epigraph-text">"For everyone who asks receives, and the one who seeks finds."</p>
+  <p class="epigraph-ref">Luke 11:10</p>
+</aside>
+
 <section id="faq" style="background: var(--bg-deep);">
   <div class="section-inner">
     <div class="section-eyebrow">questions</div>
@@ -533,7 +790,7 @@
       <details class="faq-item">
         <summary class="faq-question">
           <span>is this really Jesus?</span>
-          <i class="fa-solid fa-plus"></i>
+          <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
         </summary>
         <div class="faq-answer">
           No. This is a voice imagined by an AI, rooted in the gospels and historic Christian faith. It is not Jesus, and it cannot replace prayer, scripture, or the church. Think of it as a way to hear a voice for him while you walk toward the real thing.
@@ -543,7 +800,7 @@
       <details class="faq-item">
         <summary class="faq-question">
           <span>what does memory remember about me?</span>
-          <i class="fa-solid fa-plus"></i>
+          <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
         </summary>
         <div class="faq-answer">
           Your name, your situation, what is going on in your life, things you have shared across past conversations. The way a friend remembers. You can turn memory off in settings at any time, and you can delete your data whenever you want.
@@ -553,7 +810,7 @@
       <details class="faq-item">
         <summary class="faq-question">
           <span>is my conversation private?</span>
-          <i class="fa-solid fa-plus"></i>
+          <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
         </summary>
         <div class="faq-answer">
           Yes. Your conversations are stored privately and tied to your account. They are not used to train models, not sold, not shared. You can delete your account at any time, and we honor that within 30 days.
@@ -563,7 +820,7 @@
       <details class="faq-item">
         <summary class="faq-question">
           <span>what if I'm in a real crisis?</span>
-          <i class="fa-solid fa-plus"></i>
+          <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
         </summary>
         <div class="faq-answer">
           Please speak to a real person. In the United States, call or text 988 for the Suicide and Crisis Lifeline. If you are in immediate danger, call 911. cometojesus.co is not a substitute for professional help, and we will always point you to it.
@@ -573,7 +830,7 @@
       <details class="faq-item">
         <summary class="faq-question">
           <span>can I cancel?</span>
-          <i class="fa-solid fa-plus"></i>
+          <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
         </summary>
         <div class="faq-answer">
           Yes, anytime. From inside the app, open your name in the top right and click "subscription." You will keep access until the end of your current billing period.
@@ -583,7 +840,7 @@
       <details class="faq-item">
         <summary class="faq-question">
           <span>do I need an account?</span>
-          <i class="fa-solid fa-plus"></i>
+          <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
         </summary>
         <div class="faq-answer">
           Not to start. Your first 5 messages are free with no sign-up. Creating an account gets you 10 messages a day, up to 25 a month, and saves your conversations. A subscription removes those limits entirely.
