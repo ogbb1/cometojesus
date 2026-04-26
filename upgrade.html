@@ -3,174 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>stay longer · cometojesus</title>
+<title>stay longer · come to jesus</title>
 <link rel="icon" type="image/svg+xml" href="/cometojesus-favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/cometojesus-favicon-32.png">
 <link rel="shortcut icon" href="/cometojesus-favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="/cometojesus-touch-icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/cometojesus-icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/cometojesus-icon-512.png">
-<meta name="theme-color" content="#fbf8f1">
-<meta name="description" content="A space to help you hear him — an imagined conversation with Jesus, to guide you in your relationship with him.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="cometojesus">
-<meta property="og:title" content="cometojesus">
-<meta property="og:description" content="A space to help you hear him.">
-<meta property="og:url" content="https://cometojesus.co">
-<meta property="og:image" content="https://cometojesus.co/cometojesus-og-v1.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="cometojesus">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="cometojesus">
-<meta name="twitter:description" content="A space to help you hear him.">
-<meta name="twitter:image" content="https://cometojesus.co/cometojesus-og-v1.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta name="theme-color" content="#f4eadb">
+<meta name="description" content="Stay longer with come to jesus. Unlimited conversations, full memory across visits, and full conversation history.">
+
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
+
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #f4eadb; --ink: #1c1409; --ink-mid: #2d241a; --ink-soft: #605242;
-    --ink-whisper: #9a8c76; --light: 255, 248, 220; --light-hot: 255, 253, 240;
-  }
-  html, body { min-height: 100%; }
-  body {
-    background: var(--bg); font-family: 'Cormorant Garamond', Georgia, serif;
-    color: var(--ink); -webkit-font-smoothing: antialiased;
-    display: flex; flex-direction: column; min-height: 100vh;
-    position: relative; overflow-x: hidden;
-  }
-  .light-source {
-    position: fixed; top: -18vh; left: 50%; transform: translateX(-50%);
-    width: 60vw; height: 60vw; max-width: 800px; max-height: 800px;
-    background: radial-gradient(circle at center,
-      rgba(var(--light-hot), 1) 0%, rgba(var(--light-hot), 0.95) 8%,
-      rgba(var(--light), 0.8) 16%, rgba(var(--light), 0.45) 30%,
-      rgba(var(--light), 0.2) 48%, rgba(var(--light), 0.05) 68%, transparent 85%);
-    filter: blur(4px); pointer-events: none; z-index: 0; opacity: 0.6;
-  }
-  .wrap {
-    position: relative; z-index: 2; flex: 1;
-    display: flex; align-items: center; justify-content: center;
-    padding: 80px 32px 60px;
-    animation: rise 1.2s cubic-bezier(.16,.84,.3,1);
-  }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .content {
-    max-width: 540px; text-align: center;
-  }
-  .eyebrow {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.24em;
-    color: var(--ink-soft); font-family: Georgia, serif;
-    margin-bottom: 28px; opacity: 0.7;
-  }
-  h1 {
-    font-size: 44px; font-weight: 400; font-style: italic; color: var(--ink);
-    line-height: 1.15; margin-bottom: 28px; letter-spacing: -0.005em;
-  }
-  p {
-    font-size: 18px; line-height: 1.65; color: var(--ink-mid);
-    margin-bottom: 20px;
-  }
-  p.small {
-    font-size: 14px; color: var(--ink-soft); font-style: italic; line-height: 1.6;
-    margin-top: 28px;
-  }
-  .rule {
-    width: 36px; height: 1px; background: var(--ink-whisper);
-    margin: 40px auto; opacity: 0.5;
+    --bg: #f4eadb;
+    --bg-deep: #ebdfca;
+    --bg-soft: #f8f1e3;
+    --ink: #1c1409;
+    --ink-mid: #2d241a;
+    --ink-soft: #605242;
+    --ink-whisper: #9a8c76;
+    --rule: rgba(28, 20, 9, 0.12);
+    --rule-soft: rgba(28, 20, 9, 0.06);
+    --error: #b8412e;
   }
 
-  /* ===== PRICING TIERS ===== */
-  .tiers {
-    display: flex; gap: 16px; margin: 36px auto 8px;
-    max-width: 480px; flex-direction: column;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 50% -20%,
+        rgba(255, 248, 235, 0.65) 0%,
+        rgba(244, 234, 219, 0.0) 55%),
+      var(--bg);
+    min-height: 100vh;
+  }
+
+  .nav {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 36px;
+    background: rgba(244, 234, 219, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .nav-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: 0.005em;
+  }
+  .nav-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: Georgia, serif;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-soft); text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .nav-back:hover { color: var(--ink); }
+  .nav-back i { font-size: 10px; }
+
+  .hero {
+    text-align: center;
+    padding: 100px 32px 70px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: Georgia, serif;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
+    color: var(--ink-soft); opacity: 0.72;
+    margin-bottom: 32px;
+  }
+  .hero-headline {
+    font-size: 68px; font-weight: 400; font-style: italic;
+    line-height: 1.0; color: var(--ink);
+    letter-spacing: -0.015em;
+    margin-bottom: 24px;
+  }
+  .hero-sub {
+    font-size: 19px; font-style: italic;
+    color: var(--ink-mid); line-height: 1.55;
+    max-width: 540px; margin: 0 auto;
+  }
+
+  section { padding: 70px 32px; }
+  .section-inner { max-width: 920px; margin: 0 auto; }
+  .section-eyebrow {
+    font-family: Georgia, serif;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
+    color: var(--ink-soft); opacity: 0.78;
+    text-align: center; margin-bottom: 22px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px; font-weight: 400; font-style: italic;
+    color: var(--ink); text-align: center;
+    line-height: 1.2; letter-spacing: -0.005em;
+    max-width: 680px; margin: 0 auto 48px;
+  }
+  .section-rule {
+    width: 32px; height: 1px; background: var(--ink-whisper);
+    margin: 0 auto 48px; opacity: 0.5;
+  }
+
+  .pricing-section { padding: 30px 32px 60px; }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 760px;
+    margin: 0 auto;
   }
   .tier {
-    border: 1px solid rgba(15, 12, 8, 0.18);
-    background: rgba(255, 253, 245, 0.5);
-    padding: 28px 28px 24px;
-    text-align: left;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    padding: 36px 32px 32px;
     position: relative;
+    transition: border-color 0.25s ease, transform 0.25s ease;
   }
   .tier:hover {
-    border-color: var(--ink-mid);
-    background: rgba(255, 253, 245, 0.85);
+    border-color: rgba(28, 20, 9, 0.3);
+    transform: translateY(-2px);
   }
   .tier.featured {
-    border-color: var(--ink-mid);
-    background: rgba(255, 253, 245, 0.85);
+    border: 2px solid var(--ink);
+    background: rgba(255, 252, 244, 0.85);
   }
   .tier-badge {
-    position: absolute; top: -10px; right: 16px;
+    position: absolute;
+    top: -12px; left: 50%; transform: translateX(-50%);
     background: var(--ink); color: var(--bg);
-    font-family: Georgia, serif; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.2em;
-    padding: 4px 10px;
+    font-family: Georgia, serif;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 999px;
   }
   .tier-name {
-    font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em;
-    color: var(--ink-soft); font-family: Georgia, serif;
-    margin-bottom: 12px;
+    font-family: Georgia, serif;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.22em;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
   }
-  .tier-price {
-    font-size: 36px; font-weight: 400; color: var(--ink);
-    line-height: 1; margin-bottom: 6px;
-    display: flex; align-items: baseline; gap: 4px;
+  .tier-amount {
+    font-size: 56px; font-weight: 400;
+    color: var(--ink); line-height: 1;
+    margin-bottom: 6px;
+    display: flex; align-items: baseline; gap: 6px;
   }
-  .tier-price .currency {
-    font-size: 22px; font-style: italic; color: var(--ink-soft);
+  .tier-amount .currency {
+    font-size: 28px; font-style: italic;
+    color: var(--ink-mid);
   }
-  .tier-price .period {
-    font-size: 16px; font-style: italic; color: var(--ink-soft);
-    font-weight: 400;
+  .tier-amount .period {
+    font-family: Georgia, serif;
+    font-size: 13px; color: var(--ink-soft);
+    font-style: italic; font-weight: 400;
+    margin-left: 2px;
   }
   .tier-detail {
-    font-size: 14px; color: var(--ink-soft); font-style: italic;
-    margin-bottom: 18px; line-height: 1.5;
+    font-family: Georgia, serif;
+    font-size: 14px; color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 28px; line-height: 1.5;
+    min-height: 42px;
   }
   .tier-btn {
-    background: none; border: 1px solid var(--ink-mid); color: var(--ink);
-    font-family: inherit; font-size: 13px; letter-spacing: 0.22em;
-    text-transform: uppercase; padding: 12px 24px;
-    cursor: pointer; transition: all 0.4s cubic-bezier(.16,.84,.3,1);
-    font-weight: 400; width: 100%;
+    width: 100%;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: Georgia, serif;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 14px 24px; border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
   }
   .tier-btn:hover:not(:disabled) {
-    background: var(--ink); color: var(--bg); letter-spacing: 0.28em;
+    background: var(--ink);
+    color: var(--bg);
+    transform: translateY(-1px);
   }
   .tier-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tier-btn i { font-size: 11px; }
   .tier.featured .tier-btn {
     background: var(--ink); color: var(--bg);
   }
   .tier.featured .tier-btn:hover:not(:disabled) {
-    background: var(--ink-mid); letter-spacing: 0.28em;
+    background: var(--ink-mid);
+    border-color: var(--ink-mid);
   }
 
   .err {
-    color: #8b3a2f; font-size: 14px; font-style: italic;
-    margin-top: 16px; min-height: 20px; opacity: 0;
+    color: var(--error); font-size: 14px; font-style: italic;
+    text-align: center;
+    margin-top: 24px; min-height: 20px; opacity: 0;
     transition: opacity 0.3s;
   }
   .err.visible { opacity: 1; }
 
-  /* Loading state when redirecting to Stripe */
   .loading {
     display: none; font-size: 16px; font-style: italic;
-    color: var(--ink-soft); margin: 32px 0;
+    text-align: center;
+    color: var(--ink-soft); margin: 24px 0;
   }
   .loading.visible { display: block; }
   .loading::after {
-    content: '...';
-    animation: dots 1.4s steps(4) infinite;
+    content: '...'; animation: dots 1.4s steps(4) infinite;
   }
   @keyframes dots {
     0%, 100% { content: ''; }
@@ -181,213 +234,364 @@
 
   .signin-prompt {
     display: none;
-    margin: 28px auto 8px;
-    padding: 24px 24px 20px;
-    border: 1px solid var(--ink-mid);
-    background: rgba(255, 253, 245, 0.95);
+    margin: 32px auto 0;
+    padding: 28px 28px 24px;
+    border: 1px solid var(--ink);
+    background: rgba(255, 252, 244, 0.95);
+    border-radius: 14px;
     text-align: center;
     max-width: 480px;
-    animation: rise 0.5s ease-out;
   }
   .signin-prompt.visible { display: block; }
   .signin-prompt-text {
-    font-size: 16px; font-style: italic; color: var(--ink);
-    margin-bottom: 18px; line-height: 1.5;
+    font-size: 17px; font-style: italic; color: var(--ink);
+    margin-bottom: 20px; line-height: 1.5;
   }
   .signin-prompt-actions {
     display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
   }
   .signin-prompt-actions a {
+    display: inline-flex; align-items: center; gap: 8px;
     background: var(--ink); color: var(--bg);
-    font-family: inherit; font-size: 13px; letter-spacing: 0.22em;
-    text-transform: uppercase; padding: 12px 28px;
-    text-decoration: none; transition: all 0.4s cubic-bezier(.16,.84,.3,1);
-    font-weight: 400;
+    font-family: Georgia, serif;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    padding: 12px 22px; border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
   }
   .signin-prompt-actions a:hover {
-    background: var(--ink-mid); letter-spacing: 0.28em;
+    background: var(--ink-mid); transform: translateY(-1px);
   }
   .signin-prompt-actions a.secondary {
-    background: transparent; color: var(--ink);
-    border: 1px solid var(--ink-mid);
+    background: transparent; color: var(--ink); border: 1px solid var(--ink);
   }
   .signin-prompt-actions a.secondary:hover {
-    background: rgba(15, 12, 8, 0.05);
+    background: rgba(28, 20, 9, 0.05);
+  }
+  .signin-prompt-actions a i { font-size: 10px; }
+
+  .pricing-fineprint {
+    font-family: Georgia, serif;
+    font-size: 13px; color: var(--ink-soft);
+    font-style: italic; text-align: center;
+    margin-top: 32px; max-width: 540px;
+    margin-left: auto; margin-right: auto;
+    line-height: 1.6; opacity: 0.85;
+  }
+  .pricing-fineprint i { margin-right: 6px; opacity: 0.7; }
+
+  .changes-section { background: var(--bg-deep); }
+  .changes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 760px; margin: 0 auto;
+  }
+  .change-card {
+    background: var(--bg-soft);
+    border: 1px solid var(--rule-soft);
+    border-radius: 14px;
+    padding: 32px 28px;
+  }
+  .change-card-icon {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink); margin-bottom: 18px;
+  }
+  .change-card-icon i { font-size: 14px; }
+  .change-card-title {
+    font-size: 20px; font-style: italic; font-weight: 400;
+    color: var(--ink); margin-bottom: 10px;
+  }
+  .change-card-body {
+    font-family: Georgia, serif;
+    font-size: 14px; line-height: 1.6;
+    color: var(--ink-soft);
   }
 
-  .back {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 11px; text-transform: uppercase;
-    letter-spacing: 0.24em; color: var(--ink-soft); text-decoration: none;
-    font-family: Georgia, serif; margin-top: 48px; opacity: 0.7;
-    transition: opacity 0.3s;
+  .note-section { padding: 90px 32px; }
+  .note-card {
+    max-width: 640px; margin: 0 auto; text-align: center;
   }
-  .back:hover { opacity: 1; }
-  .back i { font-size: 10px; }
+  .note-eyebrow {
+    font-family: Georgia, serif;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
+    color: var(--ink-soft); opacity: 0.78;
+    margin-bottom: 24px;
+  }
+  .note-quote {
+    font-size: 22px; font-style: italic;
+    color: var(--ink); line-height: 1.55;
+    margin-bottom: 24px;
+  }
+  .note-attribution {
+    font-family: Georgia, serif;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
 
-  @media (max-width: 600px) {
-    .wrap { padding: 48px 24px 48px; }
-    h1 { font-size: 34px; }
-    p { font-size: 16px; }
-    .tier-price { font-size: 30px; }
+  .trust-section {
+    background: var(--bg-deep);
+    padding: 50px 32px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .trust-grid {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 32px;
+    max-width: 760px; margin: 0 auto;
+  }
+  .trust-item {
+    display: flex; align-items: center; gap: 10px;
+    font-family: Georgia, serif;
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .trust-item i { font-size: 12px; color: var(--ink); }
+
+  footer {
+    text-align: center;
+    padding: 36px 32px 48px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .footer-crisis {
+    font-family: Georgia, serif;
+    font-size: 12px; color: var(--ink-soft);
+    font-style: italic; margin-bottom: 22px;
+    opacity: 0.85;
+  }
+  .footer-links {
+    display: flex; justify-content: center; gap: 22px;
+    font-family: Georgia, serif;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .footer-links a {
+    color: var(--ink-soft); text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-links a:hover { color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .nav { padding: 14px 20px; }
+    .hero { padding: 60px 20px 50px; }
+    .hero-headline { font-size: 44px; }
+    .hero-sub { font-size: 17px; }
+    section { padding: 50px 20px; }
+    .section-title { font-size: 30px; margin-bottom: 36px; }
+    .pricing-grid { grid-template-columns: 1fr; gap: 16px; }
+    .tier { padding: 28px 24px 24px; }
+    .tier-amount { font-size: 44px; }
+    .tier-amount .currency { font-size: 22px; }
+    .changes-grid { grid-template-columns: 1fr; }
+    .note-section { padding: 60px 20px; }
+    .note-quote { font-size: 18px; }
+    .trust-grid { gap: 20px; }
   }
 </style>
 </head>
 <body>
-  <div class="light-source"></div>
-  <div class="wrap">
-    <div class="content">
-      <div class="eyebrow">stay longer</div>
-      <h1>for those who keep coming back</h1>
-      <p>The free tier gives you 10 messages a day, up to 25 a month. Plenty for most people, most days. For those walking through something deeper, who use this as part of a daily practice:</p>
 
-      <div class="tiers">
-        <div class="tier" data-plan="monthly">
-          <div class="tier-name">monthly</div>
-          <div class="tier-price">
-            <span class="currency">$</span><span>6.99</span><span class="period">/month</span>
-          </div>
-          <div class="tier-detail">unlimited conversations, billed monthly. cancel anytime.</div>
-          <button class="tier-btn" data-plan="monthly">choose monthly</button>
-        </div>
+<nav class="nav">
+  <a href="/home.html" class="nav-brand">come to jesus.</a>
+  <a href="/" class="nav-back"><i class="fa-solid fa-arrow-left"></i>back to chat</a>
+</nav>
 
-        <div class="tier featured" data-plan="annual">
-          <div class="tier-badge">save 17%</div>
-          <div class="tier-name">annual</div>
-          <div class="tier-price">
-            <span class="currency">$</span><span>69.99</span><span class="period">/year</span>
-          </div>
-          <div class="tier-detail">unlimited conversations, billed once a year. works out to about $5.83/month.</div>
-          <button class="tier-btn" data-plan="annual">choose annual</button>
+<header class="hero">
+  <div class="hero-eyebrow">stay longer</div>
+  <h1 class="hero-headline">for those who keep coming back.</h1>
+  <p class="hero-sub">the free tier is enough for most people most days. for those walking through something deeper, who use this as part of a daily practice.</p>
+</header>
+
+<section class="pricing-section">
+  <div class="section-inner">
+    <div class="pricing-grid">
+
+      <div class="tier" data-plan="monthly">
+        <div class="tier-name">monthly</div>
+        <div class="tier-amount">
+          <span class="currency">$</span><span>6.99</span><span class="period">/ month</span>
         </div>
+        <p class="tier-detail">unlimited conversations, billed monthly. cancel anytime.</p>
+        <button class="tier-btn" data-plan="monthly">choose monthly <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
-      <div class="err" id="err"></div>
-      <div class="loading" id="loading">opening secure checkout</div>
-
-      <div class="signin-prompt" id="signinPrompt">
-        <div class="signin-prompt-text">you'll need to sign in or create an account first.</div>
-        <div class="signin-prompt-actions">
-          <a href="/login.html?redirect=/upgrade.html" id="signinLink">sign in</a>
-          <a href="/login.html?redirect=/upgrade.html&mode=signup" class="secondary">create account</a>
+      <div class="tier featured" data-plan="annual">
+        <div class="tier-badge">save 17%</div>
+        <div class="tier-name">annual</div>
+        <div class="tier-amount">
+          <span class="currency">$</span><span>69.99</span><span class="period">/ year</span>
         </div>
+        <p class="tier-detail">unlimited conversations, billed once a year. works out to about $5.83 a month.</p>
+        <button class="tier-btn" data-plan="annual">choose annual <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
-      <p class="small">payment processed securely by stripe. no card details touch our servers. cancel anytime from your account.</p>
+    </div>
 
-      <a href="/" class="back"><i class="fa-solid fa-arrow-left"></i>back</a>
+    <div class="err" id="err"></div>
+    <div class="loading" id="loading">opening secure checkout</div>
+
+    <div class="signin-prompt" id="signinPrompt">
+      <div class="signin-prompt-text">you'll need to sign in or create an account first.</div>
+      <div class="signin-prompt-actions">
+        <a href="/login.html?redirect=/upgrade.html" id="signinLink">sign in <i class="fa-solid fa-arrow-right"></i></a>
+        <a href="/login.html?redirect=/upgrade.html&mode=signup" class="secondary">sign up</a>
+      </div>
+    </div>
+
+    <p class="pricing-fineprint">
+      <i class="fa-solid fa-lock"></i>payment processed securely by stripe. no card details touch our servers. cancel anytime.
+    </p>
+  </div>
+</section>
+
+<section class="changes-section">
+  <div class="section-inner">
+    <div class="section-eyebrow">what changes</div>
+    <h2 class="section-title">what staying longer gets you.</h2>
+    <div class="section-rule"></div>
+
+    <div class="changes-grid">
+      <div class="change-card">
+        <div class="change-card-icon"><i class="fa-solid fa-infinity"></i></div>
+        <div class="change-card-title">no limits.</div>
+        <div class="change-card-body">unlimited conversations, no daily cap, no monthly cap. speak as long as you need, as often as you need.</div>
+      </div>
+      <div class="change-card">
+        <div class="change-card-icon"><i class="fa-solid fa-bookmark"></i></div>
+        <div class="change-card-title">your full history.</div>
+        <div class="change-card-body">every conversation saved, organized, and searchable in your sidebar. return to a thread from last month, last week, or this morning.</div>
+      </div>
+      <div class="change-card">
+        <div class="change-card-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="change-card-title">memory across visits.</div>
+        <div class="change-card-body">he remembers what you have shared. your name, your situation, what is going on in your life. the way a friend would remember.</div>
+      </div>
+      <div class="change-card">
+        <div class="change-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="change-card-title">your privacy, kept.</div>
+        <div class="change-card-body">conversations are stored privately, never sold, never used to train ai. you can turn memory off or delete your account anytime.</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <script type="module">
-    // The supabase JS client is loaded the same way the main app does it.
-    // We need to grab the user's JWT to authorize the create-checkout-session call.
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+<section class="note-section">
+  <div class="note-card">
+    <div class="note-eyebrow">a note</div>
+    <p class="note-quote">"this site exists because i needed it. i wanted a place where i could talk through what was on my heart, in his voice, when i could not sleep. if it does the same for you, your support keeps it running."</p>
+    <p class="note-attribution">come to jesus</p>
+  </div>
+</section>
 
-    const SUPABASE_URL = 'https://hatyoorjnakvgtuvwzhv.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhdHlvb3JqbmFrdmd0dXZ3emh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTExMjgsImV4cCI6MjA5MjU2NzEyOH0.OXtoqNb8ikORBfoOKiweJd-xRdp8FdBsorUhfupWYXg';
+<section class="trust-section">
+  <div class="trust-grid">
+    <div class="trust-item"><i class="fa-solid fa-lock"></i>secure payment</div>
+    <div class="trust-item"><i class="fa-solid fa-credit-card"></i>cancel anytime</div>
+    <div class="trust-item"><i class="fa-solid fa-arrows-rotate"></i>switch plans freely</div>
+    <div class="trust-item"><i class="fa-solid fa-shield-halved"></i>private by design</div>
+  </div>
+</section>
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<footer>
+  <p class="footer-crisis">if you are in crisis, please speak to a real person. in the US, call or text 988.</p>
+  <div class="footer-links">
+    <a href="/">enter</a>
+    <a href="/home.html">home</a>
+    <a href="/terms.html">terms</a>
+    <a href="/privacy.html">privacy</a>
+  </div>
+</footer>
 
-    const errEl = document.getElementById('err');
-    const loadingEl = document.getElementById('loading');
-    const signinEl = document.getElementById('signinPrompt');
-    const buttons = document.querySelectorAll('.tier-btn');
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    function showErr(msg) {
-      errEl.textContent = msg;
-      errEl.classList.add('visible');
-      loadingEl.classList.remove('visible');
-      buttons.forEach(b => b.disabled = false);
+  const SUPABASE_URL = 'https://hatyoorjnakvgtuvwzhv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhdHlvb3JqbmFrdmd0dXZ3emh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTExMjgsImV4cCI6MjA5MjU2NzEyOH0.OXtoqNb8ikORBfoOKiweJd-xRdp8FdBsorUhfupWYXg';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const errEl = document.getElementById('err');
+  const loadingEl = document.getElementById('loading');
+  const signinEl = document.getElementById('signinPrompt');
+  const buttons = document.querySelectorAll('.tier-btn');
+
+  function showErr(msg) {
+    errEl.textContent = msg;
+    errEl.classList.add('visible');
+    loadingEl.classList.remove('visible');
+    buttons.forEach(b => b.disabled = false);
+  }
+
+  function clearErr() { errEl.classList.remove('visible'); }
+
+  async function startCheckout(plan) {
+    clearErr();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData?.session;
+
+    if (!session) {
+      signinEl.classList.add('visible');
+      sessionStorage.setItem('cometojesus:intendedPlan', plan);
+      setTimeout(() => {
+        signinEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
     }
 
-    function clearErr() {
-      errEl.classList.remove('visible');
-    }
+    buttons.forEach(b => b.disabled = true);
+    loadingEl.classList.add('visible');
 
-    async function startCheckout(plan) {
-      clearErr();
-
-      // Check if user is signed in
-      const { data: sessionData } = await supabase.auth.getSession();
-      const session = sessionData?.session;
-
-      if (!session) {
-        signinEl.classList.add('visible');
-        // Save intended plan so login can redirect back here
-        sessionStorage.setItem('cometojesus:intendedPlan', plan);
-        // Scroll the prompt into view in case it's below the fold
-        setTimeout(() => {
-          signinEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 50);
-        return;
-      }
-
-      buttons.forEach(b => b.disabled = true);
-      loadingEl.classList.add('visible');
-
-      try {
-        const r = await fetch('/api/create-checkout-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ plan }),
-        });
-
-        if (!r.ok) {
-          const err = await r.json().catch(() => ({}));
-          if (r.status === 401) {
-            showErr('please sign in again to continue.');
-            signinEl.classList.add('visible');
-            setTimeout(() => {
-              signinEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 50);
-            return;
-          }
-          throw new Error(err.detail || err.error || 'could not start checkout');
-        }
-
-        const { url } = await r.json();
-        if (!url) throw new Error('no checkout url returned');
-
-        // Redirect to Stripe-hosted checkout
-        window.location.href = url;
-      } catch (e) {
-        console.error('checkout error:', e);
-        showErr(e.message || 'something went wrong. try again in a moment.');
-      }
-    }
-
-    // Wire up buttons
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const plan = btn.getAttribute('data-plan');
-        startCheckout(plan);
+    try {
+      const r = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ plan }),
       });
-    });
 
-    // If user just came from sign-in with an intended plan saved, auto-resume
-    (async () => {
-      const intendedPlan = sessionStorage.getItem('cometojesus:intendedPlan');
-      if (intendedPlan) {
-        sessionStorage.removeItem('cometojesus:intendedPlan');
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (sessionData?.session) {
-          // user is signed in now — auto-start checkout for the plan they wanted
-          setTimeout(() => startCheckout(intendedPlan), 600);
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        if (r.status === 401) {
+          showErr('please sign in again to continue.');
+          signinEl.classList.add('visible');
+          setTimeout(() => {
+            signinEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 50);
+          return;
         }
+        throw new Error(err.detail || err.error || 'could not start checkout');
       }
-    })();
 
-    // If they were redirected back here from a canceled Stripe checkout,
-    // show a soft message rather than an error.
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('canceled') === 'true') {
-      // Don't show an error — let the page just be the upgrade page again.
-      // The user chose to cancel; don't make them feel bad about it.
+      const { url } = await r.json();
+      if (!url) throw new Error('no checkout url returned');
+      window.location.href = url;
+    } catch (e) {
+      console.error('checkout error:', e);
+      showErr(e.message || 'something went wrong. try again in a moment.');
     }
-  </script>
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const plan = btn.getAttribute('data-plan');
+      startCheckout(plan);
+    });
+  });
+
+  (async () => {
+    const intendedPlan = sessionStorage.getItem('cometojesus:intendedPlan');
+    if (intendedPlan) {
+      sessionStorage.removeItem('cometojesus:intendedPlan');
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session) {
+        setTimeout(() => startCheckout(intendedPlan), 600);
+      }
+    }
+  })();
+</script>
 </body>
 </html>
