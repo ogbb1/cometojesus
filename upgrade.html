@@ -179,18 +179,39 @@
   }
 
   .signin-prompt {
-    margin-top: 24px;
-    padding: 16px;
-    background: rgba(15, 12, 8, 0.04);
-    border-left: 2px solid var(--ink-whisper);
-    text-align: left;
-    font-size: 14px;
-    color: var(--ink-soft);
-    font-style: italic;
+    display: none;
+    margin: 28px auto 8px;
+    padding: 24px 24px 20px;
+    border: 1px solid var(--ink-mid);
+    background: rgba(255, 253, 245, 0.95);
+    text-align: center;
+    max-width: 480px;
+    animation: rise 0.5s ease-out;
   }
-  .signin-prompt a {
-    color: var(--ink); text-decoration: underline;
-    text-underline-offset: 3px;
+  .signin-prompt.visible { display: block; }
+  .signin-prompt-text {
+    font-size: 16px; font-style: italic; color: var(--ink);
+    margin-bottom: 18px; line-height: 1.5;
+  }
+  .signin-prompt-actions {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .signin-prompt-actions a {
+    background: var(--ink); color: var(--bg);
+    font-family: inherit; font-size: 13px; letter-spacing: 0.22em;
+    text-transform: uppercase; padding: 12px 28px;
+    text-decoration: none; transition: all 0.4s cubic-bezier(.16,.84,.3,1);
+    font-weight: 400;
+  }
+  .signin-prompt-actions a:hover {
+    background: var(--ink-mid); letter-spacing: 0.28em;
+  }
+  .signin-prompt-actions a.secondary {
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--ink-mid);
+  }
+  .signin-prompt-actions a.secondary:hover {
+    background: rgba(15, 12, 8, 0.05);
   }
 
   .back {
@@ -241,8 +262,12 @@
       <div class="err" id="err"></div>
       <div class="loading" id="loading">opening secure checkout</div>
 
-      <div class="signin-prompt" id="signinPrompt" style="display:none;">
-        you'll need to sign in or create an account first. <a href="/login.html?redirect=/upgrade.html">sign in</a>
+      <div class="signin-prompt" id="signinPrompt">
+        <div class="signin-prompt-text">you'll need to sign in or create an account first.</div>
+        <div class="signin-prompt-actions">
+          <a href="/login.html?redirect=/upgrade.html" id="signinLink">sign in</a>
+          <a href="/login.html?redirect=/upgrade.html&mode=signup" class="secondary">create account</a>
+        </div>
       </div>
 
       <p class="small">payment processed securely by stripe. no card details touch our servers. cancel anytime from your account.</p>
@@ -285,9 +310,13 @@
       const session = sessionData?.session;
 
       if (!session) {
-        signinEl.style.display = 'block';
+        signinEl.classList.add('visible');
         // Save intended plan so login can redirect back here
         sessionStorage.setItem('cometojesus:intendedPlan', plan);
+        // Scroll the prompt into view in case it's below the fold
+        setTimeout(() => {
+          signinEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
         return;
       }
 
@@ -308,7 +337,10 @@
           const err = await r.json().catch(() => ({}));
           if (r.status === 401) {
             showErr('please sign in again to continue.');
-            signinEl.style.display = 'block';
+            signinEl.classList.add('visible');
+            setTimeout(() => {
+              signinEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
             return;
           }
           throw new Error(err.detail || err.error || 'could not start checkout');
