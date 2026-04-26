@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>stay longer · come to me</title>
+<title>stay longer · cometojesus</title>
 <link rel="icon" type="image/svg+xml" href="/cometojesus-favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/cometojesus-favicon-32.png">
 <link rel="shortcut icon" href="/cometojesus-favicon.ico">
@@ -13,16 +13,16 @@
 <meta name="theme-color" content="#fbf8f1">
 <meta name="description" content="A space to help you hear him — an imagined conversation with Jesus, to guide you in your relationship with him.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="come to me">
-<meta property="og:title" content="come to me">
+<meta property="og:site_name" content="cometojesus">
+<meta property="og:title" content="cometojesus">
 <meta property="og:description" content="A space to help you hear him.">
 <meta property="og:url" content="https://cometojesus.co">
 <meta property="og:image" content="https://cometojesus.co/cometojesus-og-v1.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="come to me — cometojesus.co">
+<meta property="og:image:alt" content="cometojesus">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="come to me">
+<meta name="twitter:title" content="cometojesus">
 <meta name="twitter:description" content="A space to help you hear him.">
 <meta name="twitter:image" content="https://cometojesus.co/cometojesus-og-v1.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,7 +62,7 @@
     to { opacity: 1; transform: translateY(0); }
   }
   .content {
-    max-width: 500px; text-align: center;
+    max-width: 540px; text-align: center;
   }
   .eyebrow {
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.24em;
@@ -78,38 +78,121 @@
     margin-bottom: 20px;
   }
   p.small {
-    font-size: 15px; color: var(--ink-soft); font-style: italic; line-height: 1.6;
-    margin-top: 32px;
+    font-size: 14px; color: var(--ink-soft); font-style: italic; line-height: 1.6;
+    margin-top: 28px;
   }
   .rule {
     width: 36px; height: 1px; background: var(--ink-whisper);
     margin: 40px auto; opacity: 0.5;
   }
-  .form {
-    display: flex; gap: 8px; margin: 32px auto 8px;
-    max-width: 360px; flex-direction: column;
+
+  /* ===== PRICING TIERS ===== */
+  .tiers {
+    display: flex; gap: 16px; margin: 36px auto 8px;
+    max-width: 480px; flex-direction: column;
   }
-  .form input {
-    background: transparent; border: none;
-    border-bottom: 1px solid var(--ink-whisper);
-    font-family: inherit; font-size: 17px; color: var(--ink);
-    padding: 12px 4px; outline: none; text-align: center;
-    transition: border-color 0.3s;
+  .tier {
+    border: 1px solid rgba(15, 12, 8, 0.18);
+    background: rgba(255, 253, 245, 0.5);
+    padding: 28px 28px 24px;
+    text-align: left;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
   }
-  .form input:focus { border-bottom-color: var(--ink); }
-  .form input::placeholder { color: var(--ink-whisper); font-style: italic; }
-  .btn {
-    background: none; border: 1px solid var(--ink-mid); color: var(--ink);
-    font-family: inherit; font-size: 14px; letter-spacing: 0.22em;
-    text-transform: uppercase; padding: 14px 36px; margin-top: 20px;
-    cursor: pointer; transition: all 0.5s cubic-bezier(.16,.84,.3,1);
-    font-weight: 400; text-decoration: none; display: inline-block;
+  .tier:hover {
+    border-color: var(--ink-mid);
+    background: rgba(255, 253, 245, 0.85);
   }
-  .btn:hover:not(:disabled) {
+  .tier.featured {
+    border-color: var(--ink-mid);
+    background: rgba(255, 253, 245, 0.85);
+  }
+  .tier-badge {
+    position: absolute; top: -10px; right: 16px;
     background: var(--ink); color: var(--bg);
-    letter-spacing: 0.3em; padding: 14px 44px;
+    font-family: Georgia, serif; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.2em;
+    padding: 4px 10px;
   }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tier-name {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em;
+    color: var(--ink-soft); font-family: Georgia, serif;
+    margin-bottom: 12px;
+  }
+  .tier-price {
+    font-size: 36px; font-weight: 400; color: var(--ink);
+    line-height: 1; margin-bottom: 6px;
+    display: flex; align-items: baseline; gap: 4px;
+  }
+  .tier-price .currency {
+    font-size: 22px; font-style: italic; color: var(--ink-soft);
+  }
+  .tier-price .period {
+    font-size: 16px; font-style: italic; color: var(--ink-soft);
+    font-weight: 400;
+  }
+  .tier-detail {
+    font-size: 14px; color: var(--ink-soft); font-style: italic;
+    margin-bottom: 18px; line-height: 1.5;
+  }
+  .tier-btn {
+    background: none; border: 1px solid var(--ink-mid); color: var(--ink);
+    font-family: inherit; font-size: 13px; letter-spacing: 0.22em;
+    text-transform: uppercase; padding: 12px 24px;
+    cursor: pointer; transition: all 0.4s cubic-bezier(.16,.84,.3,1);
+    font-weight: 400; width: 100%;
+  }
+  .tier-btn:hover:not(:disabled) {
+    background: var(--ink); color: var(--bg); letter-spacing: 0.28em;
+  }
+  .tier-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tier.featured .tier-btn {
+    background: var(--ink); color: var(--bg);
+  }
+  .tier.featured .tier-btn:hover:not(:disabled) {
+    background: var(--ink-mid); letter-spacing: 0.28em;
+  }
+
+  .err {
+    color: #8b3a2f; font-size: 14px; font-style: italic;
+    margin-top: 16px; min-height: 20px; opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .err.visible { opacity: 1; }
+
+  /* Loading state when redirecting to Stripe */
+  .loading {
+    display: none; font-size: 16px; font-style: italic;
+    color: var(--ink-soft); margin: 32px 0;
+  }
+  .loading.visible { display: block; }
+  .loading::after {
+    content: '...';
+    animation: dots 1.4s steps(4) infinite;
+  }
+  @keyframes dots {
+    0%, 100% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+  }
+
+  .signin-prompt {
+    margin-top: 24px;
+    padding: 16px;
+    background: rgba(15, 12, 8, 0.04);
+    border-left: 2px solid var(--ink-whisper);
+    text-align: left;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .signin-prompt a {
+    color: var(--ink); text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   .back {
     display: inline-block; font-size: 11px; text-transform: uppercase;
     letter-spacing: 0.24em; color: var(--ink-soft); text-decoration: none;
@@ -117,15 +200,12 @@
     transition: opacity 0.3s;
   }
   .back:hover { opacity: 1; }
-  .success {
-    display: none; font-size: 18px; font-style: italic; color: var(--ink);
-    margin: 32px 0;
-  }
-  .success.visible { display: block; animation: rise 0.8s ease-out; }
+
   @media (max-width: 600px) {
     .wrap { padding: 48px 24px 48px; }
     h1 { font-size: 34px; }
     p { font-size: 16px; }
+    .tier-price { font-size: 30px; }
   }
 </style>
 </head>
@@ -134,47 +214,145 @@
   <div class="wrap">
     <div class="content">
       <div class="eyebrow">stay longer</div>
-      <h1>an unlimited version is coming</h1>
-      <p>The free version gives you ten messages a day, which is enough for most people most of the time.</p>
-      <p>An unlimited version — for those who want to keep talking, who are wrestling through something, who use this as part of a daily practice — is coming soon.</p>
-      <div class="rule"></div>
-      <p>If you'd like to know when it's ready, leave your email. No marketing, no newsletter — one message when it launches, then silence.</p>
-      <form class="form" id="form">
-        <input type="email" id="email" placeholder="your email" required autocomplete="email" />
-        <button type="submit" class="btn" id="submit">let me know</button>
-      </form>
-      <div class="success" id="success">thank you. i'll be in touch.</div>
-      <p class="small">in the meantime, your ten daily messages reset on a rolling 24-hour window.</p>
+      <h1>for those who keep coming back</h1>
+      <p>The free tier gives you twenty-five conversations a month — enough for most people most of the time. For those walking through something deeper, who use this as part of a daily practice:</p>
+
+      <div class="tiers">
+        <div class="tier" data-plan="monthly">
+          <div class="tier-name">monthly</div>
+          <div class="tier-price">
+            <span class="currency">$</span><span>6.99</span><span class="period">/month</span>
+          </div>
+          <div class="tier-detail">unlimited conversations, billed monthly. cancel anytime.</div>
+          <button class="tier-btn" data-plan="monthly">choose monthly</button>
+        </div>
+
+        <div class="tier featured" data-plan="annual">
+          <div class="tier-badge">save 17%</div>
+          <div class="tier-name">annual</div>
+          <div class="tier-price">
+            <span class="currency">$</span><span>69.99</span><span class="period">/year</span>
+          </div>
+          <div class="tier-detail">unlimited conversations, billed once a year. works out to about $5.83/month.</div>
+          <button class="tier-btn" data-plan="annual">choose annual</button>
+        </div>
+      </div>
+
+      <div class="err" id="err"></div>
+      <div class="loading" id="loading">opening secure checkout</div>
+
+      <div class="signin-prompt" id="signinPrompt" style="display:none;">
+        you'll need to sign in or create an account first. <a href="/login.html?redirect=/upgrade.html">sign in</a>
+      </div>
+
+      <p class="small">payment processed securely by stripe. no card details touch our servers. cancel anytime from your account.</p>
+
       <a href="/" class="back">← back</a>
     </div>
   </div>
 
-  <script>
-    const form = document.getElementById('form');
-    const emailInput = document.getElementById('email');
-    const submitBtn = document.getElementById('submit');
-    const successEl = document.getElementById('success');
+  <script type="module">
+    // The supabase JS client is loaded the same way the main app does it.
+    // We need to grab the user's JWT to authorize the create-checkout-session call.
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = emailInput.value.trim();
-      if (!email) return;
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'saving...';
-      try {
-        const r = await fetch('/api/waitlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email })
-        });
-        if (!r.ok) throw new Error('failed');
-        form.style.display = 'none';
-        successEl.classList.add('visible');
-      } catch (err) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'try again';
+    const SUPABASE_URL = 'https://hatyoorjnakvgtuvwzhv.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhdHlvb3JqbmFrdmd0dXZ3emh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTExMjgsImV4cCI6MjA5MjU2NzEyOH0.OXtoqNb8ikORBfoOKiweJd-xRdp8FdBsorUhfupWYXg';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const errEl = document.getElementById('err');
+    const loadingEl = document.getElementById('loading');
+    const signinEl = document.getElementById('signinPrompt');
+    const buttons = document.querySelectorAll('.tier-btn');
+
+    function showErr(msg) {
+      errEl.textContent = msg;
+      errEl.classList.add('visible');
+      loadingEl.classList.remove('visible');
+      buttons.forEach(b => b.disabled = false);
+    }
+
+    function clearErr() {
+      errEl.classList.remove('visible');
+    }
+
+    async function startCheckout(plan) {
+      clearErr();
+
+      // Check if user is signed in
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData?.session;
+
+      if (!session) {
+        signinEl.style.display = 'block';
+        // Save intended plan so login can redirect back here
+        sessionStorage.setItem('cometojesus:intendedPlan', plan);
+        return;
       }
+
+      buttons.forEach(b => b.disabled = true);
+      loadingEl.classList.add('visible');
+
+      try {
+        const r = await fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ plan }),
+        });
+
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          if (r.status === 401) {
+            showErr('please sign in again to continue.');
+            signinEl.style.display = 'block';
+            return;
+          }
+          throw new Error(err.detail || err.error || 'could not start checkout');
+        }
+
+        const { url } = await r.json();
+        if (!url) throw new Error('no checkout url returned');
+
+        // Redirect to Stripe-hosted checkout
+        window.location.href = url;
+      } catch (e) {
+        console.error('checkout error:', e);
+        showErr(e.message || 'something went wrong. try again in a moment.');
+      }
+    }
+
+    // Wire up buttons
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const plan = btn.getAttribute('data-plan');
+        startCheckout(plan);
+      });
     });
+
+    // If user just came from sign-in with an intended plan saved, auto-resume
+    (async () => {
+      const intendedPlan = sessionStorage.getItem('cometojesus:intendedPlan');
+      if (intendedPlan) {
+        sessionStorage.removeItem('cometojesus:intendedPlan');
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData?.session) {
+          // user is signed in now — auto-start checkout for the plan they wanted
+          setTimeout(() => startCheckout(intendedPlan), 600);
+        }
+      }
+    })();
+
+    // If they were redirected back here from a canceled Stripe checkout,
+    // show a soft message rather than an error.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('canceled') === 'true') {
+      // Don't show an error — let the page just be the upgrade page again.
+      // The user chose to cancel; don't make them feel bad about it.
+    }
   </script>
 </body>
 </html>
