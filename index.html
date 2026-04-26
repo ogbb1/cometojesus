@@ -542,6 +542,44 @@
     font-size: 13px;
     font-style: normal;
   }
+
+  /* Home corner: mirrors auth corner on the left side. Always visible
+     for any user state (signed in, signed out, anonymous). Provides
+     a discoverable path to the marketing/info homepage from inside the chat. */
+  .home-corner {
+    position: fixed;
+    top: calc(22px + env(safe-area-inset-top));
+    left: 26px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+    background: rgba(255, 252, 244, 0.7);
+    border: 1px solid rgba(28, 20, 9, 0.18);
+    border-radius: 999px;
+    padding: 7px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    letter-spacing: 0.003em;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .home-corner:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .home-corner i {
+    font-size: 12px;
+    font-style: normal;
+  }
   /* Tiny floating menu when user clicks their name */
   .auth-menu {
     position: fixed;
@@ -611,6 +649,14 @@
       top: calc(46px + env(safe-area-inset-top));
       right: 18px;
     }
+    .home-corner {
+      font-size: 16px;
+      top: calc(16px + env(safe-area-inset-top));
+      left: 18px;
+    }
+    body.has-sidebar-toggle .home-corner {
+      left: 64px;
+    }
   }
 
   /* ===== HELP ===== */
@@ -641,6 +687,7 @@
      clash with or obscure the composer at the bottom of the viewport. */
   body.keyboard-open .help-btn,
   body.keyboard-open .auth-corner,
+  body.keyboard-open .home-corner,
   body.keyboard-open .auth-menu {
     opacity: 0;
     pointer-events: none;
@@ -1090,6 +1137,13 @@
   .sidebar-toggle:hover { color: var(--ink); transform: scale(1.05); }
   .sidebar-toggle i { font-size: 18px; }
 
+  /* When sidebar toggle is visible (signed-in users), shift the home corner
+     to the right so they don't stack. Anonymous users don't see the toggle,
+     so home corner sits at the standard left position. */
+  body.has-sidebar-toggle .home-corner {
+    left: 76px;
+  }
+
   .sidebar {
     position: fixed;
     top: 0;
@@ -1467,11 +1521,11 @@
     </div>
   </div>
 
-  <button class="auth-corner" id="authCorner" type="button"><i class="fa-solid fa-door-open"></i><span id="authCornerText">come home.</span></button>
+  <button class="auth-corner" id="authCorner" type="button"><i class="fa-solid fa-door-open"></i><span id="authCornerText">sign in</span></button>
+  <a href="/home" class="home-corner" id="homeCorner"><i class="fa-solid fa-house"></i><span>home</span></a>
   <div class="auth-menu" id="authMenu">
     <button type="button" id="authMenuSettings"><i class="fa-solid fa-gear"></i>settings</button>
     <button type="button" id="authMenuSubscription" style="display:none;"><i class="fa-solid fa-credit-card"></i>subscription</button>
-    <button type="button" id="authMenuHome" onclick="window.location.href='/home'"><i class="fa-solid fa-house"></i>home</button>
     <div class="auth-menu-divider"></div>
     <button type="button" id="authMenuSignOut"><i class="fa-solid fa-arrow-right-from-bracket"></i>sign out</button>
   </div>
@@ -1657,7 +1711,7 @@
       <button class="auth-close" id="authClose" aria-label="close"><i class="fa-solid fa-xmark"></i></button>
       <div class="auth-scripture" id="authScripture">"my sheep know my voice."</div>
       <div class="auth-scripture-ref">John 10:27</div>
-      <div class="auth-title" id="authTitle">come in.</div>
+      <div class="auth-title" id="authTitle">sign in</div>
 
       <div class="auth-message" id="authMessage"></div>
 
@@ -1700,7 +1754,7 @@
         </div>
 
         <div class="auth-toggle" id="authToggle">
-          <span id="authToggleText">new here?</span>&nbsp;&nbsp;<a id="authToggleLink" href="#">come home</a>
+          <span id="authToggleText">new here?</span>&nbsp;&nbsp;<a id="authToggleLink" href="#">sign up</a>
         </div>
       </div>
 
@@ -1853,7 +1907,7 @@
         if (textEl) textEl.textContent = displayName + '.';
         if (iconEl) iconEl.className = 'fa-solid fa-circle-user';
       } else {
-        if (textEl) textEl.textContent = 'come home.';
+        if (textEl) textEl.textContent = 'sign in';
         if (iconEl) iconEl.className = 'fa-solid fa-door-open';
         if (authMenuEl) authMenuEl.classList.remove('visible');
       }
@@ -1954,15 +2008,15 @@
     function setAuthMode(mode) {
       authMode = mode;
       if (mode === 'signup') {
-        authTitle.textContent = 'welcome home.';
+        authTitle.textContent = 'sign up';
         authSubmitBtn.textContent = 'create account';
         authToggleLink.textContent = 'sign in';
         document.getElementById('authToggleText').textContent = 'already here?';
         authPasswordInput.setAttribute('autocomplete', 'new-password');
       } else {
-        authTitle.textContent = 'come in.';
+        authTitle.textContent = 'sign in';
         authSubmitBtn.textContent = 'sign in';
-        authToggleLink.textContent = 'come home';
+        authToggleLink.textContent = 'sign up';
         document.getElementById('authToggleText').textContent = 'new here?';
         authPasswordInput.setAttribute('autocomplete', 'current-password');
       }
@@ -2001,7 +2055,7 @@
 
       if (view === 'signin') {
         authViewSignin.style.display = '';
-        authTitle.textContent = authMode === 'signup' ? 'welcome home.' : 'come in.';
+        authTitle.textContent = authMode === 'signup' ? 'sign up' : 'sign in';
       } else if (view === 'forgot') {
         authViewForgot.style.display = '';
         authTitle.textContent = 'reset your password.';
@@ -2223,7 +2277,7 @@
               resendEmail: email
             });
           } else if (result.data.session) {
-            showAuthMessage('welcome home.', 'success');
+            showAuthMessage("you're in.", 'success');
             setTimeout(() => window.__closeAuthModal(), 800);
           }
         } else {
@@ -2237,7 +2291,7 @@
               showAuthMessage(result.error.message);
             }
           } else if (result.data.session) {
-            showAuthMessage('come in.', 'success');
+            showAuthMessage("you're in.", 'success');
             setTimeout(() => window.__closeAuthModal(), 500);
           }
         }
@@ -2663,7 +2717,7 @@
         counterEl.innerHTML = remaining + ' ' + word + ' remaining this month';
       } else {
         // anonymous
-        counterEl.innerHTML = remaining + ' ' + word + ' remaining · <a id="counterSignInLink">come home for more</a>';
+        counterEl.innerHTML = remaining + ' ' + word + ' remaining · <a id="counterSignInLink">sign in for more</a>';
         // Wire the sign-in link
         const link = document.getElementById('counterSignInLink');
         if (link) {
@@ -2683,8 +2737,8 @@
 
       if (tier === 'anonymous') {
         limitTitleEl.textContent = "we've been at this a while.";
-        limitBodyEl.textContent = 'to keep going, come home.';
-        limitCtaBtnEl.textContent = 'come home';
+        limitBodyEl.textContent = 'to keep going, sign in.';
+        limitCtaBtnEl.textContent = 'sign in';
         limitCtaBtnEl.href = '#';
         limitCtaBtnEl.onclick = (e) => {
           e.preventDefault();
@@ -3195,8 +3249,10 @@
       // (no account) don't see the toggle, since they have no saved convos.
       if (tier === 'paid' || tier === 'free') {
         sidebarToggleEl.classList.add('visible');
+        document.body.classList.add('has-sidebar-toggle');
       } else {
         sidebarToggleEl.classList.remove('visible');
+        document.body.classList.remove('has-sidebar-toggle');
         closeSidebar();
       }
       // Manage subscription row in settings — paid only
