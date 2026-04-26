@@ -28,12 +28,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #fbf8f1; --ink: #0f0c08; --ink-mid: #2a231a; --ink-soft: #5a4f40;
-    --ink-whisper: #9a8f7e;
+    --bg: #f4eadb; --ink: #1c1409; --ink-mid: #2d241a; --ink-soft: #605242;
+    --ink-whisper: #9a8c76;
   }
   body {
     background: var(--bg); font-family: 'Cormorant Garamond', Georgia, serif;
@@ -42,12 +43,14 @@
   }
   .wrap { max-width: 640px; margin: 0 auto; }
   .back {
-    display: inline-block; font-size: 11px; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; text-transform: uppercase;
     letter-spacing: 0.24em; color: var(--ink-soft); text-decoration: none;
     font-family: Georgia, serif; margin-bottom: 56px; opacity: 0.7;
     transition: opacity 0.3s;
   }
   .back:hover { opacity: 1; }
+  .back i { font-size: 10px; }
   h1 {
     font-size: 40px; font-weight: 400; font-style: italic; color: var(--ink);
     margin-bottom: 12px; letter-spacing: -0.005em;
@@ -64,10 +67,10 @@
   a { color: var(--ink); }
   .small {
     font-size: 13px; color: var(--ink-soft); font-style: italic;
-    margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(15,12,8,0.08);
+    margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(28,20,9,0.08);
   }
   .highlight {
-    background: rgba(15,12,8,0.04); border-left: 2px solid var(--ink-whisper);
+    background: rgba(28,20,9,0.04); border-left: 2px solid var(--ink-whisper);
     padding: 16px 20px; margin: 24px 0; font-style: italic; color: var(--ink);
   }
   @media (max-width: 600px) {
@@ -80,48 +83,60 @@
 </head>
 <body>
   <div class="wrap">
-    <a href="/" class="back">← back</a>
+    <a href="/" class="back"><i class="fa-solid fa-arrow-left"></i>back</a>
     <div class="eyebrow">privacy policy</div>
     <h1>privacy</h1>
-    <p>Last updated April 21, 2026.</p>
+    <p>Last updated April 26, 2026.</p>
 
     <div class="highlight">
-      We do not store your conversations. What you type here stays between you and, we pray, God.
+      We store your conversations privately so you can return to them, and so paid features like memory across conversations can work. We do not train models on them, sell them, or share them.
     </div>
 
-    <h2>what we don't collect</h2>
-    <p>We do not store the content of your conversations. Messages you send and responses you receive are processed in memory to generate a reply and are then discarded. We do not read your conversations. We do not save them to a database. We do not use them to train any AI model. We cannot recover them even if you asked us to.</p>
+    <h2>what we collect</h2>
+    <p>When you create an account, we collect your email address (for sign-in and account recovery) and, if you sign in with Google, the name and profile photo Google provides. When you have a conversation, we store the messages you send and the responses generated, tied to your account, in our database (Supabase). For paid users with memory enabled, we also store a structured profile derived from your conversations (your name, family details you have shared, ongoing themes, recent life events) so that future conversations can feel continuous.</p>
 
-    <h2>what is processed temporarily</h2>
-    <p>To generate responses, your message is sent to <a href="https://www.anthropic.com/legal/privacy">Anthropic</a> (the AI provider) and to <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a> (for bot protection). Both providers have their own privacy policies. Anthropic has committed to not training its models on traffic from paid API usage such as ours. These requests are not logged with identifying information on our end.</p>
+    <h2>why we store conversations</h2>
+    <p>Free users have their conversations saved so they can return to them in the sidebar. Paid users get an additional layer: a memory feature that lets the assistant remember what you have shared across conversations, the way a friend would remember. You can turn memory off in settings at any time, and you can delete your account whenever you want.</p>
 
-    <h2>what we do log</h2>
-    <p>To keep the service running and protected from abuse, we log the following minimal information, in aggregate and with IP addresses hashed:</p>
-    <p>• How many requests come from a given (hashed) IP, for rate limiting.<br>
-    • Whether requests were flagged by our safety filters (category and timestamp only — never content).<br>
-    • Server-side errors, for debugging.</p>
-    <p>None of this is tied to your identity. We cannot use these logs to reconstruct what you typed.</p>
+    <h2>what we do not do with your data</h2>
+    <p>We do not use your conversations to train AI models. We do not sell your data. We do not share it with advertisers. We do not let third parties access it for marketing. The model that generates responses is provided by <a href="https://www.anthropic.com/legal/privacy">Anthropic</a>, which has committed not to train its models on traffic from paid API usage such as ours.</p>
+
+    <h2>who can see your conversations</h2>
+    <p>You can see your own conversations in the sidebar. Authorized site personnel may access stored conversations only when necessary for technical support, debugging, legal compliance, or safety review (for example, if a user reports concerning behavior). We do not read conversations routinely, casually, or out of curiosity. Access is logged.</p>
+    <p>If you want a stronger privacy guarantee, you can use cometojesus.co without an account: anonymous users get five conversations with no storage tied to identity, processed in memory and discarded. You can also turn off memory in settings to limit what is remembered across conversations.</p>
+
+    <h2>third-party processors</h2>
+    <p>To operate this service we use the following providers, each governed by their own privacy practices:</p>
+    <p>• <a href="https://www.anthropic.com/legal/privacy">Anthropic</a> processes your messages to generate AI responses.<br>
+    • <a href="https://supabase.com/privacy">Supabase</a> hosts our database and authentication.<br>
+    • <a href="https://stripe.com/privacy">Stripe</a> processes subscription payments. Your payment card details never touch our servers.<br>
+    • <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a> provides bot protection (Turnstile), DNS, and privacy-preserving analytics.<br>
+    • <a href="https://vercel.com/legal/privacy-policy">Vercel</a> hosts the application.<br>
+    • <a href="https://resend.com/legal/privacy-policy">Resend</a> sends transactional emails (sign-up confirmation, password reset).</p>
 
     <h2>analytics</h2>
-    <p>We use Cloudflare Web Analytics to count page views and basic navigation. Cloudflare Web Analytics is privacy-preserving: it does not use cookies, does not fingerprint visitors, and does not track individuals across sites. See <a href="https://www.cloudflare.com/web-analytics/">Cloudflare's statement</a>.</p>
+    <p>We use Cloudflare Web Analytics, which is privacy-preserving: no cookies, no fingerprinting, no cross-site tracking. We see aggregate page-view counts, not individuals.</p>
 
     <h2>cookies and local storage</h2>
-    <p>We store a single flag in your browser's local storage (<code>cometojesus_entered</code>) so that returning visitors see a shorter welcome message instead of the full disclaimer every visit. We do not use cookies. Clearing your browser storage will remove the flag.</p>
+    <p>We do not use tracking cookies. We use your browser's local storage to remember a few small things: that you have visited before (so the welcome screen does not show every time), the ID of your current conversation (so refreshing the page returns you to where you left off), and your authentication session if you are signed in. Clearing your browser storage will sign you out and reset these.</p>
+
+    <h2>your data, your control</h2>
+    <p>You can delete your account at any time from settings. When you do, your conversations and stored memory are removed within 30 days. You can turn memory off at any time in settings, after which no new memory is collected and the assistant treats each conversation as fresh. You can request a copy of your data by emailing us.</p>
 
     <h2>children</h2>
-    <p>We do not knowingly collect information from children under 13. This service is not intended for use by anyone under 13. Users between 13 and 17 should only use this service with the knowledge and consent of a parent or legal guardian.</p>
+    <p>This service is not intended for anyone under 13. Users between 13 and 17 should only use this service with a parent or guardian's knowledge and consent. We do not knowingly collect information from children under 13.</p>
 
-    <h2>your rights</h2>
-    <p>Because we do not store your conversations or personal information, there is nothing to request, export, or delete. If you want to reset the returning-visitor flag, clear your browser's local storage for this site.</p>
+    <h2>security</h2>
+    <p>We use industry-standard security: HTTPS everywhere, hashed passwords (handled by Supabase Auth), Row Level Security policies on database tables to enforce that users can only read their own data, and Stripe's PCI-compliant payment processing. No system is perfect, but we take this seriously.</p>
 
-    <h2>third parties</h2>
-    <p>This service relies on: <a href="https://www.anthropic.com/legal/privacy">Anthropic</a> (AI responses), <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a> (bot protection, analytics, DNS), <a href="https://vercel.com/legal/privacy-policy">Vercel</a> (hosting), and <a href="https://github.com/privacy">GitHub</a> (source code). Each has its own privacy practices.</p>
+    <h2>international users</h2>
+    <p>Our infrastructure is hosted in the United States. By using the service, you consent to your data being processed in the US. We comply with applicable data protection laws including GDPR and CCPA where they apply.</p>
 
     <h2>changes</h2>
-    <p>This policy may be updated. Continued use of the service after changes constitutes acceptance.</p>
+    <p>This policy may be updated. Significant changes will be communicated to signed-in users via email when feasible. Continued use after changes constitutes acceptance.</p>
 
     <h2>contact</h2>
-    <p>Questions: <a href="mailto:ograbowski132@gmail.com">ograbowski132@gmail.com</a></p>
+    <p>Questions or data requests: <a href="mailto:ograbowski132@gmail.com">ograbowski132@gmail.com</a></p>
 
     <p class="small">See also the <a href="/terms.html">terms of use</a>.</p>
   </div>

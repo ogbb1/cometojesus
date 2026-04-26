@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 :root {
@@ -351,13 +352,13 @@ body::after {
 </head>
 
 <body>
-<a href="/" class="back-link">← back</a>
+<a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> back</a>
 
 <div class="page">
   <div class="scripture">"my sheep know my voice."</div>
   <div class="scripture-ref">John 10:27</div>
 
-  <h1 class="headline">come in.</h1>
+  <h1 class="headline">sign in</h1>
 
   <div class="card">
     <div id="message" class="message"></div>
@@ -373,9 +374,7 @@ body::after {
         Google
       </button>
       <button type="button" class="btn" id="emailToggleBtn">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 6l8 6 8-6M4 6v12h16V6M4 6h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <i class="fa-solid fa-envelope"></i>
         Email
       </button>
     </div>
@@ -401,7 +400,7 @@ body::after {
   </div>
 
   <div class="footer">
-    new here?&nbsp;&nbsp;<a href="/signup.html">come home</a>
+    new here?&nbsp;&nbsp;<a href="/login.html?mode=signup">sign up</a>
   </div>
 </div>
 
@@ -428,6 +427,15 @@ body::after {
       window.location.href = '/';
     }
   })();
+
+  // Detect signup mode from URL — adjust headline + button text accordingly
+  const urlParams = new URLSearchParams(window.location.search);
+  const isSignupMode = urlParams.get('mode') === 'signup';
+  if (isSignupMode) {
+    document.querySelector('.headline').textContent = 'sign up';
+    document.getElementById('signinBtn').textContent = 'create account';
+    document.querySelector('.footer').innerHTML = 'already here?&nbsp;&nbsp;<a href="/login.html">sign in</a>';
+  }
 
   const messageEl = document.getElementById('message');
   const googleBtn = document.getElementById('googleBtn');
@@ -476,32 +484,50 @@ body::after {
     e.preventDefault();
     hideMessage();
     signinBtn.disabled = true;
-    signinBtn.textContent = 'coming in...';
+    signinBtn.textContent = 'signing in...';
 
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      let data, error;
+      if (isSignupMode) {
+        ({ data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/auth/callback.html',
+          },
+        }));
+      } else {
+        ({ data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        }));
+      }
 
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           showError("that email and password don't match. try again?");
         } else if (error.message.includes('Email not confirmed')) {
           showError('check your email to confirm your account first.');
+        } else if (error.message.includes('already registered')) {
+          showError('an account with that email already exists. try signing in.');
         } else {
           showError(error.message);
         }
         signinBtn.disabled = false;
-        signinBtn.textContent = 'sign in';
+        signinBtn.textContent = isSignupMode ? 'create account' : 'sign in';
         return;
       }
 
-      if (data.session) {
-        showSuccess('come in.');
+      if (isSignupMode && !data.session) {
+        // Email confirmation required
+        showSuccess('check your email to confirm your account.');
+        signinBtn.disabled = false;
+        signinBtn.textContent = 'create account';
+      } else if (data.session) {
+        showSuccess("you're in.");
         setTimeout(() => {
           window.location.href = '/';
         }, 500);
@@ -509,7 +535,7 @@ body::after {
     } catch (err) {
       showError('something came between us. try again in a moment.');
       signinBtn.disabled = false;
-      signinBtn.textContent = 'sign in';
+      signinBtn.textContent = isSignupMode ? 'create account' : 'sign in';
     }
   });
 </script>
