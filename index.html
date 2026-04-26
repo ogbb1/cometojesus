@@ -1745,6 +1745,35 @@
       // their past conversations as soon as they hit the chat surface.
       // Guards in the loaders below prevent double-fires if polling also runs.
       if (currentUser) {
+        // Prefetch tier so the sidebar toggle and other paid-gated UI shows
+        // up immediately on page load instead of waiting for the first
+        // response from /api/chat to populate it. Three sources, in order:
+        //   1) Hardcoded bypass user → paid (matches backend BYPASS_USER_IDS)
+        //   2) Active subscription row in Supabase → paid
+        //   3) Otherwise → free (signed in but no active sub)
+        const BYPASS_UIDS = new Set(['150cd4bc-dcf9-4570-8d79-604eac447b60']);
+        if (BYPASS_UIDS.has(currentUser.id)) {
+          currentTier = 'paid';
+        } else {
+          try {
+            const { data: subRow } = await supabase
+              .from('subscriptions')
+              .select('status, current_period_end')
+              .eq('user_id', currentUser.id)
+              .in('status', ['active', 'trialing'])
+              .maybeSingle();
+            if (subRow && (!subRow.current_period_end || new Date(subRow.current_period_end) > new Date())) {
+              currentTier = 'paid';
+            } else {
+              currentTier = 'free';
+            }
+          } catch (e) {
+            // If the subscriptions read fails (RLS, network, etc.), fall back
+            // to 'free' for signed-in users — sidebar toggle still shows so
+            // they can see past convos, just no paid-gated features.
+            currentTier = 'free';
+          }
+        }
         try {
           if (typeof loadConversationList === 'function') loadConversationList();
           if (typeof loadMemorySetting === 'function') loadMemorySetting();
@@ -2976,7 +3005,10 @@
     // Show the sidebar toggle only for paid users
     function updateSidebarVisibility() {
       const tier = (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
-      if (tier === 'paid') {
+      // Sidebar toggle: shown to any signed-in user (paid OR free). Both
+      // have conversation histories worth accessing. Only anonymous users
+      // (no account) don't see the toggle, since they have no saved convos.
+      if (tier === 'paid' || tier === 'free') {
         sidebarToggleEl.classList.add('visible');
       } else {
         sidebarToggleEl.classList.remove('visible');
