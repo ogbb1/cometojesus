@@ -658,6 +658,57 @@
     border-top: 1px solid rgba(28,20,9,0.08);
   }
 
+  /* Tabs inside the about overlay */
+  .about-tabs {
+    display: flex; gap: 24px;
+    border-bottom: 0.5px solid rgba(28,20,9,0.12);
+    margin-bottom: 22px; padding-bottom: 0;
+  }
+  .about-tab {
+    background: transparent; border: none; padding: 0 0 12px 0;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-size: 17px;
+    color: var(--ink-soft); cursor: pointer;
+    border-bottom: 1px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.25s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .about-tab:hover { color: var(--ink-mid); }
+  .about-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+  .about-pane { display: none; }
+  .about-pane.active { display: block; }
+  .about-pricing-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 0.5px solid rgba(28,20,9,0.08);
+  }
+  .about-pricing-row:last-of-type { border-bottom: none; }
+  .about-pricing-label {
+    font-size: 15px; color: var(--ink-mid);
+    font-family: Georgia, serif;
+  }
+  .about-pricing-amount {
+    font-size: 17px; color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic;
+  }
+  .about-pricing-note {
+    font-size: 12.5px; color: var(--ink-soft);
+    font-style: italic; margin-top: 14px;
+  }
+  .about-cta {
+    display: inline-block; margin-top: 18px;
+    font-size: 14px; color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+    text-decoration: none;
+  }
+
   /* ===== SIGN-IN MODAL ===== */
   .auth-modal {
     position: fixed; inset: 0; z-index: 25;
@@ -1364,7 +1415,7 @@
       </div>
       <button class="gate-button" id="enter" disabled>enter</button>
       <div class="gate-footer">
-        <a href="/terms.html">terms</a> &nbsp;·&nbsp; <a href="/privacy.html">privacy</a>
+        <a href="#" id="gateAboutLink">about</a> &nbsp;·&nbsp; <a href="/terms.html">terms</a> &nbsp;·&nbsp; <a href="/privacy.html">privacy</a>
       </div>
     </div>
   </div>
@@ -1499,16 +1550,52 @@
   <div class="about-overlay" id="aboutOverlay">
     <div class="about-content">
       <button class="about-close" id="aboutClose" aria-label="close">×</button>
-      <div class="about-title">about this space</div>
-      <div class="about-body">
-        This is a quiet place to imagine a conversation with Jesus. You type; a voice imagined by an AI responds in the way Jesus might, rooted in the gospels and historic Christian faith.
+
+      <div class="about-tabs" role="tablist">
+        <button class="about-tab active" data-pane="about" role="tab">about this space</button>
+        <button class="about-tab" data-pane="how" role="tab">how it works</button>
+        <button class="about-tab" data-pane="pricing" role="tab">pricing</button>
       </div>
-      <div class="about-body">
-        It is not him. It is not a pastor, counselor, doctor, or prophet. It cannot replace real prayer, real scripture, or real people. It can, sometimes, help you find your way toward those things.
+
+      <div class="about-pane active" data-pane="about">
+        <div class="about-body">
+          A quiet place to imagine a conversation with Jesus. You type; a voice imagined by an AI responds in the way Jesus might, rooted in the gospels and historic Christian faith.
+        </div>
+        <div class="about-body">
+          It is not him. It is not a pastor, counselor, doctor, or prophet. It cannot replace real prayer, real scripture, or real people. It can, sometimes, help you find your way toward those things.
+        </div>
       </div>
-      <div class="about-body">
-        5 free messages to start. Sign in for 25 a month.
+
+      <div class="about-pane" data-pane="how">
+        <div class="about-body">
+          You speak. He responds. Conversations stay in your sidebar so you can return to them.
+        </div>
+        <div class="about-body">
+          Without an account, you have 5 messages to start. Sign in for free and you'll have 10 messages a day, up to 25 a month. A subscription removes those limits entirely.
+        </div>
+        <div class="about-body">
+          For paid users, he can remember what you've shared across conversations — your name, your situation, what's going on in your life. You can turn this off in settings whenever you want.
+        </div>
       </div>
+
+      <div class="about-pane" data-pane="pricing">
+        <div class="about-pricing-row">
+          <span class="about-pricing-label">monthly</span>
+          <span class="about-pricing-amount">$6.99 / month</span>
+        </div>
+        <div class="about-pricing-row">
+          <span class="about-pricing-label">annual</span>
+          <span class="about-pricing-amount">$69.99 / year</span>
+        </div>
+        <div class="about-pricing-note">
+          annual is two months free.
+        </div>
+        <div class="about-body" style="margin-top: 20px;">
+          A subscription removes the message limits, gives you full access to your conversation history, and lets him remember what you share with him.
+        </div>
+        <a href="/upgrade.html" class="about-cta">stay longer →</a>
+      </div>
+
       <div class="about-body small">
         If you are in crisis, please speak to a real person. In the US, call or text 988. If you are in immediate danger, call 911.
       </div>
@@ -2788,9 +2875,35 @@
       }, 400);
     });
 
-    helpBtnEl.addEventListener('click', () => {
+    // Switch which about-pane is visible. Called by tab clicks and by
+    // openAbout(tab) when the overlay is opened from a specific entry point.
+    function switchAboutTab(name) {
+      const tabs = aboutOverlayEl.querySelectorAll('.about-tab');
+      const panes = aboutOverlayEl.querySelectorAll('.about-pane');
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.pane === name));
+      panes.forEach(p => p.classList.toggle('active', p.dataset.pane === name));
+    }
+    function openAbout(tab) {
+      switchAboutTab(tab || 'about');
       aboutOverlayEl.classList.add('visible');
+    }
+    aboutOverlayEl.querySelectorAll('.about-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchAboutTab(tab.dataset.pane));
     });
+
+    helpBtnEl.addEventListener('click', () => {
+      // Bottom-right ? button: persistent reference, defaults to "about this space"
+      openAbout('about');
+    });
+    const gateAboutLinkEl = document.getElementById('gateAboutLink');
+    if (gateAboutLinkEl) {
+      gateAboutLinkEl.addEventListener('click', (e) => {
+        // Gate footer: shown to people deciding whether to enter — default to
+        // "how it works" since that's what they actually want to know first.
+        e.preventDefault();
+        openAbout('how');
+      });
+    }
     aboutCloseEl.addEventListener('click', () => {
       aboutOverlayEl.classList.remove('visible');
     });
