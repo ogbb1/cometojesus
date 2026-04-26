@@ -111,11 +111,11 @@ async function upsertSubscription({ userId, subscription }) {
     updated_at: new Date().toISOString(),
   };
 
-  // Use stripe_subscription_id as the unique key for upsert.
-  // If a row exists for this Stripe subscription, update it; otherwise insert.
+  // Use user_id as conflict key — schema enforces one subscription row per user.
+  // Whether new or updating, we write the latest Stripe state to the same row.
   const { error } = await supabaseAdmin
     .from('subscriptions')
-    .upsert(row, { onConflict: 'stripe_subscription_id' });
+    .upsert(row, { onConflict: 'user_id' });
 
   if (error) {
     console.error('upsertSubscription error:', error);

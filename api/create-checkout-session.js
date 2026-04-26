@@ -104,7 +104,7 @@ async function getOrCreateStripeCustomer(userId, email) {
         status: 'inactive',
         updated_at: new Date().toISOString(),
       },
-      { onConflict: 'stripe_customer_id' }
+      { onConflict: 'user_id' }
     );
 
   return customer.id;
