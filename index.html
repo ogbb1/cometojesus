@@ -2148,9 +2148,12 @@
       } catch (e) {}
       history.length = 0;
       messagesEl.innerHTML = '';
-      // Only show opening if we're in a signed-in state with memory,
-      // otherwise let the user type first (matches existing behavior)
       updateSendState();
+      // Jesus always speaks first on a fresh conversation. Brief delay
+      // so the clear-state animation settles before the new message arrives.
+      setTimeout(() => {
+        showOpeningFromHim();
+      }, 300);
     }
 
     // Build an ISO timestamp with timezone offset for the backend
@@ -2250,6 +2253,31 @@
       "hey {name}. how's your heart today?"
     ];
 
+    // Openings shown when the user re-enters an EXISTING conversation
+    // (refresh, sidebar click, auto-restore on load). Slightly different
+    // tone from the fresh openings — "still here" / "back so soon" energy,
+    // because the user has already been in this thread.
+    const OPENINGS_REENTRY = [
+      "still here.",
+      "shalom again.",
+      "good to see you.",
+      "back so soon?",
+      "you came back.",
+      "hey, you.",
+      "there you are.",
+      "we were in the middle of something."
+    ];
+    const OPENINGS_REENTRY_KNOWN = [
+      "still here, {name}.",
+      "shalom, {name}.",
+      "{name}. good to see you.",
+      "{name}. you're back.",
+      "hey, {name}.",
+      "there you are, {name}.",
+      "{name}. we were in the middle of something.",
+      "back so soon, {name}?"
+    ];
+
     try {
       if (localStorage.getItem('cometojesus_entered') === '1') {
         firstTimeEl.style.display = 'none';
@@ -2307,6 +2335,23 @@
       return OPENINGS_FIRST_TIME[Math.floor(Math.random() * OPENINGS_FIRST_TIME.length)];
     }
 
+    // Pick a re-entry greeting for resuming an existing conversation. Uses
+    // named templates if we know the user's first name and memory is on,
+    // otherwise falls back to the generic re-entry pool.
+    function pickReEntryGreeting() {
+      const tier = (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
+      const user = window.__getCurrentUser && window.__getCurrentUser();
+      if (tier === 'paid' && user) {
+        const name = extractOpeningName(user);
+        const memOn = typeof memoryEnabled === 'undefined' ? true : memoryEnabled;
+        if (memOn && name) {
+          const template = OPENINGS_REENTRY_KNOWN[Math.floor(Math.random() * OPENINGS_REENTRY_KNOWN.length)];
+          return template.replace(/\{name\}/g, name);
+        }
+      }
+      return OPENINGS_REENTRY[Math.floor(Math.random() * OPENINGS_REENTRY.length)];
+    }
+
     function extractOpeningName(user) {
       if (!user) return null;
       const meta = user.user_metadata || {};
@@ -2332,6 +2377,21 @@
         setState('speaking');
         renderConsideredReply(div, opening, () => setState(null));
       }, 900);
+    }
+
+    // Show a re-entry greeting after restoring an existing conversation.
+    // Different from a fresh opening — the user already has a thread; this
+    // is Jesus acknowledging they're back so they don't land on silence.
+    // Pushes to history so the model has a natural conversational flow.
+    function showReEntryGreeting() {
+      const greeting = pickReEntryGreeting();
+      const div = addMessage('him', '');
+      history.push({ role: 'assistant', content: greeting });
+      setState('thinking');
+      setTimeout(() => {
+        setState('speaking');
+        renderConsideredReply(div, greeting, () => setState(null));
+      }, 600);
     }
 
     function updateCounter(remaining, tier) {
@@ -2929,6 +2989,11 @@
         scrollToLatest();
         renderSidebarList(); // refresh active state
         closeSidebar();
+        // Jesus always speaks last on entry. After messages render, fire
+        // a re-entry greeting acknowledging the user is back.
+        setTimeout(() => {
+          showReEntryGreeting();
+        }, 400);
       } catch (err) {
         console.warn('loadConversation exception:', err);
       }
@@ -3230,10 +3295,19 @@
           const savedConvoId = localStorage.getItem('cometojesus_current_convo');
           if (savedConvoId && hasEntered && messagesEl.children.length === 0) {
             loadConversation(savedConvoId);
+          } else if (hasEntered && messagesEl.children.length === 0) {
+            // Signed-in returning user, no saved convo — fire fresh opening
+            // so they don't land on silence.
+            showOpeningFromHim();
           }
         } catch (e) { /* no-op */ }
       } else if (_memoryInitAttempts > 20) {
         clearInterval(_memoryInitInterval);
+        // Auth never settled — anonymous returning user who skipped the gate.
+        // Fire fresh opening so Jesus is always speaking on entry.
+        if (hasEntered && messagesEl.children.length === 0) {
+          showOpeningFromHim();
+        }
       }
     }, 300);
   </script>
