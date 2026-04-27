@@ -114,21 +114,21 @@
       window.location.replace('/reset-password.html' + window.location.hash);
     } else if (type === 'email_change') {
       titleEl.textContent = 'email updated.';
-      subtitleEl.textContent = 'taking you home...';
-      setTimeout(() => window.location.replace('/'), 1500);
+      subtitleEl.textContent = 'taking you back...';
+      setTimeout(() => window.location.replace('/chat.html'), 1500);
     } else {
       supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session) {
           titleEl.textContent = "you're in.";
-          subtitleEl.textContent = 'taking you home...';
-          setTimeout(() => window.location.replace('/'), 800);
+          subtitleEl.textContent = 'taking you in...';
+          setTimeout(() => window.location.replace('/chat.html'), 800);
         }
       });
 
       setTimeout(async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          window.location.replace('/');
+          window.location.replace('/chat.html');
         } else {
           showError("couldn't complete sign-in.", 'try opening cometojesus.co directly.');
         }

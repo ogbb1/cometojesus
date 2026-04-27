@@ -401,8 +401,8 @@
 <body>
 
 <nav class="nav">
-  <a href="/home.html" class="nav-brand">come to jesus.</a>
-  <a href="/" class="nav-back"><i class="fa-solid fa-arrow-left"></i>back to chat</a>
+  <a href="/" class="nav-brand">come to jesus.</a>
+  <a href="#" class="nav-back" onclick="if(document.referrer&&document.referrer.includes(location.host)){history.back();return false;}else{location.href='/chat.html';return false;}"><i class="fa-solid fa-arrow-left"></i>back to chat</a>
 </nav>
 
 <header class="hero">
@@ -504,8 +504,8 @@
 <footer>
   <p class="footer-crisis">if you are in crisis, please speak to a real person. in the US, call or text 988.</p>
   <div class="footer-links">
-    <a href="/">enter</a>
-    <a href="/home.html">home</a>
+    <a href="/chat.html">enter</a>
+    <a href="/">home</a>
     <a href="/terms.html">terms</a>
     <a href="/privacy.html">privacy</a>
   </div>

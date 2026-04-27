@@ -312,8 +312,8 @@
 <body>
 
 <nav class="nav">
-  <a href="/home.html" class="nav-brand">come to jesus.</a>
-  <a href="/" class="nav-back"><i class="fa-solid fa-arrow-left"></i>back</a>
+  <a href="/" class="nav-brand">come to jesus.</a>
+  <a href="#" class="nav-back" onclick="if(document.referrer&&document.referrer.includes(location.host)){history.back();return false;}else{location.href='/chat.html';return false;}"><i class="fa-solid fa-arrow-left"></i>back</a>
 </nav>
 
 <div class="layout">
@@ -383,12 +383,12 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
   });
 
-  // Already signed in -> bounce to home (or whatever redirect was requested)
+  // Already signed in -> bounce to chat (or whatever redirect was requested)
   (async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       const params = new URLSearchParams(window.location.search);
-      const redirect = params.get('redirect') || '/';
+      const redirect = params.get('redirect') || '/chat.html';
       window.location.href = redirect;
     }
   })();
@@ -493,7 +493,7 @@
         showSuccess("you're in.");
         setTimeout(() => {
           const params = new URLSearchParams(window.location.search);
-          const redirect = params.get('redirect') || '/';
+          const redirect = params.get('redirect') || '/chat.html';
           window.location.href = redirect;
         }, 500);
       }
