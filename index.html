@@ -287,23 +287,39 @@
     position: relative;
     padding: 110px 32px;
     overflow: hidden;
+    isolation: isolate;
   }
-  /* Same warm light treatment as hero, but positioned slightly differently
-     to feel like a sibling moment, not a copy. Light sits behind the frame. */
+  /* Jerusalem photograph as full-bleed pricing-section background. Cropped to
+     show the city + sun area. Bottom fades to cream so the image dissolves
+     into the surrounding page rather than ending in a hard edge. Same
+     treatment language as the hero rolling hills, applied to a sibling moment. */
   .pricing-section::before {
     content: '';
     position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 720px; height: 380px;
-    background:
-      radial-gradient(ellipse at 50% 0%,
-        rgba(255, 245, 220, 0.7) 0%,
-        rgba(255, 245, 220, 0.18) 36%,
-        rgba(255, 245, 220, 0) 60%);
+    inset: 0;
+    background-image: url('/jerusalem.png');
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+    opacity: 0.85;
+    z-index: -2;
     pointer-events: none;
-    z-index: 0;
-    filter: blur(2px);
+  }
+  /* Soft cream gradient fade. Sky/sun visible at top, pricing card sits on
+     cream below. Bottom fades fully to background. */
+  .pricing-section::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom,
+        rgba(244, 234, 219, 0) 0%,
+        rgba(244, 234, 219, 0.25) 25%,
+        rgba(244, 234, 219, 0.7) 50%,
+        rgba(244, 234, 219, 0.92) 80%,
+        var(--bg) 100%);
+    z-index: -1;
+    pointer-events: none;
   }
   .pricing-section > * { position: relative; z-index: 1; }
   .pricing-frame {
@@ -645,12 +661,12 @@
       <div class="pricing-grid">
         <div class="pricing-tier">
           <div class="pricing-tier-name">monthly</div>
-          <div class="pricing-tier-amount">$6.99<span class="pricing-tier-amount-suffix">/ month</span></div>
+          <div class="pricing-tier-amount">$9.99<span class="pricing-tier-amount-suffix">/ month</span></div>
           <div class="pricing-tier-note">cancel anytime.</div>
         </div>
         <div class="pricing-tier">
           <div class="pricing-tier-name">annual</div>
-          <div class="pricing-tier-amount">$69.99<span class="pricing-tier-amount-suffix">/ year</span></div>
+          <div class="pricing-tier-amount">$99.99<span class="pricing-tier-amount-suffix">/ year</span></div>
           <div class="pricing-tier-note">two months free.</div>
         </div>
       </div>
