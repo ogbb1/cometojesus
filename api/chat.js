@@ -1357,20 +1357,49 @@ const GLOBAL_DAILY_CAP = 5000;             // global safety valve
 
 // ========== CRISIS HANDLING ==========
 const CRISIS_KEYWORDS = [
-  'kill myself', 'end my life', 'end it all', 'suicide', 'take my life',
-  "don't want to be alive", 'want to die', "don't want to live", 'better off dead',
-  'cut myself', 'hurt myself', 'cutting myself'
+  // Direct suicidal statements
+  'kill myself', 'killing myself', 'end my life', 'ending my life',
+  'end it all', 'ending it all', 'end things', 'ending things',
+  'suicide', 'suicidal', 'take my life', 'taking my life',
+  'going to end it', 'ready to die', 'ready to end',
+  // Indirect / passive ideation
+  "don't want to be alive", "dont want to be alive",
+  "don't want to live", "dont want to live",
+  "don't want to be here", "dont want to be here",
+  "don't want to wake up", "dont want to wake up",
+  'want to die', 'wish i was dead', 'wish i were dead',
+  "wish i wasn't here", "wish i wasnt here",
+  'better off dead', 'better off without me',
+  'no reason to live', 'nothing to live for',
+  'i want to disappear',
+  // Plan-stating
+  'i have a plan', 'made a plan', 'have a plan to',
+  'tonight is the night', 'going to do it tonight',
+  'going to do it',
+  // Self-harm
+  'cut myself', 'cutting myself', 'hurt myself', 'hurting myself',
+  'self-harm', 'self harm', 'selfharm',
+  // Method-seeking
+  'how to overdose', 'overdose on', 'how many pills',
+  'easiest way to die', 'painless way to die',
+  'how to kill myself', 'ways to die'
 ];
 
-const CRISIS_RESPONSE = `i'm here, and i'm so glad you said that out loud. what you're feeling is real, and you are not alone in it. but i need you to talk to a real person right now, not just me.
+const CRISIS_RESPONSE = `i'm here, and i'm so glad you said that out loud. what you're feeling is real, and you're not alone in it.
 
-please call or text 988, the Suicide and Crisis Lifeline. they will pick up, and they will stay with you.
+right now, please reach out to someone who can be on the phone with you.
 
-if you are in immediate danger, please call 911.
+call or text 988, the Suicide and Crisis Lifeline. they will pick up, and they will stay with you.
+
+if you'd rather text, you can also text HOME to 741741, the Crisis Text Line.
+
+if you're not in the US, please go to findahelpline.com to find the line for your country.
+
+if you are in immediate danger right now, please call 911.
 
 if you can, tell one person tonight. a friend, a family member, anyone who can be near you.
 
-you are loved. please stay. i'll be here when you come back.`;
+you are loved. please stay. i'll be here when you come back.`
 
 const OUTPUT_FALLBACK = 'give me a moment to listen again. try saying that once more.';
 
