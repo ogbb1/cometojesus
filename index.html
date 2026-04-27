@@ -69,6 +69,25 @@
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
+    isolation: isolate;
+  }
+
+  /* Rolling hills as a barely-there ambient texture. Fixed to the viewport,
+     very low opacity so it reads as warmth rather than imagery. Negative
+     z-index keeps it under everything else without needing to touch any
+     other stacking. The body has isolation: isolate so this only stacks
+     within body, not behind html. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url('/rolling_hills.png');
+    background-size: cover;
+    background-position: center 40%;
+    background-repeat: no-repeat;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: -1;
   }
 
   /* ===== LIGHT / SUN =====
