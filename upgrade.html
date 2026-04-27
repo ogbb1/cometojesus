@@ -24,8 +24,10 @@
     --bg-soft: #f8f1e3;
     --ink: #1c1409;
     --ink-mid: #2d241a;
-    --ink-soft: #605242;
+    --ink-soft: #5a4530;
     --ink-whisper: #9a8c76;
+    --accent: #7a5a30;
+    --accent-soft: #9e7944;
     --rule: rgba(28, 20, 9, 0.12);
     --rule-soft: rgba(28, 20, 9, 0.06);
     --error: #b8412e;
@@ -88,15 +90,15 @@
   .hero-eyebrow {
     font-family: Georgia, serif;
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
-    color: var(--ink-soft); opacity: 0.72;
+    color: var(--accent); opacity: 0.85;
     margin-bottom: 32px;
   }
   .hero-headline {
     font-family: var(--font-display);
-    font-size: 84px; font-weight: 500; font-style: italic;
-    font-variation-settings: "opsz" 144;
-    line-height: 0.95; color: var(--ink);
-    letter-spacing: -0.025em;
+    font-size: 76px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 96;
+    line-height: 1.0; color: var(--ink);
+    letter-spacing: -0.018em;
     margin-bottom: 24px;
   }
   .hero-sub {
@@ -110,15 +112,15 @@
   .section-eyebrow {
     font-family: Georgia, serif;
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
-    color: var(--ink-soft); opacity: 0.78;
+    color: var(--accent); opacity: 0.85;
     text-align: center; margin-bottom: 22px;
   }
   .section-title {
     font-family: var(--font-display);
-    font-size: 44px; font-weight: 500; font-style: italic;
-    font-variation-settings: "opsz" 96;
+    font-size: 40px; font-weight: 500; font-style: italic;
+    font-variation-settings: "opsz" 72;
     color: var(--ink); text-align: center;
-    line-height: 1.15; letter-spacing: -0.012em;
+    line-height: 1.18; letter-spacing: -0.008em;
     max-width: 680px; margin: 0 auto 48px;
   }
   .section-rule {
@@ -161,7 +163,7 @@
   .tier-name {
     font-family: Georgia, serif;
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.22em;
-    color: var(--ink-soft);
+    color: var(--accent);
     margin-bottom: 18px;
   }
   .tier-amount {
@@ -304,7 +306,7 @@
     background: var(--bg);
     border: 1px solid var(--rule);
     display: inline-flex; align-items: center; justify-content: center;
-    color: var(--ink); margin-bottom: 18px;
+    color: var(--accent); margin-bottom: 18px;
   }
   .change-card-icon i { font-size: 14px; }
   .change-card-title {
@@ -354,7 +356,7 @@
     font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--ink-soft);
   }
-  .trust-item i { font-size: 12px; color: var(--ink); }
+  .trust-item i { font-size: 12px; color: var(--accent); }
 
   footer {
     text-align: center;
