@@ -141,30 +141,46 @@ async function generatePoeticTitle(messages) {
     .map(m => `${m.role === 'user' ? 'User' : 'Jesus'}: ${m.content}`)
     .join('\n');
 
-  const systemPrompt = `You are titling a conversation for a sidebar in a reverent product called cometojesus.co.
+  const systemPrompt = `You are titling a conversation for the user's sidebar so they can find it again later. Produce a SHORT title (3-7 words) that actually summarizes what the conversation was about.
 
-Produce a SHORT POETIC title (3-7 words) that captures the essence of the conversation without being clinical. The product's aesthetic is lowercase Cormorant italic — tender, slightly literary, warm but honest. Think chapter titles in a memoir, not news headlines.
+Specificity over poetry. The user has many conversations and needs to scan and recognize each one quickly. Vague memoir-chapter titles like "a quiet hello" or "wrestling with the question" are wrong, they all blur together. Name the subject, the situation, or the move. Warm in tone, not clinical, but concrete.
 
-Examples of the right register:
-- "the coming baby"
-- "a question of doubt"
-- "the night of the confession"
-- "what he couldn't tell his wife"
-- "her mother, still in the hospital"
+Style:
+- All lowercase
+- 3-7 words
+- No quotation marks, no periods at the end
+- Concrete: name the actual topic or situation
+- Warm but specific. Not melodramatic, not abstract.
+
+GOOD titles (specific, you can tell at a glance what each is):
+- "anxiety about the baby coming"
+- "doubt about hell"
+- "confessing the affair"
+- "porn relapse, frustrated"
+- "missing dad, six months"
+- "questions about prayer"
+- "marriage tension after fight"
+- "just hi, checking in"
+- "asking about heaven"
+- "rectal exam joke at night"
+- "kid's report card celebration"
+- "first time, just saying hi"
+- "just bored, hanging out"
+- "fear about cancer scan"
+- "sobriety, day 87 relapse"
+
+BAD titles (too vague, all sound the same):
 - "a quiet hello"
-- "the empty chair"
-- "wrestling with suffering"
-- "just checking in"
-- "the weight of a secret"
+- "the weight of a thing"
+- "something carried"
+- "wrestling with the question"
+- "a question of doubt"
+- "the heavy thing"
 
 Rules:
-- All lowercase
-- No quotation marks, no periods at the end
-- 3-7 words
-- Evocative but not melodramatic
-- Don't use the user's name even if you know it
-- Don't reveal the worst specifics crudely (e.g. for an abortion conversation, "a heavy thing carried" is better than "the abortion")
-- For light/casual conversations, use light/casual titles ("a quiet hello", "just saying hi")
+- For sensitive topics (abortion, affair, abuse, suicidal ideation), name the topic factually but never crudely. "carrying the abortion" or "the abortion, three years on" is fine. "thinking about ending it" is fine for SI. Don't sanitize so much that the user can't find the conversation again, but don't be tabloid either.
+- Don't use the user's name even if you know it.
+- For casual / playful / one-line conversations, the title can be casual too. "just saying hi tonight" is OK. "playing around with jokes" is OK. The point is still recognition.
 
 Output ONLY the title. No preamble, no quotes, no explanation.`;
 
