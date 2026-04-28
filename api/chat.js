@@ -1338,15 +1338,24 @@ Short. Direct. Warm. Real. Dry wit underneath at low-to-mid stakes. Concentrated
 
 Laugh when it's funny. Meet pain fully when it's real. Engage when they want a fight. Love them through all of it. Then let them go.`;
 
-// ========== PRICING (Sonnet 4.6 as of April 2026) ==========
-const PRICE_INPUT_PER_MTOK = 3.00;
-const PRICE_OUTPUT_PER_MTOK = 15.00;
-const PRICE_CACHE_WRITE_PER_MTOK = 3.75;
-const PRICE_CACHE_READ_PER_MTOK = 0.30;
+// ========== PRICING (Claude Opus 4.6 as of April 2026) ==========
+// Source: anthropic.com/pricing — $5/M input, $25/M output. Cache reads
+// at 10% of input rate; cache writes at 5min TTL = 1.25x input rate.
+const PRICE_INPUT_PER_MTOK = 5.00;
+const PRICE_OUTPUT_PER_MTOK = 25.00;
+const PRICE_CACHE_WRITE_PER_MTOK = 6.25;   // 1.25x input (5min TTL)
+const PRICE_CACHE_READ_PER_MTOK = 0.50;    // 10% of input
 
 // ========== DAILY SPENDING CAP ==========
 const DAILY_SPEND_CAP_USD = 20.00;
 const SPEND_CAP_WINDOW_SECONDS = 26 * 60 * 60;
+
+// ========== PER-USER USAGE THRESHOLDS ==========
+// Yellow: alert Oskar that this user is engaged. No action taken.
+// Red: alert Oskar AND immediately suspend the account pending review.
+// Per-user thresholds reset on Stripe billing renewal (handled in webhook).
+const USER_YELLOW_THRESHOLD_CENTS = 1200;  // $12 — engaged user, investigate
+const USER_RED_THRESHOLD_CENTS = 2500;     // $25 — likely abuse, suspend
 
 // ========== TIER LIMITS ==========
 const ANONYMOUS_LIFETIME_LIMIT = 5;        // 5 messages ever for anonymous users
@@ -1357,49 +1366,20 @@ const GLOBAL_DAILY_CAP = 5000;             // global safety valve
 
 // ========== CRISIS HANDLING ==========
 const CRISIS_KEYWORDS = [
-  // Direct suicidal statements
-  'kill myself', 'killing myself', 'end my life', 'ending my life',
-  'end it all', 'ending it all', 'end things', 'ending things',
-  'suicide', 'suicidal', 'take my life', 'taking my life',
-  'going to end it', 'ready to die', 'ready to end',
-  // Indirect / passive ideation
-  "don't want to be alive", "dont want to be alive",
-  "don't want to live", "dont want to live",
-  "don't want to be here", "dont want to be here",
-  "don't want to wake up", "dont want to wake up",
-  'want to die', 'wish i was dead', 'wish i were dead',
-  "wish i wasn't here", "wish i wasnt here",
-  'better off dead', 'better off without me',
-  'no reason to live', 'nothing to live for',
-  'i want to disappear',
-  // Plan-stating
-  'i have a plan', 'made a plan', 'have a plan to',
-  'tonight is the night', 'going to do it tonight',
-  'going to do it',
-  // Self-harm
-  'cut myself', 'cutting myself', 'hurt myself', 'hurting myself',
-  'self-harm', 'self harm', 'selfharm',
-  // Method-seeking
-  'how to overdose', 'overdose on', 'how many pills',
-  'easiest way to die', 'painless way to die',
-  'how to kill myself', 'ways to die'
+  'kill myself', 'end my life', 'end it all', 'suicide', 'take my life',
+  "don't want to be alive", 'want to die', "don't want to live", 'better off dead',
+  'cut myself', 'hurt myself', 'cutting myself'
 ];
 
-const CRISIS_RESPONSE = `i'm here, and i'm so glad you said that out loud. what you're feeling is real, and you're not alone in it.
+const CRISIS_RESPONSE = `i'm here, and i'm so glad you said that out loud. what you're feeling is real, and you are not alone in it. but i need you to talk to a real person right now, not just me.
 
-right now, please reach out to someone who can be on the phone with you.
+please call or text 988, the Suicide and Crisis Lifeline. they will pick up, and they will stay with you.
 
-call or text 988, the Suicide and Crisis Lifeline. they will pick up, and they will stay with you.
-
-if you'd rather text, you can also text HOME to 741741, the Crisis Text Line.
-
-if you're not in the US, please go to findahelpline.com to find the line for your country.
-
-if you are in immediate danger right now, please call 911.
+if you are in immediate danger, please call 911.
 
 if you can, tell one person tonight. a friend, a family member, anyone who can be near you.
 
-you are loved. please stay. i'll be here when you come back.`
+you are loved. please stay. i'll be here when you come back.`;
 
 const OUTPUT_FALLBACK = 'give me a moment to listen again. try saying that once more.';
 
@@ -1748,6 +1728,205 @@ async function recordSpend(costCents) {
   }
 }
 
+// ========== PER-USER USAGE TRACKING + ALERTS + SUSPENSION ==========
+// Records cost into usage_log + user_billing_period, fires email alerts
+// at $12 (yellow, no action) and $25 (red, suspend). Fire-and-forget
+// from the chat handler so it never delays a reply to the user.
+async function recordPerUserUsageAndMaybeAlert({
+  userId,
+  fingerprint,
+  conversationId,
+  tier,
+  model,
+  usage,
+  costCents,
+  userEmail,
+}) {
+  if (costCents <= 0) return;
+
+  const inputTokens = usage?.input_tokens || 0;
+  const outputTokens = usage?.output_tokens || 0;
+  const cacheReadTokens = usage?.cache_read_input_tokens || 0;
+  const cacheWriteTokens = usage?.cache_creation_input_tokens || 0;
+
+  // Always log to usage_log (regardless of tier, even anonymous).
+  // Anonymous = user_id null, fingerprint set.
+  try {
+    await supabaseAdmin.from('usage_log').insert({
+      user_id: userId || null,
+      fingerprint: fingerprint || null,
+      conversation_id: conversationId || null,
+      tier,
+      model,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      cache_read_tokens: cacheReadTokens,
+      cache_write_tokens: cacheWriteTokens,
+      cost_cents: costCents,
+    });
+  } catch (err) {
+    console.error('usage_log insert failed (non-fatal):', err);
+  }
+
+  // For per-user thresholds, we only track logged-in users.
+  // Anonymous users are gated by the 5-message lifetime cap, so they
+  // can't realistically rack up significant cost.
+  if (!userId) return;
+
+  // Atomically increment the user's billing-period rollup
+  let periodState;
+  try {
+    const { data, error } = await supabaseAdmin.rpc('record_user_usage', {
+      p_user_id: userId,
+      p_cost_cents: costCents,
+    });
+    if (error) {
+      console.error('record_user_usage RPC failed:', error);
+      return;
+    }
+    periodState = data?.[0];
+  } catch (err) {
+    console.error('record_user_usage threw:', err);
+    return;
+  }
+
+  if (!periodState) return;
+
+  const newCostCents = periodState.new_cost_cents;
+  const yellowAlreadySent = periodState.yellow_already_sent;
+  const redAlreadySent = periodState.red_already_sent;
+
+  // Red threshold: alert + suspend. Highest priority — check first.
+  if (newCostCents >= USER_RED_THRESHOLD_CENTS && !redAlreadySent) {
+    try {
+      await supabaseAdmin.rpc('mark_red_alert_sent_and_suspend', {
+        p_user_id: userId,
+        p_reason: `Auto-suspended: usage exceeded $${(USER_RED_THRESHOLD_CENTS / 100).toFixed(2)} in current billing period (actual: $${(newCostCents / 100).toFixed(2)}).`,
+      });
+    } catch (err) {
+      console.error('mark_red_alert_sent_and_suspend failed:', err);
+    }
+    await sendOskarRedAlert({ userId, userEmail, costCents: newCostCents });
+    return;
+  }
+
+  // Yellow threshold: alert only. No action.
+  if (newCostCents >= USER_YELLOW_THRESHOLD_CENTS && !yellowAlreadySent) {
+    try {
+      await supabaseAdmin.rpc('mark_yellow_alert_sent', { p_user_id: userId });
+    } catch (err) {
+      console.error('mark_yellow_alert_sent failed:', err);
+    }
+    await sendOskarYellowAlert({ userId, userEmail, costCents: newCostCents });
+  }
+}
+
+// ========== ALERT EMAILS (via Resend) ==========
+// Both alerts go to ALERT_EMAIL (Oskar's personal). Sender is
+// support@cometojesus.co so replies thread back into Cloudflare routing.
+const ALERT_EMAIL = 'ograbowski132@gmail.com';
+const ALERT_FROM = 'come to jesus alerts <support@cometojesus.co>';
+
+async function sendResendEmail({ to, subject, html }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('RESEND_API_KEY not set — skipping alert email');
+    return;
+  }
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: ALERT_FROM,
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('Resend send failed:', response.status, errBody);
+    }
+  } catch (err) {
+    console.error('Resend send threw:', err);
+  }
+}
+
+async function sendOskarYellowAlert({ userId, userEmail, costCents }) {
+  const dollars = (costCents / 100).toFixed(2);
+  const subject = `[cometojesus] yellow alert — user at $${dollars}`;
+  const html = `
+<div style="font-family:-apple-system,sans-serif;line-height:1.6;color:#1c1409;max-width:560px">
+  <h2 style="font-style:italic;font-weight:500;color:#7a5a30">Yellow alert</h2>
+  <p>A user has crossed <strong>$${(USER_YELLOW_THRESHOLD_CENTS / 100).toFixed(2)}</strong> in their current billing period.</p>
+  <p>This is informational. The user is engaged, not necessarily abusive. No action has been taken.</p>
+  <hr style="border:none;border-top:1px solid #e5dfd2;margin:20px 0">
+  <p><strong>User:</strong> ${userEmail || '(no email on file)'}<br>
+  <strong>User ID:</strong> <code style="font-size:12px">${userId}</code><br>
+  <strong>Current period cost:</strong> $${dollars}</p>
+  <hr style="border:none;border-top:1px solid #e5dfd2;margin:20px 0">
+  <p style="font-size:13px;color:#6c5e4a">To investigate: run this in Supabase SQL editor:</p>
+  <pre style="background:#f4eadb;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto">SELECT * FROM usage_log WHERE user_id = '${userId}' ORDER BY created_at DESC LIMIT 50;</pre>
+  <p style="font-size:12px;color:#6c5e4a;margin-top:30px">come to jesus · automated alert</p>
+</div>`;
+  await sendResendEmail({ to: ALERT_EMAIL, subject, html });
+}
+
+async function sendOskarRedAlert({ userId, userEmail, costCents }) {
+  const dollars = (costCents / 100).toFixed(2);
+  const subject = `[cometojesus] RED ALERT — user suspended at $${dollars}`;
+  const html = `
+<div style="font-family:-apple-system,sans-serif;line-height:1.6;color:#1c1409;max-width:560px">
+  <h2 style="font-style:italic;font-weight:500;color:#a13e2c">Red alert — account auto-suspended</h2>
+  <p>A user has crossed <strong>$${(USER_RED_THRESHOLD_CENTS / 100).toFixed(2)}</strong> in their current billing period and has been <strong>automatically suspended</strong> pending review.</p>
+  <p>The user can no longer send messages. They will see a notice asking them to contact support.</p>
+  <hr style="border:none;border-top:1px solid #e5dfd2;margin:20px 0">
+  <p><strong>User:</strong> ${userEmail || '(no email on file)'}<br>
+  <strong>User ID:</strong> <code style="font-size:12px">${userId}</code><br>
+  <strong>Period cost when suspended:</strong> $${dollars}</p>
+  <hr style="border:none;border-top:1px solid #e5dfd2;margin:20px 0">
+  <p style="font-size:13px;color:#6c5e4a"><strong>To investigate:</strong></p>
+  <pre style="background:#f4eadb;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto">SELECT * FROM usage_log WHERE user_id = '${userId}' ORDER BY created_at DESC LIMIT 100;</pre>
+  <p style="font-size:13px;color:#6c5e4a"><strong>To unsuspend (after investigation, if legitimate):</strong></p>
+  <pre style="background:#f4eadb;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto">UPDATE user_billing_period
+SET is_suspended = FALSE, suspended_at = NULL, suspended_reason = NULL
+WHERE user_id = '${userId}';</pre>
+  <p style="font-size:13px;color:#6c5e4a"><strong>To permanently ban (if confirmed abuse):</strong></p>
+  <pre style="background:#f4eadb;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto">-- Keep is_suspended = TRUE permanently. Optionally cancel their Stripe sub.</pre>
+  <p style="font-size:12px;color:#6c5e4a;margin-top:30px">come to jesus · automated alert</p>
+</div>`;
+  await sendResendEmail({ to: ALERT_EMAIL, subject, html });
+}
+
+// ========== SUSPENSION CHECK ==========
+// Called early in the request pipeline for logged-in users.
+// Returns { isSuspended: boolean, reason: string|null }.
+async function checkUserSuspension(userId) {
+  if (!userId) return { isSuspended: false, reason: null };
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('user_billing_period')
+      .select('is_suspended, suspended_reason')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) {
+      console.error('checkUserSuspension query failed:', error);
+      return { isSuspended: false, reason: null };  // fail open — don't block users on errors
+    }
+    return {
+      isSuspended: data?.is_suspended === true,
+      reason: data?.suspended_reason || null,
+    };
+  } catch (err) {
+    console.error('checkUserSuspension threw:', err);
+    return { isSuspended: false, reason: null };
+  }
+}
+
 // ========== MESSAGE PERSISTENCE (paid users only) ==========
 // Ensures a conversations row exists (upserts on id), then inserts the
 // user's most recent message + the assistant's reply into the messages table.
@@ -2060,6 +2239,21 @@ export default async function handler(req, res) {
     }
   }
 
+  // ========== ABUSE SUSPENSION CHECK ==========
+  // For logged-in users, check if their account has been auto-suspended
+  // due to crossing the red usage threshold. Bypass user (admin) is exempt.
+  if (user?.id && !bypassUser) {
+    const suspension = await checkUserSuspension(user.id);
+    if (suspension.isSuspended) {
+      return res.status(403).json({
+        reply: null,
+        suspended: true,
+        tier,
+        reason: 'Your account has been temporarily suspended pending review of unusual usage patterns. Please contact support@cometojesus.co.',
+      });
+    }
+  }
+
   if (!usage.allowed) {
     return res.status(402).json({
       reply: null,
@@ -2154,9 +2348,30 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     // Record actual spending from usage data
+    let costCentsForThisCall = 0;
     if (data.usage) {
-      const costCents = calculateCostCents(data.usage);
-      await recordSpend(costCents);
+      costCentsForThisCall = calculateCostCents(data.usage);
+      await recordSpend(costCentsForThisCall);
+    }
+
+    // Record per-user usage + check thresholds + fire alerts.
+    // Fire-and-forget — never delay the reply for tracking work.
+    if (data.usage && costCentsForThisCall > 0) {
+      const fingerprintForLog = !user?.id ? fingerprint : null;
+      (async () => {
+        await recordPerUserUsageAndMaybeAlert({
+          userId: user?.id || null,
+          fingerprint: fingerprintForLog,
+          conversationId: conversationId || null,
+          tier,
+          model: 'claude-opus-4-6',
+          usage: data.usage,
+          costCents: costCentsForThisCall,
+          userEmail: user?.email || null,
+        });
+      })().catch(err => {
+        console.warn('per-user usage tracking failed (non-fatal):', err);
+      });
     }
 
     let reply = (data.content || [])

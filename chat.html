@@ -23,7 +23,7 @@
 <meta property="og:title" content="Come to Jesus.">
 <meta property="og:description" content="A quiet space to imagine a conversation with Jesus. Rooted in the gospels.">
 <meta property="og:url" content="https://cometojesus.co/">
-<meta property="og:image" content="https://cometojesus.co/og-image.jpg">
+<meta property="og:image" content="https://cometojesus.co/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Come to Jesus. A quiet space to talk with him, set against rolling hills at sunrise.">
@@ -33,7 +33,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Come to Jesus.">
 <meta name="twitter:description" content="A quiet space to imagine a conversation with Jesus. Rooted in the gospels.">
-<meta name="twitter:image" content="https://cometojesus.co/og-image.jpg">
+<meta name="twitter:image" content="https://cometojesus.co/og-image.png">
 <meta name="twitter:image:alt" content="Come to Jesus. A quiet space to talk with him, set against rolling hills at sunrise.">
 
 <link rel="icon" type="image/svg+xml" href="/cometojesus-favicon.svg">
@@ -3057,6 +3057,19 @@
           const tierFromResponse = data.tier || (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
           if (window.__setCurrentTier) window.__setCurrentTier(tierFromResponse);
           showLimitReached(tierFromResponse, data.reason || null);
+          return;
+        }
+
+        if (response.status === 403) {
+          // Account suspended — show clinical message, don't allow further sends.
+          const data = await response.json().catch(() => ({}));
+          responseDiv.remove();
+          history.pop();
+          setState(null);
+          const reason = data.reason || 'Your account has been temporarily suspended pending review of unusual usage patterns. Please contact support@cometojesus.co.';
+          alert(reason);
+          // Keep send button disabled by setting a sentinel state
+          if (window.__setSuspended) window.__setSuspended(true);
           return;
         }
 
