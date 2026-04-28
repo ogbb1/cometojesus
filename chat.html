@@ -753,56 +753,11 @@
   }
   .help-btn i { font-size: 14px; }
 
-  /* ===== MOBILE NAV CLUSTER =====
-     Small centered text-link row exposing the marketing-page anchors
-     (how / pricing / faq) from the chat surface on mobile only. Lets
-     users jump back to those sections without going home first. */
-  .chat-mobile-nav {
-    display: none;
-  }
-  @media (max-width: 600px) {
-    .chat-mobile-nav {
-      position: fixed;
-      top: calc(16px + env(safe-area-inset-top));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--font-prose);
-      font-size: 13px;
-      font-style: italic;
-      color: var(--ink-soft);
-      background: rgba(255, 252, 244, 0.78);
-      border: 1px solid rgba(28, 20, 9, 0.14);
-      border-radius: 999px;
-      padding: 6px 14px;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      transition: opacity 0.25s ease;
-    }
-  }
-  /* On small phones the centered nav can collide with the home/sign-in
-     pills. Drop the "home" text label so the home pill becomes icon-only
-     and frees up horizontal space. */
+  /* On small phones, drop the "home" text label so the home pill becomes
+     icon-only and frees up the top bar. */
   @media (max-width: 420px) {
     .home-corner span { display: none; }
     .home-corner { padding: 7px 11px; }
-    .chat-mobile-nav { font-size: 12px; gap: 8px; padding: 6px 12px; }
-    .chat-mobile-nav a {
-      color: var(--ink-soft);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-    .chat-mobile-nav a:hover,
-    .chat-mobile-nav a:active {
-      color: var(--ink);
-    }
-    .chat-mobile-nav-sep {
-      color: var(--ink-whisper);
-      opacity: 0.6;
-    }
   }
 
   /* When mobile keyboard is open, hide corner elements so they don't
@@ -810,7 +765,6 @@
   body.keyboard-open .help-btn,
   body.keyboard-open .auth-corner,
   body.keyboard-open .home-corner,
-  body.keyboard-open .chat-mobile-nav,
   body.keyboard-open .auth-menu {
     opacity: 0;
     pointer-events: none;
@@ -1676,13 +1630,6 @@
 
   <button class="auth-corner" id="authCorner" type="button"><i class="fa-solid fa-door-open"></i><span id="authCornerText">sign in</span></button>
   <a href="/" class="home-corner" id="homeCorner"><i class="fa-solid fa-house"></i><span>home</span></a>
-  <nav class="chat-mobile-nav" aria-label="marketing pages">
-    <a href="/#how">how</a>
-    <span class="chat-mobile-nav-sep">·</span>
-    <a href="/#pricing">pricing</a>
-    <span class="chat-mobile-nav-sep">·</span>
-    <a href="/#faq">faq</a>
-  </nav>
   <div class="auth-menu" id="authMenu">
     <button type="button" id="authMenuSettings"><i class="fa-solid fa-gear"></i>settings</button>
     <button type="button" id="authMenuSubscription" style="display:none;"><i class="fa-solid fa-credit-card"></i>subscription</button>
@@ -3057,7 +3004,6 @@
     function renderConsideredReply(container, text, onDone) {
       container.innerHTML = '';
       const tokens = tokenizeWithTiming(text);
-      let cumulative = 0;
       const spans = [];
       tokens.forEach(({ word, trailing }) => {
         const span = document.createElement('span');
@@ -3067,29 +3013,22 @@
         if (trailing) container.appendChild(document.createTextNode(trailing));
         spans.push(span);
       });
-      // Reveal first word synchronously — the bubble shouldn't sit empty
-      // for any visible beat. Subsequent words follow normal cadence.
-      if (spans.length > 0) {
-        spans[0].classList.add('seen');
-      }
       scrollToLatest();
-      // Schedule remaining words starting from index 1.
-      for (let i = 1; i < tokens.length; i++) {
-        cumulative += tokens[i].delay;
-        const idx = i;
-        setTimeout(() => {
-          spans[idx].classList.add('seen');
-          scrollToLatest();
-          if (idx === tokens.length - 1 && typeof onDone === 'function') {
-            setTimeout(onDone, 200);
-          }
-        }, cumulative);
+      // All words exhale into existence simultaneously. No inter-word stagger,
+      // no waiting. The smoke condensation IS the reveal. Two rAFs ensure the
+      // initial styles paint before the .seen transition starts.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          spans.forEach(s => s.classList.add('seen'));
+        });
+      });
+      if (typeof onDone === 'function') {
+        // Fire after the smoke transition completes so state cleanup
+        // (re-enable send, drop "speaking" body class) lines up with the
+        // moment the words finish settling.
+        setTimeout(onDone, 1100);
       }
-      // If there was only one word (or none), still call onDone
-      if (tokens.length <= 1 && typeof onDone === 'function') {
-        setTimeout(onDone, 200);
-      }
-      return cumulative;
+      return 0;
     }
 
     // Render instantly (for crisis responses). Still uses .word spans for consistent
@@ -3163,11 +3102,7 @@
           headers['Authorization'] = 'Bearer ' + token;
         }
 
-        // Hold the thinking state for at least 250ms before the reply starts,
-        // even if the API returns faster. Keeps the sense that he heard
-        // before speaking, without the prior 500ms feeling like artificial lag.
-        const minPause = new Promise(r => setTimeout(r, 250));
-        const apiCall = fetch('/api/chat', {
+        const response = await fetch('/api/chat', {
           method: 'POST',
           headers: headers,
           body: JSON.stringify({
@@ -3178,7 +3113,6 @@
             nameContext: (window.__getNameContext && window.__getNameContext()) || null
           })
         });
-        const [response] = await Promise.all([apiCall, minPause]);
 
         if (response.status === 402) {
           const data = await response.json().catch(() => ({}));
