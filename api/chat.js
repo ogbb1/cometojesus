@@ -2309,7 +2309,10 @@ export default async function handler(req, res) {
     {
       type: 'text',
       text: SYSTEM_PROMPT,
-      cache_control: { type: 'ephemeral' }
+      // 1-hour TTL (default is 5m). Worth ~$0.04 more per cache write but
+      // keeps the system prompt warm for users who pause mid-conversation
+      // and come back, instead of paying full input rate on every revisit.
+      cache_control: { type: 'ephemeral', ttl: '1h' }
     }
   ];
   if (memoryBlock) {
@@ -2391,16 +2394,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // Persist the exchange for any signed-in user (fire-and-forget; non-blocking).
-    // Anonymous users (no user.id) don't get persistence — they have nothing to recall.
+    // Persist the exchange for any signed-in user BEFORE returning the reply.
+    // Vercel serverless can kill fire-and-forget promises when the response
+    // is sent and the function exits, risking lost messages on slow DB writes.
+    // Awaiting adds typically 200-500ms but guarantees the message is saved
+    // before the user sees it on the client. Anonymous users (no user.id)
+    // skip persistence; they have nothing to recall.
     if (user?.id && conversationId) {
-      // Intentionally NOT awaited — don't delay the reply to the user.
-      (async () => {
+      try {
         await ensureConversationRow(conversationId, user.id);
         await persistMessages(conversationId, user.id, lastUserMessage.content, reply);
-      })().catch(err => {
+      } catch (err) {
         console.warn('message persistence block failed (non-fatal):', err);
-      });
+      }
     }
 
     return res.status(200).json({
