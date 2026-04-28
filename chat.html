@@ -423,35 +423,62 @@
   }
 
   /* ===== CONSIDERED WORD REVEAL =====
-     Each word of his reply arrives with a soft blur-in, paced by punctuation.
-     The full text exists in the DOM from the start (for screen readers + copy),
-     just with opacity 0 until its scheduled reveal.
+     Each word is exhaled into existence: starts diffuse and slightly
+     above its final position (like smoke condensing), then settles into
+     focus. Blur 10px to 0, translateY 6px to 0, scale 1.05 to 1, 1.1s
+     ease-out. Slower than a UI fade so each word has a beat of presence.
      Display: inline-block (not inline) so the blur filter's paint region
-     includes italic descenders (g, y, p, j, q) — inline elements with CSS
+     includes italic descenders (g, y, p, j, q); inline elements with CSS
      filters compute their paint box from the text-only inline box, which
      clips characters that extend below the baseline. Whitespace between
-     words is rendered as sibling text nodes (not inside the spans) so the
-     browser's normal whitespace collapsing handles spacing and paragraph
-     breaks the way it would in any prose.
-  */
+     words is rendered as sibling text nodes (not inside the spans). */
   .word {
     display: inline-block;
     opacity: 0;
-    filter: blur(2.5px);
+    filter: blur(10px);
+    transform: translateY(6px) scale(1.05);
+    transform-origin: center bottom;
     transition:
-      opacity 0.85s cubic-bezier(.2,.7,.2,1),
-      filter 0.85s cubic-bezier(.2,.7,.2,1);
+      opacity 1.1s cubic-bezier(.2,.7,.2,1),
+      filter 1.1s cubic-bezier(.2,.7,.2,1),
+      transform 1.1s cubic-bezier(.2,.7,.2,1);
+    will-change: opacity, filter, transform;
   }
   .word.seen {
     opacity: 1;
     filter: blur(0);
+    transform: translateY(0) scale(1);
   }
-  /* For users who prefer reduced motion, skip the blur, just fade */
+  /* For users who prefer reduced motion, skip the smoke, just fade */
   @media (prefers-reduced-motion: reduce) {
     .word {
       filter: none;
+      transform: none;
       transition: opacity 0.3s ease;
     }
+  }
+
+  /* ===== BREATH PULSE =====
+     Shown inside the empty Jesus bubble while we wait for the API. Gives
+     the bubble visible content from the start so when the words arrive
+     they don't snap into a previously-empty container. Subtle breathing
+     opacity + scale, says "he is here, considering." */
+  .breath-pulse {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    opacity: 0.3;
+    vertical-align: middle;
+    margin: 0 2px;
+    animation: breath-pulse 1.6s cubic-bezier(.4,0,.6,1) infinite;
+  }
+  @keyframes breath-pulse {
+    0%, 100% { opacity: 0.2; transform: scale(0.85); }
+    50%      { opacity: 0.55; transform: scale(1.1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .breath-pulse { animation: none; opacity: 0.4; }
   }
 
   /* ===== COMPOSER =====
@@ -3119,10 +3146,15 @@
       addMessage('user', text);
       history.push({ role: 'user', content: text });
 
-      // Enter thinking state — sun dims, holds. Brief reverent pause.
+      // Enter thinking state, sun dims, holds. Brief reverent pause.
       setState('thinking');
 
+      // Add the Jesus bubble pre-populated with a breath pulse so the
+      // bubble has visible content from the start; when the reply arrives,
+      // renderConsideredReply clears innerHTML and replaces with words.
+      // No layout snap from empty-to-filled, just a graceful swap.
       const responseDiv = addMessage('him', '');
+      responseDiv.innerHTML = '<span class="breath-pulse" aria-hidden="true"></span>';
 
       try {
         const headers = { 'Content-Type': 'application/json' };
@@ -3131,9 +3163,10 @@
           headers['Authorization'] = 'Bearer ' + token;
         }
 
-        // Hold the thinking state for at least 500ms before the reply starts,
-        // even if the API returns faster. Gives the sense that he heard before speaking.
-        const minPause = new Promise(r => setTimeout(r, 500));
+        // Hold the thinking state for at least 250ms before the reply starts,
+        // even if the API returns faster. Keeps the sense that he heard
+        // before speaking, without the prior 500ms feeling like artificial lag.
+        const minPause = new Promise(r => setTimeout(r, 250));
         const apiCall = fetch('/api/chat', {
           method: 'POST',
           headers: headers,
