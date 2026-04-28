@@ -3097,15 +3097,25 @@
         }
 
         if (response.status === 403) {
-          // Account suspended — show clinical message, don't allow further sends.
           const data = await response.json().catch(() => ({}));
           responseDiv.remove();
           history.pop();
           setState(null);
-          const reason = data.reason || 'Your account has been temporarily suspended pending review of unusual usage patterns. Please contact support@cometojesus.co.';
-          alert(reason);
-          // Keep send button disabled by setting a sentinel state
-          if (window.__setSuspended) window.__setSuspended(true);
+          // Only treat as suspension when the API explicitly flags it.
+          // Other 403s (e.g. Turnstile bot-check failures) carry a soft reply
+          // and should not trigger the suspended UI lockdown.
+          if (data.suspended === true) {
+            const reason = data.reason || 'Your account has been temporarily suspended pending review of unusual usage patterns. Please contact support@cometojesus.co.';
+            alert(reason);
+            if (window.__setSuspended) window.__setSuspended(true);
+            return;
+          }
+          const softReply = data.reply || 'please refresh the page and come in again.';
+          const softDiv = document.createElement('div');
+          softDiv.className = 'msg him';
+          softDiv.textContent = softReply;
+          messagesEl.appendChild(softDiv);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
           return;
         }
 
