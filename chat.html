@@ -396,9 +396,13 @@
   .messages {
     flex: 1 1 auto;
     overflow-y: auto;
+    /* Pin x-axis closed so italic descenders extending past their word
+       boxes can't trigger a horizontal scrollbar. Horizontal padding gives
+       descenders breathing room inside the scroll container. */
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 20vh 0 calc(var(--composer-height) + 40px);
+    padding: 20vh 14px calc(var(--composer-height) + 40px);
     scroll-padding-bottom: calc(var(--composer-height) + 40px);
     display: flex; flex-direction: column; gap: 36px;
     scrollbar-width: thin; scrollbar-color: var(--ink-whisper) transparent;
@@ -420,11 +424,6 @@
   .msg.him {
     color: var(--ink); font-weight: 600; font-style: italic;
     font-size: 34px; letter-spacing: 0.003em; line-height: 1.6;
-    /* Italic Cormorant glyphs (g, j, y, f) extend past their nominal box.
-       Pad the bubble inward and pull the margin out by the same amount so
-       descenders have breathing room without shifting the visual position. */
-    padding: 0 12px;
-    margin: 0 -12px;
   }
 
   /* ===== CONSIDERED WORD REVEAL =====
