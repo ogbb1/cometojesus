@@ -420,6 +420,11 @@
   .msg.him {
     color: var(--ink); font-weight: 400; font-style: italic;
     font-size: 34px; letter-spacing: 0.003em; line-height: 1.6;
+    /* Italic Cormorant glyphs (g, j, y, f) extend past their nominal box.
+       Pad the bubble inward and pull the margin out by the same amount so
+       descenders have breathing room without shifting the visual position. */
+    padding: 0 12px;
+    margin: 0 -12px;
   }
 
   /* ===== CONSIDERED WORD REVEAL =====
@@ -436,8 +441,7 @@
     display: inline-block;
     opacity: 0;
     filter: blur(10px);
-    transform: translateY(6px) scale(1.05);
-    transform-origin: center bottom;
+    transform: translateY(6px);
     transition:
       opacity 1.1s cubic-bezier(.2,.7,.2,1),
       filter 1.1s cubic-bezier(.2,.7,.2,1),
@@ -447,7 +451,7 @@
   .word.seen {
     opacity: 1;
     filter: blur(0);
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
   /* For users who prefer reduced motion, skip the smoke, just fade */
   @media (prefers-reduced-motion: reduce) {
@@ -3013,22 +3017,33 @@
         if (trailing) container.appendChild(document.createTextNode(trailing));
         spans.push(span);
       });
-      scrollToLatest();
-      // All words exhale into existence simultaneously. No inter-word stagger,
-      // no waiting. The smoke condensation IS the reveal. Two rAFs ensure the
-      // initial styles paint before the .seen transition starts.
-      requestAnimationFrame(() => {
+      // First word reveals immediately so the bubble is never empty for a
+      // visible beat. Subsequent words follow tokenizeWithTiming's punctuation-
+      // paced cadence, giving each word weight as it exhales into existence.
+      if (spans.length > 0) {
         requestAnimationFrame(() => {
-          spans.forEach(s => s.classList.add('seen'));
+          requestAnimationFrame(() => {
+            spans[0].classList.add('seen');
+          });
         });
-      });
-      if (typeof onDone === 'function') {
-        // Fire after the smoke transition completes so state cleanup
-        // (re-enable send, drop "speaking" body class) lines up with the
-        // moment the words finish settling.
-        setTimeout(onDone, 1100);
       }
-      return 0;
+      scrollToLatest();
+      let cumulative = 0;
+      for (let i = 1; i < tokens.length; i++) {
+        cumulative += tokens[i].delay;
+        const idx = i;
+        setTimeout(() => {
+          spans[idx].classList.add('seen');
+          scrollToLatest();
+          if (idx === tokens.length - 1 && typeof onDone === 'function') {
+            setTimeout(onDone, 200);
+          }
+        }, cumulative);
+      }
+      if (tokens.length <= 1 && typeof onDone === 'function') {
+        setTimeout(onDone, 200);
+      }
+      return cumulative;
     }
 
     // Render instantly (for crisis responses). Still uses .word spans for consistent
