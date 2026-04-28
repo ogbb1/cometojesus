@@ -2,5 +2,8 @@
   "redirects": [
     { "source": "/home.html", "destination": "/", "permanent": true },
     { "source": "/home", "destination": "/", "permanent": true }
+  ],
+  "crons": [
+    { "path": "/api/cron/cost-check", "schedule": "0 14 * * *" }
   ]
 }

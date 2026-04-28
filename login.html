@@ -488,10 +488,12 @@
       }
 
       if (isSignupMode && !data.session) {
+        if (window.va) window.va('event', { name: 'signup_completed' });
         showSuccess('check your email to confirm your account.');
         signinBtn.disabled = false;
         submitText.textContent = 'create account';
       } else if (data.session) {
+        if (isSignupMode && window.va) window.va('event', { name: 'signup_completed' });
         showSuccess("you're in.");
         setTimeout(() => {
           const params = new URLSearchParams(window.location.search);
@@ -506,5 +508,7 @@
     }
   });
 </script>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

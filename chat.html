@@ -2387,7 +2387,8 @@
           if (result.error) {
             showAuthMessage(result.error.message);
           } else if (result.data.user && !result.data.session) {
-            // Email confirmation required — switch to pending view for cleaner UX
+            if (window.va) window.va('event', { name: 'signup_completed' });
+            // Email confirmation required, switch to pending view for cleaner UX
             setAuthView('pending', {
               title: 'almost there.',
               message: 'check your email.',
@@ -2396,6 +2397,7 @@
               resendEmail: email
             });
           } else if (result.data.session) {
+            if (window.va) window.va('event', { name: 'signup_completed' });
             showAuthMessage("you're in.", 'success');
             setTimeout(() => window.__closeAuthModal(), 800);
           }
@@ -2912,6 +2914,7 @@
       try {
         const params = new URLSearchParams(window.location.search);
         if (params.get('upgraded') !== 'true') return;
+        if (window.va) window.va('event', { name: 'subscription_completed' });
         welcomeOverlayEl.classList.add('visible');
         welcomeAutoDismissTimer = setTimeout(dismissWelcomeOverlay, 6000);
       } catch (e) { /* no-op */ }
@@ -3099,6 +3102,7 @@
       }, 1500);
     }
 
+    let chatStartedFired = false;
     async function send() {
       const text = inputEl.value.trim();
       if (!text || sendEl.disabled) return;
@@ -3107,6 +3111,14 @@
       sendEl.disabled = true;
       addMessage('user', text);
       history.push({ role: 'user', content: text });
+
+      // Funnel marker: fires once per page load when the user first commits
+      // to the chat (sends a message). Page view tracks "reached chat", this
+      // tracks "actually engaged."
+      if (!chatStartedFired) {
+        chatStartedFired = true;
+        if (window.va) window.va('event', { name: 'chat_started' });
+      }
 
       // Enter thinking state, sun dims, holds. Brief reverent pause.
       setState('thinking');
@@ -3912,5 +3924,7 @@
       loadConversation(targetId);
     });
   </script>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
