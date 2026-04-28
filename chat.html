@@ -439,6 +439,11 @@
      words is rendered as sibling text nodes (not inside the spans). */
   .word {
     display: inline-block;
+    /* Pad each word's box horizontally so italic descenders (g, j, y, f)
+       have room within the filter's paint context; negative margin keeps
+       the visual word spacing identical. */
+    padding: 0 0.08em;
+    margin: 0 -0.08em;
     opacity: 0;
     filter: blur(10px);
     transform: translateY(6px);
@@ -448,9 +453,12 @@
       transform 1.1s cubic-bezier(.2,.7,.2,1);
     will-change: opacity, filter, transform;
   }
+  /* On reveal, drop the filter entirely (not blur(0)). A zero blur still
+     creates a paint clipping context that crops italic descenders extending
+     past the word's nominal box. filter: none removes the context. */
   .word.seen {
     opacity: 1;
-    filter: blur(0);
+    filter: none;
     transform: translateY(0);
   }
   /* For users who prefer reduced motion, skip the smoke, just fade */
