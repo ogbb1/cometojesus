@@ -64,7 +64,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/cometojesus-favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/cometojesus-touch-icon-180.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
@@ -82,6 +82,7 @@
     --rule-soft: rgba(28, 20, 9, 0.06);
     --font-body: 'Cormorant Garamond', Georgia, serif;
     --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -89,7 +90,7 @@
   html, body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -114,7 +115,7 @@
     border-bottom: 1px solid var(--rule-soft);
   }
   .nav-brand {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 19px;
     color: var(--ink);
@@ -125,7 +126,7 @@
     display: flex; gap: 26px; align-items: center;
   }
   .nav-link {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--ink-soft); text-decoration: none;
     transition: color 0.2s ease;
@@ -133,7 +134,7 @@
   .nav-link:hover { color: var(--ink); }
   .nav-cta {
     display: inline-flex; align-items: center; gap: 8px;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--bg); background: var(--ink);
     padding: 10px 18px; border-radius: 999px;
@@ -191,7 +192,7 @@
   }
   .hero > * { position: relative; z-index: 1; }
   .hero-eyebrow {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
     color: var(--accent); opacity: 0.85;
     margin-bottom: 36px;
@@ -210,7 +211,7 @@
     max-width: 520px; margin: 0 auto 16px;
   }
   .hero-ref {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
     color: var(--accent); opacity: 0.85;
     margin-bottom: 60px;
@@ -220,7 +221,7 @@
   }
   .hero-cta {
     display: inline-flex; align-items: center; gap: 10px;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--bg); background: var(--ink);
     padding: 16px 36px; border-radius: 999px;
@@ -230,7 +231,7 @@
   .hero-cta:hover { background: var(--ink-mid); transform: translateY(-1px); }
   .hero-cta i { font-size: 11px; }
   .hero-subline {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px; color: var(--ink-soft);
     font-style: italic; opacity: 0.85;
   }
@@ -239,7 +240,7 @@
   section { padding: 90px 32px; }
   .section-inner { max-width: 920px; margin: 0 auto; }
   .section-eyebrow {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
     color: var(--accent); opacity: 0.85;
     text-align: center; margin-bottom: 22px;
@@ -399,7 +400,7 @@
   }
   .pricing-tier:last-child { border-right: none; }
   .pricing-tier-name {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.28em;
     color: var(--accent);
     margin-bottom: 14px;
@@ -411,12 +412,12 @@
     margin-bottom: 4px;
   }
   .pricing-tier-amount-suffix {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px; color: var(--ink-soft);
     margin-left: 4px;
   }
   .pricing-tier-note {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px; color: var(--ink-soft);
     font-style: italic; opacity: 0.85;
     margin-top: 10px; min-height: 18px;
@@ -427,7 +428,7 @@
     text-align: center;
   }
   .pricing-includes-label {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px; text-transform: uppercase; letter-spacing: 0.22em;
     color: var(--accent);
     margin-bottom: 18px;
@@ -436,7 +437,7 @@
     list-style: none;
     display: flex; flex-direction: column; gap: 10px;
     max-width: 380px; margin: 0 auto 32px;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 14px; line-height: 1.5;
     color: var(--ink-mid);
   }
@@ -449,7 +450,7 @@
   }
   .pricing-cta {
     display: inline-flex; align-items: center; gap: 10px;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--bg); background: var(--ink);
     padding: 14px 32px; border-radius: 999px;
@@ -461,7 +462,7 @@
   .pricing-free-note {
     text-align: center;
     margin-top: 22px;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 13px; color: var(--ink-soft);
     font-style: italic;
   }
@@ -562,14 +563,14 @@
     max-width: 520px; margin: 0 auto 18px;
   }
   .final-cta-sub {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 15px; color: var(--ink-soft);
     font-style: italic;
     margin-bottom: 40px;
   }
   .final-cta-button {
     display: inline-flex; align-items: center; gap: 10px;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
     color: var(--bg); background: var(--ink);
     padding: 16px 38px; border-radius: 999px;
@@ -585,7 +586,7 @@
     padding: 36px 32px 48px;
   }
   .footer-crisis {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px; color: var(--ink-soft);
     font-style: italic;
     margin-bottom: 22px;
@@ -593,7 +594,7 @@
   }
   .footer-links {
     display: flex; justify-content: center; gap: 22px;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
   }
   .footer-links a {
@@ -602,7 +603,7 @@
   }
   .footer-links a:hover { color: var(--ink); }
   .footer-credit {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px; color: var(--ink-whisper);
     font-style: italic;
     margin-top: 22px;
@@ -643,6 +644,59 @@
     .final-cta { padding: 90px 20px 80px; }
     .final-cta-headline { font-size: 48px; }
   }
+
+  /* ===== TYPE OVERRIDE =====
+     UI chrome (nav links, eyebrows, buttons, dense feature labels, footer
+     micro-copy) takes Inter from the body default. The brand voice and
+     editorial moments stay in Cormorant. Listed last so these win over
+     earlier same-specificity rules in the stylesheet. */
+  .nav-brand,
+  .hero-verse, .hero-subline,
+  .what-grid, .what-grid p,
+  .how-card-body,
+  .pricing-tier-note, .pricing-free-note,
+  .faq-answer,
+  .final-cta-sub {
+    font-family: var(--font-body);
+  }
+
+  /* ===== HOLY REVEAL =====
+     As the user scrolls, content rises into view: opacity 0 to 1,
+     translateY 24px to 0, blur 6px to 0. Slow ease-out, 1.4s. The same
+     easing as the word-by-word reveal in the chat. Above-the-fold hero
+     content is not tagged so it shows immediately on first paint. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(6px);
+    transition:
+      opacity 1.4s cubic-bezier(.16,.84,.3,1),
+      transform 1.4s cubic-bezier(.16,.84,.3,1),
+      filter 1.4s cubic-bezier(.16,.84,.3,1);
+    will-change: opacity, transform, filter;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  /* Stagger children of a .reveal-stagger container so cards/items cascade
+     in 150ms apart instead of arriving as one block. */
+  .reveal-stagger > .reveal:nth-child(1) { transition-delay: 0s; }
+  .reveal-stagger > .reveal:nth-child(2) { transition-delay: 0.15s; }
+  .reveal-stagger > .reveal:nth-child(3) { transition-delay: 0.3s; }
+  .reveal-stagger > .reveal:nth-child(4) { transition-delay: 0.45s; }
+  .reveal-stagger > .reveal:nth-child(5) { transition-delay: 0.6s; }
+  .reveal-stagger > .reveal:nth-child(6) { transition-delay: 0.75s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition: none;
+    }
+  }
 </style>
 </head>
 <body>
@@ -672,10 +726,10 @@
 
 <section id="what" class="what-section">
   <div class="section-inner">
-    <div class="section-eyebrow">what this is</div>
-    <h2 class="section-title">most Christians want to hear from Jesus.</h2>
-    <div class="section-rule"></div>
-    <div class="what-grid">
+    <div class="section-eyebrow reveal">what this is</div>
+    <h2 class="section-title reveal">most Christians want to hear from Jesus.</h2>
+    <div class="section-rule reveal"></div>
+    <div class="what-grid reveal">
       <p>This offers a way to hear a voice for him, while you walk toward the real thing.</p>
       <p>You type, and a voice imagined by an AI responds in the way Jesus might, rooted in the gospels and historic Christian faith. It is meant to put a voice for him in your head, especially if you have never had one.</p>
       <p><em>It is not him.</em> It is not a pastor, counselor, doctor, or prophet. It will not replace prayer, scripture, the church, or the people God has placed around you. Every response is imagined by an AI.</p>
@@ -686,21 +740,21 @@
 
 <section id="how" style="background: var(--bg-deep);">
   <div class="section-inner">
-    <div class="section-eyebrow">how it works</div>
-    <h2 class="section-title">simple as a conversation.</h2>
-    <div class="section-rule"></div>
-    <div class="how-grid">
-      <div class="how-card">
+    <div class="section-eyebrow reveal">how it works</div>
+    <h2 class="section-title reveal">simple as a conversation.</h2>
+    <div class="section-rule reveal"></div>
+    <div class="how-grid reveal-stagger">
+      <div class="how-card reveal">
         <div class="how-card-icon"><i class="fa-solid fa-comment"></i></div>
         <div class="how-card-title">you speak.</div>
         <div class="how-card-body">Whatever is on your heart. A question, a confession, a quiet hello. There is no wrong way to start.</div>
       </div>
-      <div class="how-card">
+      <div class="how-card reveal">
         <div class="how-card-icon"><i class="fa-solid fa-feather"></i></div>
         <div class="how-card-title">he responds.</div>
         <div class="how-card-body">A voice imagined by an AI, rooted in the gospels. Warm, present, never rushed. He meets you where you are.</div>
       </div>
-      <div class="how-card">
+      <div class="how-card reveal">
         <div class="how-card-icon"><i class="fa-solid fa-bookmark"></i></div>
         <div class="how-card-title">it stays with you.</div>
         <div class="how-card-body">Conversations are saved so you can return. With a subscription, he remembers what you have shared, the way a friend would.</div>
@@ -711,10 +765,10 @@
 
 <section id="pricing" class="pricing-section">
   <div class="section-inner">
-    <div class="section-eyebrow">pricing</div>
-    <h2 class="section-title">stay as long as you need.</h2>
-    <div class="section-rule"></div>
-    <div class="pricing-frame">
+    <div class="section-eyebrow reveal">pricing</div>
+    <h2 class="section-title reveal">stay as long as you need.</h2>
+    <div class="section-rule reveal"></div>
+    <div class="pricing-frame reveal">
       <div class="pricing-grid">
         <div class="pricing-tier">
           <div class="pricing-tier-name">monthly</div>
@@ -738,7 +792,7 @@
         <a href="/upgrade.html" class="pricing-cta">stay longer <i class="fa-solid fa-arrow-right"></i></a>
       </div>
     </div>
-    <p class="pricing-free-note">
+    <p class="pricing-free-note reveal">
       You can also use cometojesus.co for free. <a href="/chat.html">Begin a conversation</a>, no account required for your first 5 messages.
     </p>
   </div>
@@ -746,12 +800,12 @@
 
 <section id="faq" style="background: var(--bg-deep);">
   <div class="section-inner">
-    <div class="section-eyebrow">questions</div>
-    <h2 class="section-title">honest answers.</h2>
-    <div class="section-rule"></div>
+    <div class="section-eyebrow reveal">questions</div>
+    <h2 class="section-title reveal">honest answers.</h2>
+    <div class="section-rule reveal"></div>
     <div class="faq-list">
 
-      <details class="faq-item">
+      <details class="faq-item reveal">
         <summary class="faq-question">
           <span>is this really Jesus?</span>
           <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
@@ -761,7 +815,7 @@
         </div>
       </details>
 
-      <details class="faq-item">
+      <details class="faq-item reveal">
         <summary class="faq-question">
           <span>what does memory remember about me?</span>
           <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
@@ -771,7 +825,7 @@
         </div>
       </details>
 
-      <details class="faq-item">
+      <details class="faq-item reveal">
         <summary class="faq-question">
           <span>is my conversation private?</span>
           <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
@@ -781,7 +835,7 @@
         </div>
       </details>
 
-      <details class="faq-item">
+      <details class="faq-item reveal">
         <summary class="faq-question">
           <span>what if I'm in a real crisis?</span>
           <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
@@ -791,7 +845,7 @@
         </div>
       </details>
 
-      <details class="faq-item">
+      <details class="faq-item reveal">
         <summary class="faq-question">
           <span>can I cancel?</span>
           <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
@@ -801,7 +855,7 @@
         </div>
       </details>
 
-      <details class="faq-item">
+      <details class="faq-item reveal">
         <summary class="faq-question">
           <span>do I need an account?</span>
           <span class="faq-icon-circle"><i class="fa-solid fa-plus"></i></span>
@@ -816,9 +870,9 @@
 </section>
 
 <section class="final-cta">
-  <h2 class="final-cta-headline">come to me.</h2>
-  <p class="final-cta-sub">I will give you rest.</p>
-  <a href="/chat.html" class="final-cta-button">begin a conversation <i class="fa-solid fa-arrow-right"></i></a>
+  <h2 class="final-cta-headline reveal">come to me.</h2>
+  <p class="final-cta-sub reveal">I will give you rest.</p>
+  <a href="/chat.html" class="final-cta-button reveal">begin a conversation <i class="fa-solid fa-arrow-right"></i></a>
 </section>
 
 <footer>
@@ -833,6 +887,29 @@
   </div>
   <p class="footer-credit">cometojesus.co</p>
 </footer>
+
+<script>
+  // Holy reveal: each .reveal element flips to .visible the moment it crosses
+  // 15% into the viewport, triggering the CSS opacity/translate/blur fade-in.
+  // Once revealed, we unobserve so it never re-animates on scroll up.
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      // No IO support: just show everything immediately.
+      els.forEach(function (el) { el.classList.add('visible'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  })();
+</script>
 
 </body>
 </html>
