@@ -197,6 +197,27 @@ async function handleInvoiceEvent(invoice, eventType) {
 
   await upsertSubscription({ userId, subscription });
 
+  // On a successful first payment or renewal, roll over the user's billing
+  // period: reset cost/message counters and clear yellow/red alert flags so
+  // thresholds work fresh next cycle. Suspension flag is intentionally NOT
+  // cleared; abusers must be unsuspended manually after investigation.
+  // Skip subscription_update (mid-cycle proration) since the period hasn't
+  // actually rolled over.
+  if (
+    eventType === 'invoice.payment_succeeded' &&
+    (invoice.billing_reason === 'subscription_create' ||
+      invoice.billing_reason === 'subscription_cycle')
+  ) {
+    const { error } = await supabaseAdmin.rpc('reset_user_billing_period', {
+      p_user_id: userId,
+    });
+    if (error) {
+      console.error('[stripe-webhook] reset_user_billing_period failed:', error);
+      throw error;
+    }
+    console.log('[stripe-webhook] billing period reset for user', userId, '(' + invoice.billing_reason + ')');
+  }
+
   if (eventType === 'invoice.payment_failed') {
     console.warn('[stripe-webhook] payment failed for user', userId, 'subscription', subscription.id);
     // TODO future: send email to user warning them card was declined
