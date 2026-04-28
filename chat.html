@@ -44,7 +44,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/cometojesus-icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
@@ -54,19 +54,25 @@
     /* Dynamic viewport sizing - updated by JS for iOS keyboard handling */
     --app-height: 100dvh;
     --composer-height: 132px;
-    /* Warmer cream palette — paper/parchment feel */
+    /* Warmer cream palette, paper/parchment feel */
     --bg: #f4eadb;
     --bg-deep: #ebdfca;
     --ink: #1c1409;
     --ink-mid: #2d241a;
     --ink-soft: #605242;
     --ink-whisper: #9a8c76;
+    --accent: #7a5a30;
+    --accent-deep: #5a4222;
     --light: 255, 248, 220;
     --light-hot: 255, 253, 245;
     --line: rgba(28, 20, 9, 0.1);
     --input-bg: rgba(255, 252, 244, 0.7);
     --input-border: rgba(28, 20, 9, 0.14);
-    --input-border-focus: rgba(28, 20, 9, 0.38);
+    --input-border-focus: rgba(122, 90, 48, 0.55);
+    /* Type system: sans for chrome, serif for the conversation surface */
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-prose: 'Cormorant Garamond', Georgia, serif;
+    --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   }
 
   html, body {
@@ -79,7 +85,7 @@
     min-height: var(--app-height);
     height: var(--app-height);
     background: var(--bg);
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     color: var(--ink);
     position: relative;
     display: flex;
@@ -321,7 +327,7 @@
   }
   .scripture-ref {
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
-    color: var(--ink-soft); font-family: Georgia, serif; opacity: 0.78;
+    color: var(--ink-soft); font-family: var(--font-ui); opacity: 0.78;
   }
   .scripture-rule {
     width: 28px; height: 1px; background: var(--ink-whisper);
@@ -330,7 +336,7 @@
 
   .gate-eyebrow {
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
-    color: var(--ink-soft); font-family: Georgia, serif;
+    color: var(--ink-soft); font-family: var(--font-ui);
     margin-bottom: 22px; opacity: 0.72;
   }
   .gate-title {
@@ -369,7 +375,7 @@
   .gate-button i { font-size: 11px; margin-left: 6px; font-style: normal; }
   .gate-footer {
     margin-top: 28px; font-size: 10px; color: var(--ink-whisper);
-    font-family: Georgia, serif; letter-spacing: 0.1em;
+    font-family: var(--font-ui); letter-spacing: 0.1em;
     text-transform: uppercase;
   }
   .gate-footer a {
@@ -402,7 +408,7 @@
   .messages::-webkit-scrollbar-thumb {
     background: var(--ink-whisper); border-radius: 2px; opacity: 0.3;
   }
-  .msg { line-height: 1.55; animation: appear 1.4s cubic-bezier(.16,.84,.3,1); }
+  .msg { line-height: 1.55; animation: appear 0.3s cubic-bezier(.16,.84,.3,1); }
   @keyframes appear {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -499,17 +505,17 @@
   .input:disabled { opacity: 0.4; cursor: not-allowed; }
   .send {
     flex-shrink: 0;
-    background: var(--ink);
+    background: var(--accent);
     border: none; border-radius: 50%;
     width: 42px; height: 42px;
     color: var(--bg);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: background 0.3s, transform 0.2s, opacity 0.3s;
+    transition: background 0.2s, transform 0.15s, opacity 0.2s;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
   }
-  .send:hover:not(:disabled) { background: var(--ink-mid); transform: scale(1.05); }
+  .send:hover:not(:disabled) { background: var(--accent-deep); transform: scale(1.05); }
   .send:active:not(:disabled) { transform: scale(0.93); }
   .send:disabled { opacity: 0.3; cursor: default; background: var(--ink-soft); }
   .send svg { width: 17px; height: 17px; }
@@ -525,12 +531,12 @@
   .footer {
     text-align: center; font-size: 9px; color: var(--ink-soft);
     padding: 6px 20px 0; letter-spacing: 0.18em;
-    text-transform: uppercase; font-family: Georgia, serif; opacity: 0.55;
+    text-transform: uppercase; font-family: var(--font-ui); opacity: 0.55;
   }
   .counter {
     text-align: center; font-size: 10px; color: var(--ink-whisper);
     padding: 4px 20px 0; letter-spacing: 0.08em;
-    font-family: Georgia, serif; font-style: italic;
+    font-family: var(--font-ui); font-style: italic;
     opacity: 0; transition: opacity 0.5s;
   }
   .counter.visible { opacity: 0.75; }
@@ -549,7 +555,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-size: 16px;
     font-style: italic;
     font-weight: 400;
@@ -592,7 +598,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-size: 16px;
     font-style: italic;
     font-weight: 400;
@@ -650,7 +656,7 @@
     background: transparent;
     border: none;
     padding: 10px 14px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 16px;
     color: var(--ink-soft);
@@ -708,7 +714,7 @@
     border: 1px solid var(--ink-whisper);
     background: rgba(244, 234, 219, 0.7);
     color: var(--ink-soft);
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 13px; font-style: italic;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -782,7 +788,7 @@
   }
   .about-tab {
     background: transparent; border: none; padding: 0 0 12px 0;
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     font-style: italic; font-size: 17px;
     color: var(--ink-soft); cursor: pointer;
     border-bottom: 1px solid transparent;
@@ -805,11 +811,11 @@
   .about-pricing-row:last-of-type { border-bottom: none; }
   .about-pricing-label {
     font-size: 15px; color: var(--ink-mid);
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
   }
   .about-pricing-amount {
     font-size: 17px; color: var(--ink);
-    font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic;
+    font-family: var(--font-ui); font-style: italic;
   }
   .about-pricing-note {
     font-size: 12.5px; color: var(--ink-soft);
@@ -818,7 +824,7 @@
   .about-cta {
     display: inline-block; margin-top: 18px;
     font-size: 14px; color: var(--ink);
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     font-style: italic;
     border-bottom: 1px solid var(--ink);
     padding-bottom: 1px;
@@ -873,7 +879,7 @@
     letter-spacing: 0.22em;
     color: var(--ink-whisper);
     text-transform: uppercase;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     margin-bottom: 20px;
   }
   .auth-title {
@@ -904,7 +910,7 @@
     border: 1px solid rgba(28, 20, 9, 0.18);
     background: transparent;
     color: var(--ink);
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-size: 17px;
     font-weight: 400;
     cursor: pointer;
@@ -935,7 +941,7 @@
     letter-spacing: 0.22em;
     color: var(--ink-whisper);
     text-transform: uppercase;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
   }
   .auth-divider::before,
   .auth-divider::after {
@@ -959,7 +965,7 @@
     letter-spacing: 0.18em;
     color: var(--ink-soft);
     text-transform: uppercase;
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-style: italic;
   }
   .auth-field input {
@@ -967,7 +973,7 @@
     border-radius: 8px;
     border: 1px solid rgba(28, 20, 9, 0.18);
     background: rgba(244, 234, 219, 0.5);
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-size: 18px;
     color: var(--ink);
     transition: border-color 0.2s ease, background 0.2s ease;
@@ -984,7 +990,7 @@
     border: 1px solid var(--ink);
     padding: 14px 18px;
     border-radius: 10px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-size: 17px;
     font-weight: 500;
     cursor: pointer;
@@ -1039,7 +1045,7 @@
     opacity: 0.5;
   }
   .auth-prose {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 17px;
     line-height: 1.6;
     color: var(--ink-mid);
@@ -1047,7 +1053,7 @@
     text-align: center;
   }
   .auth-prose-small {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 15px;
     color: var(--ink-soft);
@@ -1060,7 +1066,7 @@
     background: transparent;
     border: none;
     color: var(--ink);
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 15px;
     cursor: pointer;
@@ -1222,7 +1228,7 @@
     justify-content: space-between;
   }
   .sidebar-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 22px;
     color: var(--ink);
@@ -1232,7 +1238,7 @@
     background: transparent;
     border: none;
     color: var(--ink-soft);
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 16px;
     cursor: pointer;
@@ -1264,7 +1270,7 @@
     border-left-color: var(--ink-mid);
   }
   .sidebar-item-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 17px;
     color: var(--ink);
@@ -1276,7 +1282,7 @@
     overflow: hidden;
   }
   .sidebar-item-date {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px;
     letter-spacing: 0.18em;
     color: var(--ink-whisper);
@@ -1285,7 +1291,7 @@
   .sidebar-empty {
     padding: 40px 24px;
     text-align: center;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 15px;
     color: var(--ink-whisper);
@@ -1299,7 +1305,7 @@
     background: transparent;
     border: none;
     color: var(--ink-soft);
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -1333,7 +1339,7 @@
     box-shadow: 0 20px 60px rgba(28, 20, 9, 0.18);
   }
   .settings-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 26px;
     color: var(--ink);
@@ -1346,13 +1352,13 @@
   }
   .settings-row:last-child { border-bottom: none; }
   .settings-row-label {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-size: 18px;
     color: var(--ink);
     margin-bottom: 6px;
   }
   .settings-row-desc {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-ui);
     font-style: italic;
     font-size: 14px;
     color: var(--ink-soft);
@@ -1389,7 +1395,7 @@
   .settings-toggle.on .settings-toggle-switch { background: var(--ink-mid); }
   .settings-toggle.on .settings-toggle-switch::after { transform: translateX(20px); }
   .settings-toggle-label {
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 12px;
     letter-spacing: 0.22em;
     color: var(--ink-soft);
@@ -1399,7 +1405,7 @@
     background: transparent;
     border: 1px solid rgba(28, 20, 9, 0.15);
     color: var(--ink);
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -1419,7 +1425,7 @@
     background: transparent;
     border: 1px solid rgba(28, 20, 9, 0.15);
     color: var(--ink);
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -1449,7 +1455,7 @@
   .settings-inline-form input {
     width: 100%;
     padding: 10px 12px;
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 16px;
     color: var(--ink);
     background: var(--bg-soft, #f9f1e3);
@@ -1471,7 +1477,7 @@
     background: transparent;
     border: none;
     color: var(--ink-soft);
-    font-family: Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -1502,7 +1508,7 @@
   }
   .settings-danger-confirm.visible { display: block; }
   .settings-danger-confirm-text {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: var(--font-ui);
     font-size: 14px;
     color: var(--ink-mid);
     line-height: 1.5;
@@ -1512,6 +1518,36 @@
   @media (max-width: 640px) {
     .sidebar-toggle { top: 18px; left: 18px; }
     .sidebar { width: 300px; }
+  }
+
+  /* ===== TYPE OVERRIDE =====
+     UI chrome (buttons, labels, micro-copy, fields) lives in --font-ui (sans).
+     The conversation surface, ornamental headers, AND any prose paragraphs
+     where the brand speaks to the user stay in --font-prose (Cormorant).
+     Listed last so these win over earlier same-specificity rules. */
+  .msg.user, .msg.him,
+  .scripture-verse,
+  .gate-title, .returning .gate-title,
+  .gate-body, .gate-body.small,
+  .auth-title, .auth-scripture,
+  .auth-prose, .auth-prose-small,
+  .auth-toggle, .auth-secondary-actions,
+  .about-title, .about-body, .about-pricing-amount,
+  .limit-title, .limit-body,
+  .sidebar-title, .sidebar-item-title, .sidebar-empty,
+  .settings-title, .settings-row-desc {
+    font-family: var(--font-prose);
+  }
+
+  /* ===== TABLET BREAKPOINT (601-1024px) =====
+     iPad portrait/landscape gets desktop layout otherwise. Tighten
+     message sizes and give the composer some breathing room. */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    .messages { padding-top: 16vh; gap: 30px; }
+    .msg.him { font-size: 28px; line-height: 1.55; }
+    .msg.user { font-size: 19px; }
+    .input-area { padding-left: 28px; padding-right: 28px; }
+    .container { padding: 0 24px; }
   }
 </style>
 </head>
