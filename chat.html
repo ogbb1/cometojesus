@@ -44,7 +44,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/cometojesus-icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
@@ -69,8 +69,7 @@
     --input-bg: rgba(255, 252, 244, 0.7);
     --input-border: rgba(28, 20, 9, 0.14);
     --input-border-focus: rgba(122, 90, 48, 0.55);
-    /* Type system: sans for chrome, serif for the conversation surface */
-    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    /* Type system: editorial Cormorant throughout, Fraunces for display headers */
     --font-prose: 'Cormorant Garamond', Georgia, serif;
     --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   }
@@ -85,7 +84,7 @@
     min-height: var(--app-height);
     height: var(--app-height);
     background: var(--bg);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     color: var(--ink);
     position: relative;
     display: flex;
@@ -327,7 +326,7 @@
   }
   .scripture-ref {
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
-    color: var(--ink-soft); font-family: var(--font-ui); opacity: 0.78;
+    color: var(--ink-soft); font-family: var(--font-prose); opacity: 0.78;
   }
   .scripture-rule {
     width: 28px; height: 1px; background: var(--ink-whisper);
@@ -336,7 +335,7 @@
 
   .gate-eyebrow {
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.28em;
-    color: var(--ink-soft); font-family: var(--font-ui);
+    color: var(--ink-soft); font-family: var(--font-prose);
     margin-bottom: 22px; opacity: 0.72;
   }
   .gate-title {
@@ -375,7 +374,7 @@
   .gate-button i { font-size: 11px; margin-left: 6px; font-style: normal; }
   .gate-footer {
     margin-top: 28px; font-size: 10px; color: var(--ink-whisper);
-    font-family: var(--font-ui); letter-spacing: 0.1em;
+    font-family: var(--font-prose); letter-spacing: 0.1em;
     text-transform: uppercase;
   }
   .gate-footer a {
@@ -531,12 +530,12 @@
   .footer {
     text-align: center; font-size: 9px; color: var(--ink-soft);
     padding: 6px 20px 0; letter-spacing: 0.18em;
-    text-transform: uppercase; font-family: var(--font-ui); opacity: 0.55;
+    text-transform: uppercase; font-family: var(--font-prose); opacity: 0.55;
   }
   .counter {
     text-align: center; font-size: 10px; color: var(--ink-whisper);
     padding: 4px 20px 0; letter-spacing: 0.08em;
-    font-family: var(--font-ui); font-style: italic;
+    font-family: var(--font-prose); font-style: italic;
     opacity: 0; transition: opacity 0.5s;
   }
   .counter.visible { opacity: 0.75; }
@@ -555,7 +554,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 16px;
     font-style: italic;
     font-weight: 400;
@@ -598,7 +597,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 16px;
     font-style: italic;
     font-weight: 400;
@@ -656,7 +655,7 @@
     background: transparent;
     border: none;
     padding: 10px 14px;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 16px;
     color: var(--ink-soft);
@@ -714,7 +713,7 @@
     border: 1px solid var(--ink-whisper);
     background: rgba(244, 234, 219, 0.7);
     color: var(--ink-soft);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 13px; font-style: italic;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -727,11 +726,64 @@
   }
   .help-btn i { font-size: 14px; }
 
+  /* ===== MOBILE NAV CLUSTER =====
+     Small centered text-link row exposing the marketing-page anchors
+     (how / pricing / faq) from the chat surface on mobile only. Lets
+     users jump back to those sections without going home first. */
+  .chat-mobile-nav {
+    display: none;
+  }
+  @media (max-width: 600px) {
+    .chat-mobile-nav {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-prose);
+      font-size: 13px;
+      font-style: italic;
+      color: var(--ink-soft);
+      background: rgba(255, 252, 244, 0.78);
+      border: 1px solid rgba(28, 20, 9, 0.14);
+      border-radius: 999px;
+      padding: 6px 14px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: opacity 0.25s ease;
+    }
+  }
+  /* On small phones the centered nav can collide with the home/sign-in
+     pills. Drop the "home" text label so the home pill becomes icon-only
+     and frees up horizontal space. */
+  @media (max-width: 420px) {
+    .home-corner span { display: none; }
+    .home-corner { padding: 7px 11px; }
+    .chat-mobile-nav { font-size: 12px; gap: 8px; padding: 6px 12px; }
+    .chat-mobile-nav a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .chat-mobile-nav a:hover,
+    .chat-mobile-nav a:active {
+      color: var(--ink);
+    }
+    .chat-mobile-nav-sep {
+      color: var(--ink-whisper);
+      opacity: 0.6;
+    }
+  }
+
   /* When mobile keyboard is open, hide corner elements so they don't
      clash with or obscure the composer at the bottom of the viewport. */
   body.keyboard-open .help-btn,
   body.keyboard-open .auth-corner,
   body.keyboard-open .home-corner,
+  body.keyboard-open .chat-mobile-nav,
   body.keyboard-open .auth-menu {
     opacity: 0;
     pointer-events: none;
@@ -788,7 +840,7 @@
   }
   .about-tab {
     background: transparent; border: none; padding: 0 0 12px 0;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic; font-size: 17px;
     color: var(--ink-soft); cursor: pointer;
     border-bottom: 1px solid transparent;
@@ -811,11 +863,11 @@
   .about-pricing-row:last-of-type { border-bottom: none; }
   .about-pricing-label {
     font-size: 15px; color: var(--ink-mid);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
   }
   .about-pricing-amount {
     font-size: 17px; color: var(--ink);
-    font-family: var(--font-ui); font-style: italic;
+    font-family: var(--font-prose); font-style: italic;
   }
   .about-pricing-note {
     font-size: 12.5px; color: var(--ink-soft);
@@ -824,7 +876,7 @@
   .about-cta {
     display: inline-block; margin-top: 18px;
     font-size: 14px; color: var(--ink);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     border-bottom: 1px solid var(--ink);
     padding-bottom: 1px;
@@ -879,7 +931,7 @@
     letter-spacing: 0.22em;
     color: var(--ink-whisper);
     text-transform: uppercase;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     margin-bottom: 20px;
   }
   .auth-title {
@@ -910,7 +962,7 @@
     border: 1px solid rgba(28, 20, 9, 0.18);
     background: transparent;
     color: var(--ink);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 17px;
     font-weight: 400;
     cursor: pointer;
@@ -941,7 +993,7 @@
     letter-spacing: 0.22em;
     color: var(--ink-whisper);
     text-transform: uppercase;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
   }
   .auth-divider::before,
   .auth-divider::after {
@@ -965,7 +1017,7 @@
     letter-spacing: 0.18em;
     color: var(--ink-soft);
     text-transform: uppercase;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
   }
   .auth-field input {
@@ -973,7 +1025,7 @@
     border-radius: 8px;
     border: 1px solid rgba(28, 20, 9, 0.18);
     background: rgba(244, 234, 219, 0.5);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 18px;
     color: var(--ink);
     transition: border-color 0.2s ease, background 0.2s ease;
@@ -990,7 +1042,7 @@
     border: 1px solid var(--ink);
     padding: 14px 18px;
     border-radius: 10px;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 17px;
     font-weight: 500;
     cursor: pointer;
@@ -1045,7 +1097,7 @@
     opacity: 0.5;
   }
   .auth-prose {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 17px;
     line-height: 1.6;
     color: var(--ink-mid);
@@ -1053,7 +1105,7 @@
     text-align: center;
   }
   .auth-prose-small {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 15px;
     color: var(--ink-soft);
@@ -1066,7 +1118,7 @@
     background: transparent;
     border: none;
     color: var(--ink);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 15px;
     cursor: pointer;
@@ -1247,7 +1299,7 @@
     justify-content: space-between;
   }
   .sidebar-title {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 22px;
     color: var(--ink);
@@ -1257,7 +1309,7 @@
     background: transparent;
     border: none;
     color: var(--ink-soft);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 16px;
     cursor: pointer;
@@ -1289,7 +1341,7 @@
     border-left-color: var(--ink-mid);
   }
   .sidebar-item-title {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 17px;
     color: var(--ink);
@@ -1301,7 +1353,7 @@
     overflow: hidden;
   }
   .sidebar-item-date {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 11px;
     letter-spacing: 0.18em;
     color: var(--ink-whisper);
@@ -1310,7 +1362,7 @@
   .sidebar-empty {
     padding: 40px 24px;
     text-align: center;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 15px;
     color: var(--ink-whisper);
@@ -1324,7 +1376,7 @@
     background: transparent;
     border: none;
     color: var(--ink-soft);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 12px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -1358,7 +1410,7 @@
     box-shadow: 0 20px 60px rgba(28, 20, 9, 0.18);
   }
   .settings-title {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 26px;
     color: var(--ink);
@@ -1371,13 +1423,13 @@
   }
   .settings-row:last-child { border-bottom: none; }
   .settings-row-label {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 18px;
     color: var(--ink);
     margin-bottom: 6px;
   }
   .settings-row-desc {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-style: italic;
     font-size: 14px;
     color: var(--ink-soft);
@@ -1414,7 +1466,7 @@
   .settings-toggle.on .settings-toggle-switch { background: var(--ink-mid); }
   .settings-toggle.on .settings-toggle-switch::after { transform: translateX(20px); }
   .settings-toggle-label {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 12px;
     letter-spacing: 0.22em;
     color: var(--ink-soft);
@@ -1424,7 +1476,7 @@
     background: transparent;
     border: 1px solid rgba(28, 20, 9, 0.15);
     color: var(--ink);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 11px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -1444,7 +1496,7 @@
     background: transparent;
     border: 1px solid rgba(28, 20, 9, 0.15);
     color: var(--ink);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -1474,7 +1526,7 @@
   .settings-inline-form input {
     width: 100%;
     padding: 10px 12px;
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 16px;
     color: var(--ink);
     background: var(--bg-soft, #f9f1e3);
@@ -1496,7 +1548,7 @@
     background: transparent;
     border: none;
     color: var(--ink-soft);
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -1527,7 +1579,7 @@
   }
   .settings-danger-confirm.visible { display: block; }
   .settings-danger-confirm-text {
-    font-family: var(--font-ui);
+    font-family: var(--font-prose);
     font-size: 14px;
     color: var(--ink-mid);
     line-height: 1.5;
@@ -1537,29 +1589,6 @@
   @media (max-width: 640px) {
     .sidebar-toggle { top: 18px; left: 18px; }
     .sidebar { width: 300px; }
-  }
-
-  /* ===== TYPE OVERRIDE =====
-     UI chrome (action buttons, form fields, dense controls, micro-copy
-     eyebrows) lives in --font-ui (sans). Anything that's the brand voice
-     speaking, or the conversation surface itself (including the composer
-     and the navigation pills that wrap it), stays in --font-prose
-     (Cormorant). Listed last so these win over earlier same-specificity
-     rules in the stylesheet. */
-  .msg.user, .msg.him,
-  .input, .input::placeholder,
-  .auth-corner, .home-corner, .auth-menu button,
-  .scripture-verse,
-  .gate-title, .returning .gate-title,
-  .gate-body, .gate-body.small,
-  .auth-title, .auth-scripture,
-  .auth-prose, .auth-prose-small,
-  .auth-toggle, .auth-secondary-actions,
-  .about-title, .about-body, .about-pricing-amount,
-  .limit-title, .limit-body,
-  .sidebar-title, .sidebar-item-title, .sidebar-empty,
-  .settings-title, .settings-row-desc {
-    font-family: var(--font-prose);
   }
 
   /* ===== TABLET BREAKPOINT (601-1024px) =====
@@ -1620,6 +1649,13 @@
 
   <button class="auth-corner" id="authCorner" type="button"><i class="fa-solid fa-door-open"></i><span id="authCornerText">sign in</span></button>
   <a href="/" class="home-corner" id="homeCorner"><i class="fa-solid fa-house"></i><span>home</span></a>
+  <nav class="chat-mobile-nav" aria-label="marketing pages">
+    <a href="/#how">how</a>
+    <span class="chat-mobile-nav-sep">·</span>
+    <a href="/#pricing">pricing</a>
+    <span class="chat-mobile-nav-sep">·</span>
+    <a href="/#faq">faq</a>
+  </nav>
   <div class="auth-menu" id="authMenu">
     <button type="button" id="authMenuSettings"><i class="fa-solid fa-gear"></i>settings</button>
     <button type="button" id="authMenuSubscription" style="display:none;"><i class="fa-solid fa-credit-card"></i>subscription</button>
