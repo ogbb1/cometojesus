@@ -394,7 +394,12 @@
     min-height: 0;
   }
   .messages {
-    flex: 1 1 auto;
+    /* flex: 1 1 0 (basis zero) plus min-height: 0 give iOS Safari a fully
+       constrained intrinsic height to scroll within. flex: 1 1 auto with
+       no min-height can leave the container without a defined scrollable
+       size and silently lock up scroll on long conversations. */
+    flex: 1 1 0;
+    min-height: 0;
     overflow-y: auto;
     /* Pin x-axis closed so italic descenders extending past their word
        boxes can't trigger a horizontal scrollbar. Horizontal padding gives
@@ -402,9 +407,6 @@
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    /* Explicitly tell iOS Safari that vertical pans are scroll gestures.
-       Without this, compositing layers from word transitions can absorb
-       touches and lock up the scroll container on long conversations. */
     touch-action: pan-y;
     padding: 20vh 14px calc(var(--composer-height) + 40px);
     scroll-padding-bottom: calc(var(--composer-height) + 40px);
