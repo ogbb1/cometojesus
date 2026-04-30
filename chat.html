@@ -44,7 +44,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/cometojesus-icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
@@ -69,9 +69,11 @@
     --input-bg: rgba(255, 252, 244, 0.7);
     --input-border: rgba(28, 20, 9, 0.14);
     --input-border-focus: rgba(122, 90, 48, 0.55);
-    /* Type system: editorial Cormorant throughout, Fraunces for display headers */
+    /* Type system: editorial Cormorant throughout, Fraunces for display headers,
+       EB Garamond reserved for Jesus's voice (more biblical character at 30px) */
     --font-prose: 'Cormorant Garamond', Georgia, serif;
     --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+    --font-jesus: 'EB Garamond', Georgia, serif;
   }
 
   html, body {
@@ -428,8 +430,47 @@
     border-left: 2px solid var(--ink-whisper);
   }
   .msg.him {
-    color: var(--ink); font-weight: 600; font-style: italic;
-    font-size: 34px; letter-spacing: 0.003em; line-height: 1.6;
+    position: relative;
+    font-family: var(--font-jesus);
+    color: var(--ink); font-weight: 500; font-style: italic;
+    font-size: 30px; letter-spacing: -0.003em; line-height: 1.5;
+    text-wrap: pretty;
+  }
+  /* Soft golden radiance halo behind every Jesus message, light shining
+     from above. Sits behind the text via z-index, blurred for ambient glow. */
+  .msg.him::before {
+    content: "";
+    position: absolute;
+    left: -80px; top: -40px;
+    right: -120px; bottom: -20px;
+    background: radial-gradient(ellipse 70% 80% at 30% 40%,
+      rgba(255, 220, 145, 0.32) 0%,
+      rgba(255, 220, 145, 0.12) 40%,
+      rgba(255, 220, 145, 0) 75%);
+    z-index: -1;
+    pointer-events: none;
+    filter: blur(8px);
+  }
+  /* Illuminated drop-cap on the first letter of Jesus's reply. The first
+     .word span is inline-block, which lets ::first-letter target its lead
+     glyph. Gold-to-bronze gradient text-fill gives the breathed-from-above
+     feel; falls back to accent-deep solid color where gradient unsupported. */
+  .msg.him > .word:first-child::first-letter {
+    font-family: 'Fraunces', Georgia, serif;
+    font-variation-settings: "opsz" 144;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 4.2em;
+    line-height: 0.85;
+    float: left;
+    padding: 0.08em 0.12em 0 0;
+    margin-right: 0.04em;
+    color: var(--accent-deep);
+    background: linear-gradient(180deg, #b88c3a 0%, #8a5a1a 60%, #6b4a1c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 0 rgba(255, 220, 145, 0.4);
   }
 
   /* ===== CONSIDERED WORD REVEAL =====
