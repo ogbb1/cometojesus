@@ -432,7 +432,7 @@
   .msg.him {
     position: relative;
     font-family: var(--font-jesus);
-    color: var(--ink); font-weight: 500; font-style: italic;
+    color: var(--ink); font-weight: 500; font-style: normal;
     font-size: 30px; letter-spacing: -0.003em; line-height: 1.5;
     text-wrap: pretty;
   }
@@ -450,27 +450,6 @@
     z-index: -1;
     pointer-events: none;
     filter: blur(8px);
-  }
-  /* Illuminated drop-cap on the first letter of Jesus's reply. The first
-     .word span is inline-block, which lets ::first-letter target its lead
-     glyph. Gold-to-bronze gradient text-fill gives the breathed-from-above
-     feel; falls back to accent-deep solid color where gradient unsupported. */
-  .msg.him > .word:first-child::first-letter {
-    font-family: 'Fraunces', Georgia, serif;
-    font-variation-settings: "opsz" 144;
-    font-style: italic;
-    font-weight: 600;
-    font-size: 4.2em;
-    line-height: 0.85;
-    float: left;
-    padding: 0.08em 0.12em 0 0;
-    margin-right: 0.04em;
-    color: var(--accent-deep);
-    background: linear-gradient(180deg, #b88c3a 0%, #8a5a1a 60%, #6b4a1c 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 1px 0 rgba(255, 220, 145, 0.4);
   }
 
   /* ===== CONSIDERED WORD REVEAL =====
