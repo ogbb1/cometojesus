@@ -3235,6 +3235,119 @@
       if (typeof onDone === 'function') setTimeout(onDone, 100);
     }
 
+    // Append a single completed word to the streaming container with the
+    // smoke reveal animation. Whitespace gets appended as a plain text node
+    // so the browser's normal whitespace handling kicks in.
+    function appendStreamWord(container, word) {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = word;
+      container.appendChild(span);
+      // Two rAFs: the first lets the initial styles paint, the second
+      // triggers the .seen transition. Without this, the word can flash
+      // into existence without the smoke effect.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          span.classList.add('seen');
+        });
+      });
+      scrollToLatest();
+    }
+
+    // Push streamed characters into a buffer and commit complete words
+    // (anything followed by whitespace) into the container as .word spans.
+    // The unfinished tail (trailing partial word) is returned so the caller
+    // can prepend it on the next chunk.
+    function commitStreamWords(container, buffer) {
+      // Find the last whitespace; everything up to and including it is
+      // a sequence of complete words. Anything after is the in-progress
+      // token still being streamed.
+      let lastWs = -1;
+      for (let i = buffer.length - 1; i >= 0; i--) {
+        const ch = buffer[i];
+        if (ch === ' ' || ch === '\n' || ch === '\t' || ch === '\r') { lastWs = i; break; }
+      }
+      if (lastWs === -1) return buffer;
+      const completePart = buffer.slice(0, lastWs + 1);
+      const incomplete = buffer.slice(lastWs + 1);
+      // Split completePart on whitespace runs, preserving them as their
+      // own tokens so we can re-emit them as text nodes.
+      const tokens = completePart.split(/(\s+)/);
+      for (const t of tokens) {
+        if (!t) continue;
+        if (/^\s+$/.test(t)) {
+          container.appendChild(document.createTextNode(t));
+        } else {
+          appendStreamWord(container, t);
+        }
+      }
+      return incomplete;
+    }
+
+    // Read an SSE stream from the chat API and render Jesus's reply word
+    // by word as fragments arrive. Returns metadata captured from the
+    // final `done` event (or sets blocked/fallback if the server screened
+    // the response after streaming).
+    async function renderStreamedReply(container, response) {
+      container.innerHTML = '';
+      const reader = response.body && response.body.getReader && response.body.getReader();
+      if (!reader) throw new Error('streaming not supported');
+      const decoder = new TextDecoder();
+      let sseBuf = '';
+      let wordBuf = '';
+      const result = { blocked: false, fallback: null, metadata: null };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        sseBuf += decoder.decode(value, { stream: true });
+
+        let eventEnd;
+        while ((eventEnd = sseBuf.indexOf('\n\n')) !== -1) {
+          const eventBlock = sseBuf.slice(0, eventEnd);
+          sseBuf = sseBuf.slice(eventEnd + 2);
+          for (const line of eventBlock.split('\n')) {
+            if (!line.startsWith('data: ')) continue;
+            const dataStr = line.slice(6);
+            try {
+              const evt = JSON.parse(dataStr);
+              if (evt.type === 'text' && evt.text) {
+                wordBuf = commitStreamWords(container, wordBuf + evt.text);
+              } else if (evt.type === 'blocked') {
+                result.blocked = true;
+                result.fallback = evt.fallback || '';
+              } else if (evt.type === 'done') {
+                result.metadata = evt;
+              } else if (evt.type === 'error') {
+                throw new Error(evt.message || 'stream error');
+              }
+            } catch (e) {
+              if (e && e.message === 'stream error') throw e;
+              // Otherwise ignore JSON parse errors on partial events.
+            }
+          }
+        }
+      }
+
+      // Flush any trailing word that arrived without a trailing whitespace.
+      if (wordBuf.length > 0) {
+        if (/\S/.test(wordBuf)) {
+          appendStreamWord(container, wordBuf);
+        } else {
+          container.appendChild(document.createTextNode(wordBuf));
+        }
+        wordBuf = '';
+      }
+
+      // If output was blocked server-side, clear what streamed and render
+      // the fallback. Crisis-style instant render so the resources land fast.
+      if (result.blocked) {
+        renderInstantReply(container, result.fallback || 'something came between us. try again in a moment.');
+      }
+
+      return result;
+    }
+
     // Scroll to the bottom of the messages container. Uses requestAnimationFrame
     // to wait for layout to settle, then scrolls. Also uses scrollIntoView as a
     // belt-and-suspenders fallback for mobile viewports where scrollTop can lag.
@@ -3346,35 +3459,30 @@
         }
 
         if (!response.ok && response.status !== 429) throw new Error('Request failed');
-        const data = await response.json();
 
-        if (data.tier && window.__setCurrentTier) {
-          window.__setCurrentTier(data.tier);
-        }
-        const tierFromResponse = data.tier || 'anonymous';
-
-        if (typeof data.remaining === 'number') {
-          updateCounter(data.remaining, tierFromResponse);
-        }
-
-        const reply = (data.reply || '').trim();
-        if (response.ok) history.push({ role: 'assistant', content: reply });
-
-        // Transition from thinking to speaking — sun warms up.
+        // Successful response is now a Server-Sent Events stream from
+        // /api/chat. Words arrive at Anthropic generation speed and are
+        // smoke-revealed individually as they land. Final metadata
+        // (full reply, remaining, tier) comes in the `done` event.
         setState('speaking');
 
-        // Crisis responses render instantly. Everything else: considered mode.
-        if (isCrisisResponse(reply)) {
-          renderInstantReply(responseDiv, reply, () => {
-            setState(null);
-            updateSendState();
-          });
-        } else {
-          renderConsideredReply(responseDiv, reply, () => {
-            setState(null);
-            updateSendState();
-          });
+        const result = await renderStreamedReply(responseDiv, response);
+        const meta = result.metadata || {};
+        const finalReply = (meta.reply || '').trim();
+        const tierFromResponse = meta.tier || 'anonymous';
+
+        if (meta.tier && window.__setCurrentTier) {
+          window.__setCurrentTier(meta.tier);
         }
+        if (typeof meta.remaining === 'number') {
+          updateCounter(meta.remaining, tierFromResponse);
+        }
+        if (response.ok && finalReply) {
+          history.push({ role: 'assistant', content: finalReply });
+        }
+
+        setState(null);
+        updateSendState();
 
         // Trigger memory update for paid users (fire and forget).
         // Runs after every N exchanges to avoid summarizing after every single message.

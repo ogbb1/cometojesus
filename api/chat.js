@@ -2599,44 +2599,107 @@ export default async function handler(req, res) {
     });
   }
 
-  // Call Anthropic API
+  // Call Anthropic API with streaming so words arrive at generation
+  // speed instead of after the full reply is buffered server-side.
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        'accept': 'text/event-stream'
       },
       body: JSON.stringify({
         model: 'claude-opus-4-6',
         max_tokens: 1200,
         system: systemArray,
         messages: messages,
-        thinking: { type: 'adaptive' }
+        thinking: { type: 'adaptive' },
+        stream: true
       })
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Anthropic error:', response.status, errText);
+    if (!upstream.ok) {
+      const errText = await upstream.text();
+      console.error('Anthropic error:', upstream.status, errText);
       return res.status(500).json({
         reply: 'something came between us. try again in a moment.'
       });
     }
 
-    const data = await response.json();
+    // Switch our response into SSE mode and start piping text deltas to
+    // the client as they arrive from Anthropic. The full reply is also
+    // accumulated in memory so we can run output-block screening,
+    // persistence, and usage tracking once the stream completes.
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
 
-    // Record actual spending from usage data
+    const reader = upstream.body.getReader();
+    const decoder = new TextDecoder();
+    let sseBuffer = '';
+    let fullReply = '';
+    let usageData = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      sseBuffer += decoder.decode(value, { stream: true });
+
+      // Anthropic sends discrete events delimited by blank lines.
+      let eventEnd;
+      while ((eventEnd = sseBuffer.indexOf('\n\n')) !== -1) {
+        const eventBlock = sseBuffer.slice(0, eventEnd);
+        sseBuffer = sseBuffer.slice(eventEnd + 2);
+        for (const line of eventBlock.split('\n')) {
+          if (!line.startsWith('data: ')) continue;
+          const dataStr = line.slice(6);
+          try {
+            const evt = JSON.parse(dataStr);
+            if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+              const fragment = scrubEmDashes(evt.delta.text || '');
+              if (fragment) {
+                fullReply += fragment;
+                res.write('data: ' + JSON.stringify({ type: 'text', text: fragment }) + '\n\n');
+              }
+            } else if (evt.type === 'message_start' && evt.message?.usage) {
+              usageData = { ...evt.message.usage };
+            } else if (evt.type === 'message_delta' && evt.usage) {
+              usageData = { ...(usageData || {}), ...evt.usage };
+            }
+          } catch (e) {
+            // Ignore JSON parse errors on partial / unknown events.
+          }
+        }
+      }
+    }
+
+    fullReply = fullReply.trim();
+
+    // Output screening on the assembled full reply. If anything blocked
+    // shows up (jailbreak echoes, etc.), tell the client to discard what
+    // it streamed and render the soft fallback instead.
+    if (outputBlocked(fullReply)) {
+      console.warn('Output blocked by screening filter');
+      res.write('data: ' + JSON.stringify({ type: 'blocked', fallback: OUTPUT_FALLBACK }) + '\n\n');
+      res.end();
+      return;
+    }
+
+    // Spend recording (cheap Redis incr, awaited).
     let costCentsForThisCall = 0;
-    if (data.usage) {
-      costCentsForThisCall = calculateCostCents(data.usage);
+    if (usageData) {
+      costCentsForThisCall = calculateCostCents(usageData);
       await recordSpend(costCentsForThisCall);
     }
 
-    // Record per-user usage + check thresholds + fire alerts.
-    // Fire-and-forget — never delay the reply for tracking work.
-    if (data.usage && costCentsForThisCall > 0) {
+    // Per-user usage tracking + threshold alerts. Fire-and-forget here
+    // matches the prior pattern; the work doesn't need to block the
+    // final "done" event reaching the client.
+    if (usageData && costCentsForThisCall > 0) {
       const fingerprintForLog = !user?.id ? fingerprint : null;
       (async () => {
         await recordPerUserUsageAndMaybeAlert({
@@ -2645,7 +2708,7 @@ export default async function handler(req, res) {
           conversationId: conversationId || null,
           tier,
           model: 'claude-opus-4-6',
-          usage: data.usage,
+          usage: usageData,
           costCents: costCentsForThisCall,
           userEmail: user?.email || null,
         });
@@ -2654,47 +2717,42 @@ export default async function handler(req, res) {
       });
     }
 
-    let reply = (data.content || [])
-      .filter(c => c.type === 'text')
-      .map(c => c.text)
-      .join('')
-      .trim();
-
-    reply = scrubEmDashes(reply);
-
-    if (outputBlocked(reply)) {
-      console.warn('Output blocked by screening filter');
-      return res.status(200).json({
-        reply: OUTPUT_FALLBACK,
-        remaining: usage.remaining,
-        tier,
-      });
-    }
-
-    // Persist the exchange for any signed-in user BEFORE returning the reply.
-    // Vercel serverless can kill fire-and-forget promises when the response
-    // is sent and the function exits, risking lost messages on slow DB writes.
-    // Awaiting adds typically 200-500ms but guarantees the message is saved
-    // before the user sees it on the client. Anonymous users (no user.id)
-    // skip persistence; they have nothing to recall.
+    // Persist the exchange before signaling done. Vercel serverless can
+    // kill background promises when the function exits, so we await this
+    // just like the previous (non-streaming) implementation did.
     if (user?.id && conversationId) {
       try {
         await ensureConversationRow(conversationId, user.id);
-        await persistMessages(conversationId, user.id, lastUserMessage.content, reply);
+        await persistMessages(conversationId, user.id, lastUserMessage.content, fullReply);
       } catch (err) {
         console.warn('message persistence block failed (non-fatal):', err);
       }
     }
 
-    return res.status(200).json({
-      reply,
+    // Final event: full reply (for client-side history.push), counter
+    // remaining, current tier. Closes the SSE stream.
+    res.write('data: ' + JSON.stringify({
+      type: 'done',
+      reply: fullReply,
       remaining: usage.remaining,
       tier,
-    });
+    }) + '\n\n');
+    res.end();
   } catch (err) {
     console.error('Handler error:', err);
-    return res.status(500).json({
-      reply: 'something came between us. try again in a moment.'
-    });
+    if (res.headersSent) {
+      // Already streaming; append an error event then close.
+      try {
+        res.write('data: ' + JSON.stringify({
+          type: 'error',
+          message: 'something came between us. try again in a moment.'
+        }) + '\n\n');
+      } catch (_) {}
+      try { res.end(); } catch (_) {}
+    } else {
+      return res.status(500).json({
+        reply: 'something came between us. try again in a moment.'
+      });
+    }
   }
 }
