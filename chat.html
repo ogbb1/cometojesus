@@ -2534,7 +2534,12 @@
             },
           });
           if (result.error) {
-            showAuthMessage(result.error.message);
+            const msg = result.error.message || '';
+            if (msg.includes('already registered') || msg.includes('already exists')) {
+              showAuthMessage('an account with that email already exists. try signing in.');
+            } else {
+              showAuthMessage(msg);
+            }
           } else if (result.data.user && !result.data.session) {
             if (window.va) window.va('event', { name: 'signup_completed' });
             // Email confirmation required, switch to pending view for cleaner UX

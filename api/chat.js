@@ -1,7 +1,7 @@
 // api/chat.js — Vercel serverless function
 // v8: Three-tier auth-aware caps + Supabase integration.
 //   - Anonymous: 5 messages lifetime per fingerprint (small taste before sign-in wall)
-//   - Free logged-in: 25 messages per calendar month, tracked in Supabase
+//   - Free logged-in: 10 messages per calendar month, tracked in Supabase
 //   - Paid logged-in: unlimited, checked against Supabase subscriptions table
 //
 // Claude Sonnet 4.6 with adaptive thinking, prompt caching, $20/day spend cap.
@@ -1633,7 +1633,7 @@ const USER_RED_THRESHOLD_CENTS = 2500;     // $25 — likely abuse, suspend
 const ANONYMOUS_LIFETIME_LIMIT = 5;        // 5 messages ever for anonymous users
 const ANONYMOUS_TTL_SECONDS = 60 * 24 * 60 * 60;  // 60 days — effectively "lifetime" for a fingerprint
 const FREE_LOGGED_IN_DAILY_LIMIT = 10;     // 10 messages per day for free logged-in
-const FREE_LOGGED_IN_MONTHLY_LIMIT = 25;   // 25 messages per calendar month for free logged-in
+const FREE_LOGGED_IN_MONTHLY_LIMIT = 10;   // 10 messages per calendar month for free logged-in
 const GLOBAL_DAILY_CAP = 5000;             // global safety valve
 
 // ========== CRISIS HANDLING ==========

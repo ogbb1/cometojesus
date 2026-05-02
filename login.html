@@ -477,7 +477,7 @@
           showError("that email and password don't match. try again?");
         } else if (error.message.includes('Email not confirmed')) {
           showError('check your email to confirm your account first.');
-        } else if (error.message.includes('already registered')) {
+        } else if (error.message.includes('already registered') || error.message.includes('already exists')) {
           showError('an account with that email already exists. try signing in.');
         } else {
           showError(error.message);
