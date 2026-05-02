@@ -60,9 +60,12 @@ export default async function handler(req, res) {
   );
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
+  // usage_log stores cost in micros (1 cent = 10000 micros). Convert to
+  // cents in-process so the rest of this function (thresholds, email
+  // dollars math) stays simple.
   const { data: rows, error } = await supabaseAdmin
     .from('usage_log')
-    .select('cost_cents, user_id')
+    .select('cost_micros, user_id')
     .gte('created_at', since);
 
   if (error) {
@@ -78,7 +81,8 @@ export default async function handler(req, res) {
   }
 
   const safeRows = rows || [];
-  const totalCents = safeRows.reduce((a, r) => a + (r.cost_cents || 0), 0);
+  const totalMicros = safeRows.reduce((a, r) => a + (r.cost_micros || 0), 0);
+  const totalCents = Math.floor(totalMicros / 10000);
   const callCount = safeRows.length;
   const uniqueUsers = new Set(
     safeRows.map(r => r.user_id).filter(Boolean)
@@ -99,16 +103,17 @@ export default async function handler(req, res) {
     });
   }
 
-  // Above threshold: aggregate top spenders for the email.
-  const userTotals = {};
+  // Above threshold: aggregate top spenders for the email. Sum in micros
+  // for precision, convert to dollars only at display.
+  const userTotalsMicros = {};
   for (const r of safeRows) {
     if (!r.user_id) continue;
-    userTotals[r.user_id] = (userTotals[r.user_id] || 0) + (r.cost_cents || 0);
+    userTotalsMicros[r.user_id] = (userTotalsMicros[r.user_id] || 0) + (r.cost_micros || 0);
   }
-  const topSpenders = Object.entries(userTotals)
+  const topSpenders = Object.entries(userTotalsMicros)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
-    .map(([id, cents]) => ({ id, dollars: (cents / 100).toFixed(2) }));
+    .map(([id, micros]) => ({ id, dollars: (micros / 1000000).toFixed(2) }));
 
   // Best-effort email resolution. Non-fatal if the auth-schema query fails.
   const userEmails = {};

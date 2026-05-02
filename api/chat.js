@@ -2018,23 +2018,25 @@ async function recordPerUserUsageAndMaybeAlert({
 
   const inputTokens = usage?.input_tokens || 0;
   const outputTokens = usage?.output_tokens || 0;
-  const cacheReadTokens = usage?.cache_read_input_tokens || 0;
-  const cacheWriteTokens = usage?.cache_creation_input_tokens || 0;
+  const cachedInputTokens = usage?.cache_read_input_tokens || 0;
+  const thinkingTokens = usage?.thinking_tokens || 0;
+  // 1 cent = 10,000 micros. usage_log.cost_micros is BIGINT for precision.
+  const costMicros = costCents * 10000;
 
   // Always log to usage_log (regardless of tier, even anonymous).
-  // Anonymous = user_id null, fingerprint set.
+  // Production schema columns: id, user_id, conversation_id, input_tokens,
+  // cached_input_tokens, output_tokens, thinking_tokens, cost_micros,
+  // model, created_at. No fingerprint, tier, or cache_write_tokens columns.
   try {
     await supabaseAdmin.from('usage_log').insert({
       user_id: userId || null,
-      fingerprint: fingerprint || null,
       conversation_id: conversationId || null,
-      tier,
       model,
       input_tokens: inputTokens,
+      cached_input_tokens: cachedInputTokens,
       output_tokens: outputTokens,
-      cache_read_tokens: cacheReadTokens,
-      cache_write_tokens: cacheWriteTokens,
-      cost_cents: costCents,
+      thinking_tokens: thinkingTokens,
+      cost_micros: costMicros,
     });
   } catch (err) {
     console.error('usage_log insert failed (non-fatal):', err);
@@ -2045,12 +2047,13 @@ async function recordPerUserUsageAndMaybeAlert({
   // can't realistically rack up significant cost.
   if (!userId) return;
 
-  // Atomically increment the user's billing-period rollup
+  // Atomically increment the user's billing-period rollup. RPC takes
+  // micros to match the cost_micros column in user_billing_period.
   let periodState;
   try {
     const { data, error } = await supabaseAdmin.rpc('record_user_usage', {
       p_user_id: userId,
-      p_cost_cents: costCents,
+      p_cost_micros: costMicros,
     });
     if (error) {
       console.error('record_user_usage RPC failed:', error);
@@ -2064,7 +2067,9 @@ async function recordPerUserUsageAndMaybeAlert({
 
   if (!periodState) return;
 
-  const newCostCents = periodState.new_cost_cents;
+  // RPC returns new_cost_micros; convert back to cents for the existing
+  // threshold comparisons (USER_YELLOW/RED_THRESHOLD_CENTS are in cents).
+  const newCostCents = Math.floor((periodState.new_cost_micros || 0) / 10000);
   const yellowAlreadySent = periodState.yellow_already_sent;
   const redAlreadySent = periodState.red_already_sent;
 
