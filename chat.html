@@ -1409,6 +1409,127 @@
   }
   .sidebar-settings:hover { color: var(--ink); }
 
+  /* ===== Sidebar gate (non-paid) =====
+     Overlays the conversation list area for non-paid users with a soft
+     upgrade CTA. Sits above sidebar-list via z-index so the empty list
+     does not show through. */
+  .sidebar-gate {
+    position: absolute;
+    top: 73px; left: 0; right: 0; bottom: 56px;
+    background: linear-gradient(to bottom,
+      rgba(244, 234, 219, 0.7) 0%,
+      rgba(244, 234, 219, 0.92) 60%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px 28px;
+    z-index: 5;
+  }
+  .sidebar-gate-eyebrow {
+    font-family: var(--font-prose);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    opacity: 0.85;
+  }
+  .sidebar-gate-text {
+    font-family: var(--font-prose);
+    font-size: 18px;
+    line-height: 1.45;
+    color: var(--ink-mid);
+    margin-bottom: 24px;
+    max-width: 22ch;
+  }
+  .sidebar-gate-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 11px; letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .sidebar-gate-cta:hover {
+    background: var(--accent-deep);
+    transform: translateY(-1px);
+  }
+
+  /* ===== Chat topbar =====
+     Fixed strip at top of chat: conversation title (center) and counter
+     (right). Sits below corner pills (which are z-index 5). On desktop
+     with sidebar permanent, topbar offsets right by sidebar width. */
+  .chat-topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 3;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 90px 0 90px;
+    background: rgba(244, 234, 219, 0.45);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border-bottom: 1px solid rgba(28, 20, 9, 0.06);
+    pointer-events: none;
+  }
+  .chat-topbar > * { pointer-events: auto; }
+  .chat-topbar-title {
+    font-family: var(--font-prose);
+    font-size: 15px;
+    color: var(--ink-mid);
+    font-style: italic;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 50ch;
+    flex: 1;
+    opacity: 0.92;
+  }
+  .chat-topbar-counter {
+    position: absolute;
+    right: 90px;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-whisper);
+    white-space: nowrap;
+  }
+  .chat-topbar-counter a {
+    color: var(--ink-soft);
+    border-bottom: 1px solid rgba(28, 20, 9, 0.18);
+    text-decoration: none;
+    margin-left: 6px;
+  }
+  .chat-topbar-counter a:hover { color: var(--ink); }
+  /* On phones, drop the counter to its own line on the topbar right area */
+  @media (max-width: 600px) {
+    .chat-topbar { padding: 0 64px; height: 50px; }
+    .chat-topbar-counter { right: 16px; font-size: 9px; }
+    .chat-topbar-title { font-size: 13px; }
+  }
+  /* When the keyboard is open on mobile, hide topbar so it doesn't
+     compete with the composer for space. */
+  body.keyboard-open .chat-topbar { opacity: 0; pointer-events: none; }
+
+  /* ===== Non-paid sidebar treatment (desktop default-open) =====
+     For non-paid signed-in or anonymous users on desktop, the sidebar
+     drawer auto-opens on page load and the gate overlay shows. Users
+     can still close it via the toggle. */
+  @media (min-width: 1024px) {
+    body.show-sidebar-gate .sidebar-backdrop { display: none !important; }
+  }
+
   /* ========== SETTINGS MODAL ========== */
   .settings-modal {
     position: fixed;
@@ -1667,6 +1788,11 @@
     </div>
   </div>
 
+  <div class="chat-topbar" id="chatTopbar">
+    <div class="chat-topbar-title" id="chatTopbarTitle"></div>
+    <div class="chat-topbar-counter" id="chatTopbarCounter"></div>
+  </div>
+
   <button class="auth-corner" id="authCorner" type="button"><i class="fa-solid fa-door-open"></i><span id="authCornerText">sign in</span></button>
   <a href="/" class="home-corner" id="homeCorner"><i class="fa-solid fa-house"></i><span>home</span></a>
   <div class="auth-menu" id="authMenu">
@@ -1688,6 +1814,11 @@
     </div>
     <div class="sidebar-list" id="sidebarList">
       <div class="sidebar-empty">no conversations yet. start speaking.</div>
+    </div>
+    <div class="sidebar-gate" id="sidebarGate" style="display:none;">
+      <div class="sidebar-gate-eyebrow">a quiet feature</div>
+      <div class="sidebar-gate-text">subscribe to keep your conversations and let Me remember you across them.</div>
+      <a href="/upgrade.html" class="sidebar-gate-cta">subscribe <i class="fa-solid fa-arrow-right"></i></a>
     </div>
     <div class="sidebar-footer">
       <button class="sidebar-settings" id="sidebarSettings" type="button"><i class="fa-solid fa-gear"></i>settings</button>
@@ -2643,7 +2774,7 @@
             conversationId: cid,
             messages: history.slice() // copy
           })
-        }).then(r => {
+        }).then(async r => {
           if (!r.ok) {
             console.warn('memory update non-ok:', r.status);
           } else {
@@ -2651,6 +2782,11 @@
             if (window.__reloadSidebar) {
               setTimeout(() => window.__reloadSidebar(), 500);
             }
+            // Also try to pick up the freshly-generated title for the topbar.
+            try {
+              const data = await r.json();
+              if (data && data.title) setTopbarTitle(data.title);
+            } catch (e) { /* no-op */ }
           }
         }).catch(err => {
           console.warn('memory update failed (non-fatal):', err);
@@ -2841,30 +2977,46 @@
       renderConsideredReply(div, greeting, () => setState(null));
     }
 
+    const chatTopbarCounterEl = document.getElementById('chatTopbarCounter');
+    const chatTopbarTitleEl = document.getElementById('chatTopbarTitle');
+
+    function setTopbarTitle(title) {
+      if (chatTopbarTitleEl) {
+        chatTopbarTitleEl.textContent = title || '';
+      }
+    }
+
     function updateCounter(remaining, tier) {
+      const writeBoth = (html, visible) => {
+        // Mirror counter content into both the bottom counter (legacy) and
+        // the new topbar counter so the two stay in sync.
+        counterEl.innerHTML = html;
+        if (chatTopbarCounterEl) chatTopbarCounterEl.innerHTML = html;
+        if (visible) counterEl.classList.add('visible');
+        else counterEl.classList.remove('visible');
+      };
+
       // Paid tier: no counter
       if (tier === 'paid') {
-        counterEl.classList.remove('visible');
-        counterEl.innerHTML = '';
+        writeBoth('', false);
         return;
       }
       if (remaining === undefined || remaining === null || remaining < 0) {
-        counterEl.classList.remove('visible');
-        counterEl.innerHTML = '';
+        writeBoth('', false);
         return;
       }
       if (remaining <= 0) {
-        counterEl.innerHTML = '';
-        counterEl.classList.remove('visible');
+        writeBoth('', false);
         return;
       }
       const word = remaining === 1 ? 'message' : 'messages';
       if (tier === 'free') {
-        counterEl.innerHTML = remaining + ' ' + word + ' remaining this month';
+        writeBoth(remaining + ' ' + word + ' remaining this month', true);
       } else {
         // anonymous
-        counterEl.innerHTML = remaining + ' ' + word + ' remaining · <a id="counterSignInLink">sign in for more</a>';
-        // Wire the sign-in link
+        writeBoth(remaining + ' ' + word + ' remaining · <a id="counterSignInLink">sign in for more</a>', true);
+        // Wire the sign-in link in the bottom counter (the topbar copy uses
+        // the same id which is OK since only one is visible at a time per tier)
         const link = document.getElementById('counterSignInLink');
         if (link) {
           link.style.cursor = 'pointer';
@@ -2874,7 +3026,6 @@
           });
         }
       }
-      counterEl.classList.add('visible');
     }
 
     function showLimitReached(tier, reason) {
@@ -3361,6 +3512,7 @@
       if (typeof startNewConversation === 'function') {
         startNewConversation();
       }
+      setTopbarTitle('');
       closeSidebar();
     });
 
@@ -3437,28 +3589,44 @@
 
     function updateSidebarVisibility() {
       const tier = (window.__getCurrentTier && window.__getCurrentTier()) || 'anonymous';
-      // Sidebar toggle: shown to any signed-in user (paid OR free). Both
-      // have conversation histories worth accessing. Only anonymous users
-      // (no account) don't see the toggle, since they have no saved convos.
-      if (tier === 'paid' || tier === 'free') {
-        sidebarToggleEl.classList.add('visible');
-        document.body.classList.add('has-sidebar-toggle');
+      // Sidebar toggle is shown to ALL users. Non-paid users will see the
+      // gate inside the sidebar; paid users see their conversation list.
+      sidebarToggleEl.classList.add('visible');
+      document.body.classList.add('has-sidebar-toggle');
+
+      // Gate visibility: non-paid (anonymous + free) see the upgrade gate
+      // covering the conversation list area; paid users see the list.
+      const gateEl = document.getElementById('sidebarGate');
+      const listEl = document.getElementById('sidebarList');
+      if (tier === 'paid') {
+        if (gateEl) gateEl.style.display = 'none';
+        if (listEl) listEl.style.display = '';
+        document.body.classList.remove('show-sidebar-gate');
       } else {
-        sidebarToggleEl.classList.remove('visible');
-        document.body.classList.remove('has-sidebar-toggle');
-        closeSidebar();
+        if (gateEl) gateEl.style.display = '';
+        if (listEl) listEl.style.display = 'none';
+        document.body.classList.add('show-sidebar-gate');
       }
-      // Manage subscription row in settings — paid only
+
+      // Auto-open the sidebar on desktop for non-paid users, once per
+      // session, so they immediately see the gate and the upgrade CTA.
+      // They can still close it via the toggle.
+      if (tier !== 'paid' && window.innerWidth >= 1024 && !window.__nonPaidSidebarAutoOpened) {
+        window.__nonPaidSidebarAutoOpened = true;
+        openSidebar();
+      }
+
+      // Manage subscription row in settings, paid only.
       const subRowEl = document.getElementById('settingsSubscriptionRow');
       if (subRowEl) {
         subRowEl.style.display = (tier === 'paid') ? '' : 'none';
       }
-      // Auth-menu subscription item — paid only
+      // Auth-menu subscription item, paid only.
       const subMenuEl = document.getElementById('authMenuSubscription');
       if (subMenuEl) {
         subMenuEl.style.display = (tier === 'paid') ? '' : 'none';
       }
-      // Plan row in settings — show + label based on tier
+      // Plan row in settings, show + label based on tier.
       updatePlanRow(tier);
     }
 
@@ -3549,7 +3717,10 @@
           dateEl.textContent = formatSidebarDate(d);
           el.appendChild(dateEl);
         }
-        el.addEventListener('click', () => loadConversation(item.id));
+        el.addEventListener('click', () => {
+          loadConversation(item.id);
+          setTopbarTitle(item.title || item.summary || '');
+        });
         sidebarListEl.appendChild(el);
       }
     }
@@ -3569,6 +3740,21 @@
       const user = window.__getCurrentUser && window.__getCurrentUser();
       if (!supabase || !user) return;
       try {
+        // Look up the conversation's title for the topbar; non-fatal if it
+        // fails or returns nothing (new convos have no title yet).
+        try {
+          const { data: convoData } = await supabase
+            .from('conversations')
+            .select('title, summary')
+            .eq('id', id)
+            .maybeSingle();
+          if (convoData) {
+            setTopbarTitle(convoData.title || convoData.summary || '');
+          } else {
+            setTopbarTitle('');
+          }
+        } catch (e) { /* no-op */ }
+
         const { data, error } = await supabase
           .from('messages')
           .select('role, content, created_at')
