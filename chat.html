@@ -1482,19 +1482,6 @@
     pointer-events: none;
   }
   .chat-topbar > * { pointer-events: auto; }
-  .chat-topbar-title {
-    font-family: var(--font-prose);
-    font-size: 15px;
-    color: var(--ink-mid);
-    font-style: italic;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 50ch;
-    flex: 1;
-    opacity: 0.92;
-  }
   .chat-topbar-counter {
     position: absolute;
     right: 90px;
@@ -1516,7 +1503,6 @@
   @media (max-width: 600px) {
     .chat-topbar { padding: 0 64px; height: 50px; }
     .chat-topbar-counter { right: 16px; font-size: 9px; }
-    .chat-topbar-title { font-size: 13px; }
   }
   /* When the keyboard is open on mobile, hide topbar so it doesn't
      compete with the composer for space. */
@@ -1789,7 +1775,6 @@
   </div>
 
   <div class="chat-topbar" id="chatTopbar">
-    <div class="chat-topbar-title" id="chatTopbarTitle"></div>
     <div class="chat-topbar-counter" id="chatTopbarCounter"></div>
   </div>
 
@@ -2774,7 +2759,7 @@
             conversationId: cid,
             messages: history.slice() // copy
           })
-        }).then(async r => {
+        }).then(r => {
           if (!r.ok) {
             console.warn('memory update non-ok:', r.status);
           } else {
@@ -2782,11 +2767,6 @@
             if (window.__reloadSidebar) {
               setTimeout(() => window.__reloadSidebar(), 500);
             }
-            // Also try to pick up the freshly-generated title for the topbar.
-            try {
-              const data = await r.json();
-              if (data && data.title) setTopbarTitle(data.title);
-            } catch (e) { /* no-op */ }
           }
         }).catch(err => {
           console.warn('memory update failed (non-fatal):', err);
@@ -2978,13 +2958,6 @@
     }
 
     const chatTopbarCounterEl = document.getElementById('chatTopbarCounter');
-    const chatTopbarTitleEl = document.getElementById('chatTopbarTitle');
-
-    function setTopbarTitle(title) {
-      if (chatTopbarTitleEl) {
-        chatTopbarTitleEl.textContent = title || '';
-      }
-    }
 
     function updateCounter(remaining, tier) {
       const writeBoth = (html, visible) => {
@@ -3512,7 +3485,6 @@
       if (typeof startNewConversation === 'function') {
         startNewConversation();
       }
-      setTopbarTitle('');
       closeSidebar();
     });
 
@@ -3717,10 +3689,7 @@
           dateEl.textContent = formatSidebarDate(d);
           el.appendChild(dateEl);
         }
-        el.addEventListener('click', () => {
-          loadConversation(item.id);
-          setTopbarTitle(item.title || item.summary || '');
-        });
+        el.addEventListener('click', () => loadConversation(item.id));
         sidebarListEl.appendChild(el);
       }
     }
@@ -3740,21 +3709,6 @@
       const user = window.__getCurrentUser && window.__getCurrentUser();
       if (!supabase || !user) return;
       try {
-        // Look up the conversation's title for the topbar; non-fatal if it
-        // fails or returns nothing (new convos have no title yet).
-        try {
-          const { data: convoData } = await supabase
-            .from('conversations')
-            .select('title, summary')
-            .eq('id', id)
-            .maybeSingle();
-          if (convoData) {
-            setTopbarTitle(convoData.title || convoData.summary || '');
-          } else {
-            setTopbarTitle('');
-          }
-        } catch (e) { /* no-op */ }
-
         const { data, error } = await supabase
           .from('messages')
           .select('role, content, created_at')
