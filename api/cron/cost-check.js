@@ -70,14 +70,7 @@ export default async function handler(req, res) {
 
   if (error) {
     console.error('cost-check query error:', error);
-    return res.status(500).json({
-      error: 'query failed',
-      detail: error.message || String(error),
-      code: error.code || null,
-      hint: error.hint || null,
-      url_set: !!process.env.SUPABASE_URL,
-      key_set: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    });
+    return res.status(500).json({ error: 'query failed' });
   }
 
   const safeRows = rows || [];
