@@ -614,7 +614,7 @@
   */
   .auth-corner {
     position: fixed;
-    top: calc(22px + env(safe-area-inset-top));
+    top: calc(13px + env(safe-area-inset-top));
     right: 26px;
     z-index: 5;
     display: inline-flex;
@@ -657,7 +657,7 @@
      a discoverable path to the marketing/info homepage from inside the chat. */
   .home-corner {
     position: fixed;
-    top: calc(22px + env(safe-area-inset-top));
+    top: calc(13px + env(safe-area-inset-top));
     left: 26px;
     z-index: 5;
     display: inline-flex;
@@ -692,7 +692,7 @@
   /* Tiny floating menu when user clicks their name */
   .auth-menu {
     position: fixed;
-    top: calc(58px + env(safe-area-inset-top));
+    top: calc(50px + env(safe-area-inset-top));
     right: 26px;
     z-index: 6;
     background: rgba(255, 252, 244, 0.95);
@@ -751,16 +751,16 @@
   @media (max-width: 600px) {
     .auth-corner {
       font-size: 16px;
-      top: calc(16px + env(safe-area-inset-top));
+      top: calc(10px + env(safe-area-inset-top));
       right: 18px;
     }
     .auth-menu {
-      top: calc(46px + env(safe-area-inset-top));
+      top: calc(44px + env(safe-area-inset-top));
       right: 18px;
     }
     .home-corner {
       font-size: 16px;
-      top: calc(16px + env(safe-area-inset-top));
+      top: calc(10px + env(safe-area-inset-top));
       left: 18px;
     }
     body.has-sidebar-toggle .home-corner {
@@ -1254,7 +1254,7 @@
   /* ========== SIDEBAR (conversation history) ========== */
   .sidebar-toggle {
     position: fixed;
-    top: 22px;
+    top: calc(10px + env(safe-area-inset-top));
     left: 22px;
     width: 36px;
     height: 36px;
@@ -1720,7 +1720,7 @@
   }
 
   @media (max-width: 640px) {
-    .sidebar-toggle { top: 18px; left: 18px; }
+    .sidebar-toggle { top: calc(7px + env(safe-area-inset-top)); left: 18px; }
     .sidebar { width: 300px; }
   }
 
@@ -1794,7 +1794,7 @@
   </div>
 
   <!-- Sidebar (visible only for paid users) -->
-  <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Open conversation history">
+  <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle conversation history">
     <i class="fa-solid fa-bars"></i>
   </button>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -3597,7 +3597,17 @@
       sidebarBackdropEl.classList.remove('visible');
     }
 
-    sidebarToggleEl.addEventListener('click', openSidebar);
+    // Toggle: if drawer is open, close it; otherwise open. Without this,
+    // non-paid desktop users have no close affordance (backdrop is hidden
+    // for them via the show-sidebar-gate body class) and the drawer would
+    // get stuck open with only ESC as a way out.
+    sidebarToggleEl.addEventListener('click', () => {
+      if (sidebarEl.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
     sidebarBackdropEl.addEventListener('click', closeSidebar);
 
     sidebarNewConvoEl.addEventListener('click', () => {
