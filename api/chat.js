@@ -1619,7 +1619,7 @@ const PRICE_CACHE_WRITE_PER_MTOK = 6.25;   // 1.25x input (5min TTL)
 const PRICE_CACHE_READ_PER_MTOK = 0.50;    // 10% of input
 
 // ========== DAILY SPENDING CAP ==========
-const DAILY_SPEND_CAP_USD = 20.00;
+const DAILY_SPEND_CAP_USD = 50.00;
 const SPEND_CAP_WINDOW_SECONDS = 26 * 60 * 60;
 
 // ========== PER-USER USAGE THRESHOLDS ==========
