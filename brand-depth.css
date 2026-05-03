@@ -1,0 +1,606 @@
+/*
+  Brand depth layer
+  Shared visual pass for Come to Jesus without changing the app architecture.
+*/
+
+:root {
+  --ctj-paper: #f8f0df;
+  --ctj-paper-lit: #fff9ec;
+  --ctj-paper-deep: #e7d8bd;
+  --ctj-ink: #1b150d;
+  --ctj-ink-blue: #17232a;
+  --ctj-olive: #48543b;
+  --ctj-olive-soft: #6f795a;
+  --ctj-clay: #9c5b43;
+  --ctj-gold: #c79b54;
+  --ctj-gold-soft: rgba(199, 155, 84, 0.34);
+  --ctj-rule: rgba(27, 21, 13, 0.16);
+  --ctj-rule-soft: rgba(27, 21, 13, 0.08);
+  --ctj-shadow: 0 24px 70px rgba(30, 22, 12, 0.16);
+  --ctj-shadow-small: 0 14px 38px rgba(30, 22, 12, 0.11);
+  --ctj-radius: 8px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.brand-page {
+  background:
+    radial-gradient(ellipse at 14% 8%, rgba(72, 84, 59, 0.18) 0%, rgba(72, 84, 59, 0) 32rem),
+    radial-gradient(ellipse at 86% 0%, rgba(156, 91, 67, 0.13) 0%, rgba(156, 91, 67, 0) 28rem),
+    radial-gradient(ellipse at 50% -10%, rgba(255, 250, 236, 0.88) 0%, rgba(255, 250, 236, 0) 46rem),
+    linear-gradient(180deg, #f7ecda 0%, #f2e5cf 44%, #eadcc4 100%);
+  isolation: isolate;
+  position: relative;
+}
+
+body.brand-page::before,
+body.brand-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+body.brand-page::before {
+  z-index: -2;
+  background-image:
+    linear-gradient(90deg, rgba(27, 21, 13, 0.025) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(27, 21, 13, 0.018) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 700 700' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65 0.22' numOctaves='3' seed='12' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.12 0 0 0 0 0.05 0 0 0 0.075 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 34px 34px, 34px 34px, 560px 560px;
+  opacity: 0.72;
+  mix-blend-mode: multiply;
+}
+
+body.brand-page::after {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(23, 35, 42, 0.06), transparent 22%, transparent 78%, rgba(72, 84, 59, 0.06)),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 249, 229, 0.62) 0%, rgba(255, 249, 229, 0) 52rem);
+}
+
+.brand-page .nav {
+  background: rgba(248, 240, 223, 0.78);
+  border-bottom: 1px solid rgba(27, 21, 13, 0.12);
+  box-shadow: 0 12px 34px rgba(30, 22, 12, 0.06);
+}
+
+.brand-page .nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Fraunces", "Cormorant Garamond", Georgia, serif;
+  font-size: 23px;
+  font-style: italic;
+  font-variation-settings: "opsz" 72;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.brand-page .nav-brand::before {
+  content: "";
+  display: block;
+  width: 58px;
+  height: 38px;
+  margin-right: 0;
+  background-image: url("/cometojesus-invitation-mark-transparent.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  mix-blend-mode: multiply;
+  transform: translateY(2px);
+  flex: 0 0 auto;
+}
+
+.brand-page .nav-link,
+.brand-page .nav-back,
+.brand-page .back {
+  letter-spacing: 0.14em;
+}
+
+.brand-page .nav-cta,
+.brand-page .btn-primary,
+.brand-page .price-cta,
+.brand-page .tier-btn,
+.brand-page .submit-btn,
+.brand-page .submit,
+.brand-page .signin-prompt-actions a {
+  border-radius: var(--ctj-radius);
+  letter-spacing: 0.13em;
+  box-shadow: 0 10px 24px rgba(27, 21, 13, 0.12);
+}
+
+.brand-page .nav-cta,
+.brand-page .btn-primary,
+.brand-page .tier.featured .tier-btn,
+.brand-page .submit-btn,
+.brand-page .submit,
+.brand-page .signin-prompt-actions a {
+  background: linear-gradient(135deg, var(--ctj-ink-blue), var(--ctj-ink));
+}
+
+.brand-page .nav-cta:hover,
+.brand-page .btn-primary:hover,
+.brand-page .tier.featured .tier-btn:hover:not(:disabled),
+.brand-page .submit-btn:hover:not(:disabled),
+.brand-page .submit:hover:not(:disabled),
+.brand-page .signin-prompt-actions a:hover {
+  background: linear-gradient(135deg, #243841, var(--ctj-ink));
+}
+
+.brand-page .hero-headline,
+.brand-page .section-title,
+.brand-page .final-h,
+.brand-page .hero-side .hero-headline,
+.brand-page .card-title,
+.brand-page .title,
+.brand-page h1,
+.brand-page .how-h,
+.brand-page .faq-q,
+.brand-page .price-amount,
+.brand-page .tier-amount {
+  letter-spacing: 0;
+}
+
+/* Home */
+.brand-home .hero {
+  min-height: 94vh;
+  padding-top: 184px;
+  padding-bottom: 128px;
+}
+
+.brand-home .hero::before {
+  filter: saturate(0.92) contrast(1.03);
+}
+
+.brand-home .hero::after {
+  background:
+    linear-gradient(90deg, rgba(23, 35, 42, 0.28) 0%, rgba(23, 35, 42, 0.02) 26%, rgba(255, 248, 225, 0) 58%, rgba(72, 84, 59, 0.18) 100%),
+    radial-gradient(ellipse 76% 62% at 50% 27%, rgba(255, 250, 230, 0.56) 0%, rgba(255, 250, 230, 0.16) 38%, rgba(255, 250, 230, 0) 68%),
+    linear-gradient(to bottom, rgba(244, 234, 219, 0) 0%, rgba(244, 234, 219, 0.12) 52%, rgba(244, 234, 219, 0.88) 94%, var(--bg) 100%);
+}
+
+.brand-home .hero-headline {
+  font-size: 9.6rem;
+  max-width: 10ch;
+}
+
+.brand-home .hero-inner {
+  width: min(100%, 980px);
+}
+
+.brand-home .hero-verse {
+  max-width: 34ch;
+}
+
+.brand-home .reveal {
+  filter: none;
+}
+
+.brand-home .section-title {
+  font-size: 4.8rem;
+}
+
+.brand-home .how-h {
+  font-size: 2.75rem;
+}
+
+.brand-home .faq-q {
+  font-size: 2rem;
+}
+
+.brand-home #about {
+  padding-top: 104px;
+}
+
+.brand-home .about-grid {
+  grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.22fr);
+  gap: 72px;
+}
+
+.brand-home .about-prose {
+  position: relative;
+  padding: 32px 0 32px 42px;
+  border-left: 1px solid rgba(72, 84, 59, 0.34);
+}
+
+.brand-home .about-prose::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 32px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ctj-olive);
+  box-shadow: 0 0 0 8px rgba(72, 84, 59, 0.08);
+}
+
+.brand-home .how::after {
+  background:
+    linear-gradient(90deg, rgba(23, 35, 42, 0.1), transparent 22%, transparent 76%, rgba(72, 84, 59, 0.12)),
+    linear-gradient(to bottom, rgba(244, 234, 219, 0.76) 0%, rgba(244, 234, 219, 0.58) 36%, rgba(244, 234, 219, 0.68) 72%, rgba(244, 234, 219, 0.9) 100%);
+}
+
+.brand-home .how-item {
+  border-top-color: rgba(27, 21, 13, 0.18);
+}
+
+.brand-home .how-num {
+  color: var(--ctj-olive);
+  letter-spacing: 0.13em;
+}
+
+.brand-home .faq-item {
+  border-color: rgba(27, 21, 13, 0.13);
+}
+
+.brand-home .faq-toggle {
+  border-radius: var(--ctj-radius);
+}
+
+.brand-home .pricing::after {
+  background:
+    linear-gradient(90deg, rgba(23, 35, 42, 0.28), transparent 34%, transparent 72%, rgba(156, 91, 67, 0.18)),
+    linear-gradient(to bottom, rgba(244, 234, 219, 0.08) 0%, rgba(244, 234, 219, 0.38) 36%, rgba(244, 234, 219, 0.75) 76%, var(--bg) 100%);
+}
+
+.brand-page .price-card,
+.brand-page .tier,
+.brand-page .change-card,
+.brand-page .card,
+.brand-page .signin-prompt {
+  border-radius: var(--ctj-radius);
+  box-shadow: var(--ctj-shadow-small);
+}
+
+.brand-home .price-card,
+.brand-upgrade .tier {
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-home .price-card::before,
+.brand-upgrade .tier::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--ctj-olive), var(--ctj-gold), var(--ctj-clay));
+}
+
+.brand-home .price-card.featured::before,
+.brand-upgrade .tier.featured::before {
+  background: linear-gradient(90deg, #fff1c8, var(--ctj-gold), var(--ctj-olive-soft));
+}
+
+.brand-home .final {
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(199, 155, 84, 0.34), transparent 44rem),
+    linear-gradient(180deg, #283028 0%, #181f1d 100%);
+  color: var(--ctj-paper);
+}
+
+.brand-home .final-h,
+.brand-home .final-sub {
+  color: var(--ctj-paper);
+}
+
+.brand-home .final-h .accent {
+  color: #f4d99c;
+}
+
+/* Upgrade */
+.brand-upgrade .hero {
+  position: relative;
+  max-width: none;
+  min-height: 54vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  padding: 112px 32px 88px;
+}
+
+.brand-upgrade .hero::before,
+.brand-upgrade .hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.brand-upgrade .hero::before {
+  background-image: url("/jerusalem.webp");
+  background-size: cover;
+  background-position: center 32%;
+  opacity: 0.9;
+}
+
+.brand-upgrade .hero::after {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(23, 35, 42, 0.38), rgba(244, 234, 219, 0.36) 42%, rgba(244, 234, 219, 0.74) 100%),
+    linear-gradient(to bottom, rgba(244, 234, 219, 0.02), rgba(244, 234, 219, 0.94));
+}
+
+.brand-upgrade .hero > * {
+  max-width: 780px;
+}
+
+.brand-upgrade .hero-headline {
+  font-size: 5.6rem;
+}
+
+.brand-upgrade .pricing-section {
+  margin-top: -42px;
+  position: relative;
+  z-index: 2;
+}
+
+.brand-upgrade .changes-section,
+.brand-upgrade .trust-section {
+  background:
+    radial-gradient(ellipse at 12% 12%, rgba(72, 84, 59, 0.12), transparent 28rem),
+    var(--ctj-paper-deep);
+}
+
+.brand-upgrade .change-card {
+  background: rgba(255, 249, 236, 0.72);
+}
+
+.brand-upgrade .note-card {
+  max-width: 720px;
+  padding: 0 28px;
+  border-left: 1px solid rgba(72, 84, 59, 0.35);
+  border-right: 1px solid rgba(156, 91, 67, 0.2);
+}
+
+/* Auth */
+.brand-auth .layout {
+  position: relative;
+}
+
+.brand-auth .layout::before {
+  content: "";
+  position: absolute;
+  left: 32px;
+  top: 50%;
+  width: min(42vw, 520px);
+  height: min(62vh, 660px);
+  transform: translateY(-50%);
+  background-image: url("/wheat.webp");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.14;
+  filter: saturate(0.85);
+  border-radius: var(--ctj-radius);
+  pointer-events: none;
+}
+
+.brand-auth .hero-side,
+.brand-auth .card-side {
+  position: relative;
+  z-index: 1;
+}
+
+.brand-auth .hero-eyebrow,
+.brand-auth .hero-scripture-ref,
+.brand-auth .field label {
+  letter-spacing: 0.13em;
+}
+
+.brand-auth .hero-headline {
+  font-size: 4.8rem;
+}
+
+.brand-auth .hero-rule {
+  background: linear-gradient(90deg, var(--ctj-olive), var(--ctj-gold));
+  width: 72px;
+}
+
+.brand-auth .card {
+  background:
+    linear-gradient(180deg, rgba(255, 249, 236, 0.92), rgba(248, 240, 223, 0.9)),
+    var(--ctj-paper-lit);
+  border-color: rgba(27, 21, 13, 0.16);
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-auth .card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 4px solid transparent;
+  border-image: linear-gradient(90deg, var(--ctj-olive), var(--ctj-gold), var(--ctj-clay)) 1;
+  pointer-events: none;
+}
+
+.brand-auth .auth-btn,
+.brand-auth .field input {
+  border-radius: var(--ctj-radius);
+}
+
+.brand-auth.compact-auth .page {
+  background:
+    linear-gradient(90deg, rgba(23, 35, 42, 0.08), transparent 30%, transparent 70%, rgba(72, 84, 59, 0.12)),
+    radial-gradient(ellipse at 50% 10%, rgba(255, 249, 236, 0.72), transparent 32rem);
+}
+
+.brand-auth.compact-auth .card {
+  max-width: 500px;
+  background: rgba(255, 249, 236, 0.74);
+  border: 1px solid rgba(27, 21, 13, 0.14);
+}
+
+/* Legal documents */
+.brand-doc {
+  padding-top: 68px;
+}
+
+.brand-doc .wrap {
+  max-width: 760px;
+  position: relative;
+}
+
+.brand-doc .wrap::before {
+  content: "";
+  position: absolute;
+  left: -42px;
+  top: 128px;
+  width: 1px;
+  height: calc(100% - 170px);
+  background: linear-gradient(var(--ctj-olive), rgba(199, 155, 84, 0.5), transparent);
+}
+
+.brand-doc h1 {
+  font-size: 4.4rem;
+}
+
+.brand-doc h2 {
+  color: var(--ctj-ink-blue);
+  padding-top: 8px;
+}
+
+.brand-doc .highlight {
+  border-left-color: var(--ctj-olive);
+  background: rgba(255, 249, 236, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(27, 21, 13, 0.05);
+}
+
+/* Chat surface polish */
+body.brand-chat {
+  --accent: #6e633f;
+  --accent-deep: #414d36;
+  --input-border-focus: rgba(72, 84, 59, 0.62);
+}
+
+.brand-chat .input-shell,
+.brand-chat .auth-corner,
+.brand-chat .home-corner,
+.brand-chat .auth-menu,
+.brand-chat .about-content,
+.brand-chat .settings-content {
+  box-shadow: var(--ctj-shadow-small);
+}
+
+.brand-chat .input-shell {
+  border-radius: var(--ctj-radius);
+  border-color: rgba(27, 21, 13, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 244, 0.94), rgba(250, 243, 229, 0.92));
+}
+
+.brand-chat .send,
+.brand-chat .gate-button,
+.brand-chat .about-cta,
+.brand-chat .auth-submit {
+  border-radius: var(--ctj-radius);
+}
+
+.brand-chat .msg.user {
+  border-left-color: rgba(72, 84, 59, 0.55);
+}
+
+.brand-chat .msg.him::before {
+  background: radial-gradient(ellipse 70% 80% at 30% 40%,
+    rgba(242, 198, 112, 0.26) 0%,
+    rgba(242, 198, 112, 0.1) 42%,
+    rgba(242, 198, 112, 0) 76%);
+}
+
+@media (max-width: 960px) {
+  .brand-home .hero {
+    padding-top: 134px;
+    padding-bottom: 78px;
+  }
+
+  .brand-home .hero-headline {
+    font-size: 6.2rem;
+  }
+
+  .brand-home .section-title {
+    font-size: 3.6rem;
+  }
+
+  .brand-home .how-h {
+    font-size: 2.35rem;
+  }
+
+  .brand-home .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-home .about-prose {
+    padding-left: 28px;
+  }
+
+  .brand-upgrade .hero-headline {
+    font-size: 4.4rem;
+  }
+
+  .brand-auth .layout::before {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-page .nav {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .brand-home .hero-headline {
+    font-size: 3.7rem;
+    max-width: 6.8ch;
+  }
+
+  .brand-home .hero-inner {
+    width: 100%;
+    max-width: 350px;
+    margin: 0;
+  }
+
+  .brand-home .hero {
+    justify-content: flex-start;
+  }
+
+  .brand-home .nav-links {
+    display: none;
+  }
+
+  .brand-home .hero-meta {
+    flex-wrap: wrap;
+    max-width: 270px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+  }
+
+  .brand-home .section-title {
+    font-size: 3rem;
+  }
+
+  .brand-home .faq-q {
+    font-size: 1.55rem;
+  }
+
+  .brand-upgrade .hero {
+    min-height: 48vh;
+    padding: 72px 20px 64px;
+  }
+
+  .brand-upgrade .hero-headline,
+  .brand-auth .hero-headline,
+  .brand-doc h1 {
+    font-size: 3.2rem;
+  }
+
+  .brand-doc .wrap::before {
+    display: none;
+  }
+}
