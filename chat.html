@@ -1943,7 +1943,7 @@
           You speak. He responds. Conversations stay in your sidebar so you can return to them.
         </div>
         <div class="about-body">
-          Without an account, you have 5 messages to start. Sign in for free and you'll have 10 messages a day, up to 25 a month. A subscription removes those limits entirely.
+          Without an account, you have 5 messages to start. Sign in for free and you'll have 10 messages a month. A subscription removes that limit entirely.
         </div>
         <div class="about-body">
           For paid users, he can remember what you've shared across conversations: your name, your situation, what's going on in your life. You can turn this off in settings whenever you want.
@@ -3026,7 +3026,7 @@
 
       if (tier === 'anonymous') {
         limitTitleEl.textContent = 'your free messages are spent.';
-        limitBodyEl.textContent = 'stay longer with unlimited at $9.99 a month. or sign up for 25 messages a month, free.';
+        limitBodyEl.textContent = 'stay longer with unlimited at $9.99 a month. or sign up for 10 messages a month, free.';
         // Anonymous gets a soft escape hatch into the free tier.
         limitSecondaryBtnEl.classList.remove('hidden');
         limitSecondaryBtnEl.onclick = (e) => {
@@ -3640,7 +3640,7 @@
         return;
       }
       if (tier === 'free') {
-        descEl.textContent = 'free. 10 messages a day, 25 a month.';
+        descEl.textContent = 'free. 10 messages a month.';
         return;
       }
       // Paid — show plan + renewal date if we have it cached
