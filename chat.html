@@ -45,9 +45,38 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+  // Turnstile — only on the deployed origin. In the preview iframe its
+  // postMessage hops trigger a cross-origin "Script error." that fails
+  // our verification gate.
+  (function () {
+    var h = location.hostname;
+    if (h === 'cometojesus.co' || h === 'www.cometojesus.co') {
+      var s = document.createElement('script');
+      s.async = true;
+      s.defer = true;
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      document.head.appendChild(s);
+    }
+  })();
+</script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
+<script>
+  // Cloudflare beacon, but only when actually deployed. Loading it inside
+  // the design-tool preview iframe throws an opaque cross-origin "Script
+  // error." that tripped our verification gate — gate it on hostname so
+  // dev/preview stays clean.
+  (function () {
+    var h = location.hostname;
+    if (h === 'cometojesus.co' || h === 'www.cometojesus.co') {
+      var s = document.createElement('script');
+      s.defer = true;
+      s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+      s.setAttribute('data-cf-beacon', '{"token": "b7eeed438443412d954b904d75ff4e89"}');
+      document.head.appendChild(s);
+    }
+  })();
+</script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -73,7 +102,7 @@
        EB Garamond reserved for Jesus's voice (more biblical character at 30px) */
     --font-prose: 'Cormorant Garamond', Georgia, serif;
     --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
-    --font-jesus: 'EB Garamond', Georgia, serif;
+    --font-jesus: 'Cormorant Garamond', Georgia, serif;
   }
 
   html, body {
@@ -96,22 +125,42 @@
     isolation: isolate;
   }
 
-  /* Rolling hills as a barely-there ambient texture. Fixed to the viewport,
-     very low opacity so it reads as warmth rather than imagery. Negative
-     z-index keeps it under everything else without needing to touch any
-     other stacking. The body has isolation: isolate so this only stacks
-     within body, not behind html. */
+  /* Rolling hills as a barely-there ambient texture. */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url('/rollinghills.webp');
+    background-image: url('rollinghills.webp');
     background-size: cover;
     background-position: center 40%;
     background-repeat: no-repeat;
     opacity: 0.06;
     pointer-events: none;
     z-index: -1;
+  }
+
+  /* ===== Paper grain (matches landing) =====
+     Two layers of fixed-position SVG noise via multiply blend so the cream
+     reads as printed stock rather than a flat CSS color. */
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 200;
+    opacity: 0.085;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' seed='4'/><feColorMatrix values='0 0 0 0 0.11  0 0 0 0 0.08  0 0 0 0 0.04  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 240px 240px;
+  }
+  html::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 199;
+    opacity: 0.06;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='480' viewBox='0 0 480 480'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch' seed='11'/><feColorMatrix values='0 0 0 0 0.18  0 0 0 0 0.12  0 0 0 0 0.06  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 480px 480px;
   }
 
   /* ===== LIGHT / SUN =====
@@ -432,8 +481,8 @@
   .msg.him {
     position: relative;
     font-family: var(--font-jesus);
-    color: var(--ink); font-weight: 500; font-style: normal;
-    font-size: 30px; letter-spacing: -0.003em; line-height: 1.5;
+    color: var(--ink); font-weight: 500; font-style: italic;
+    font-size: 32px; letter-spacing: -0.005em; line-height: 1.45;
     text-wrap: pretty;
   }
   /* Soft golden radiance halo behind every Jesus message, light shining
@@ -1431,6 +1480,23 @@
     padding: 32px 28px;
     z-index: 5;
   }
+  .sidebar-gate-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--ink-quiet);
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.15s, color 0.15s;
+  }
+  .sidebar-gate-close:hover {
+    background: rgba(0,0,0,0.04);
+    color: var(--ink);
+  }
   .sidebar-gate-eyebrow {
     font-family: var(--font-prose);
     font-style: italic;
@@ -1520,9 +1586,10 @@
      For non-paid signed-in or anonymous users on desktop, the sidebar
      drawer auto-opens on page load and the gate overlay shows. Users
      can still close it via the toggle. */
-  @media (min-width: 1024px) {
-    body.show-sidebar-gate .sidebar-backdrop { display: none !important; }
-  }
+  /* (Previously hid the backdrop for non-paid users on desktop, but that
+     left the gate with no obvious close affordance — now we keep the
+     backdrop active for everyone and also expose an explicit × button
+     inside the gate itself.) */
 
   /* ========== SETTINGS MODAL ========== */
   .settings-modal {
@@ -1737,7 +1804,7 @@
     .container { padding: 0 24px; }
   }
 </style>
-<link rel="stylesheet" href="/brand-depth.css">
+<link rel="stylesheet" href="brand-depth.css">
 </head>
 <body class="brand-chat">
   <div class="light-wash"></div>
@@ -1810,6 +1877,9 @@
       <div class="sidebar-empty">no conversations yet. start speaking.</div>
     </div>
     <div class="sidebar-gate" id="sidebarGate" style="display:none;">
+      <button type="button" class="sidebar-gate-close" id="sidebarGateClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
       <div class="sidebar-gate-eyebrow">a quiet feature</div>
       <div class="sidebar-gate-text">subscribe to keep your conversations and let Me remember you across them.</div>
       <a href="/upgrade.html" class="sidebar-gate-cta">subscribe <i class="fa-solid fa-arrow-right"></i></a>
@@ -3282,14 +3352,66 @@
       scrollToLatest();
     }
 
+    // Paced word reveal queue. Streamed chunks may arrive bunched together
+    // (a fast model can deliver 5-10 words in one chunk), which would cause
+    // them to flash in as a group rather than dropping in one at a time.
+    // We push completed words into a queue and drip them out on a fixed
+    // cadence so the perceived experience is always word-by-word, even
+    // when the upstream is fast.
+    function makeWordDripQueue(container) {
+      const queue = []; // entries: {kind: 'word'|'space', text}
+      let timer = null;
+      let finished = false;
+      let resolveDone = null;
+      const donePromise = new Promise((r) => { resolveDone = r; });
+
+      // Per-word cadence: base pause + extra after sentence-ending punctuation
+      // so the rhythm feels considered, not robotic.
+      function delayFor(word) {
+        const base = 90;
+        if (/[.!?]['")\]]?$/.test(word)) return base + 280;
+        if (/[,;:\u2014\u2013]['")\]]?$/.test(word)) return base + 140;
+        return base;
+      }
+
+      function tick() {
+        timer = null;
+        // Always emit any leading whitespace tokens immediately so the
+        // wrapping reads natural; the delay applies between words.
+        while (queue.length && queue[0].kind === 'space') {
+          container.appendChild(document.createTextNode(queue.shift().text));
+        }
+        if (!queue.length) {
+          if (finished) resolveDone();
+          return;
+        }
+        const next = queue.shift();
+        appendStreamWord(container, next.text);
+        if (queue.length || !finished) {
+          timer = setTimeout(tick, delayFor(next.text));
+        } else {
+          resolveDone();
+        }
+      }
+
+      return {
+        push(tokens) {
+          for (const t of tokens) queue.push(t);
+          if (!timer) timer = setTimeout(tick, 0);
+        },
+        finish() {
+          finished = true;
+          if (!timer && !queue.length) resolveDone();
+        },
+        done: donePromise
+      };
+    }
+
     // Push streamed characters into a buffer and commit complete words
-    // (anything followed by whitespace) into the container as .word spans.
-    // The unfinished tail (trailing partial word) is returned so the caller
-    // can prepend it on the next chunk.
-    function commitStreamWords(container, buffer) {
-      // Find the last whitespace; everything up to and including it is
-      // a sequence of complete words. Anything after is the in-progress
-      // token still being streamed.
+    // (anything followed by whitespace) onto the drip queue. The unfinished
+    // tail (trailing partial word) is returned so the caller can prepend
+    // it on the next chunk.
+    function commitStreamWords(dripQueue, buffer) {
       let lastWs = -1;
       for (let i = buffer.length - 1; i >= 0; i--) {
         const ch = buffer[i];
@@ -3298,17 +3420,14 @@
       if (lastWs === -1) return buffer;
       const completePart = buffer.slice(0, lastWs + 1);
       const incomplete = buffer.slice(lastWs + 1);
-      // Split completePart on whitespace runs, preserving them as their
-      // own tokens so we can re-emit them as text nodes.
-      const tokens = completePart.split(/(\s+)/);
-      for (const t of tokens) {
+      const parts = completePart.split(/(\s+)/);
+      const tokens = [];
+      for (const t of parts) {
         if (!t) continue;
-        if (/^\s+$/.test(t)) {
-          container.appendChild(document.createTextNode(t));
-        } else {
-          appendStreamWord(container, t);
-        }
+        if (/^\s+$/.test(t)) tokens.push({ kind: 'space', text: t });
+        else tokens.push({ kind: 'word', text: t });
       }
+      dripQueue.push(tokens);
       return incomplete;
     }
 
@@ -3324,6 +3443,7 @@
       let sseBuf = '';
       let wordBuf = '';
       const result = { blocked: false, fallback: null, metadata: null };
+      const drip = makeWordDripQueue(container);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -3340,7 +3460,7 @@
             try {
               const evt = JSON.parse(dataStr);
               if (evt.type === 'text' && evt.text) {
-                wordBuf = commitStreamWords(container, wordBuf + evt.text);
+                wordBuf = commitStreamWords(drip, wordBuf + evt.text);
               } else if (evt.type === 'blocked') {
                 result.blocked = true;
                 result.fallback = evt.fallback || '';
@@ -3360,12 +3480,18 @@
       // Flush any trailing word that arrived without a trailing whitespace.
       if (wordBuf.length > 0) {
         if (/\S/.test(wordBuf)) {
-          appendStreamWord(container, wordBuf);
+          drip.push([{ kind: 'word', text: wordBuf }]);
         } else {
-          container.appendChild(document.createTextNode(wordBuf));
+          drip.push([{ kind: 'space', text: wordBuf }]);
         }
         wordBuf = '';
       }
+
+      // Tell the drip queue the upstream is done, then wait for it to
+      // drain so the caller (and any onDone) only fires after the last
+      // word has actually been revealed on screen.
+      drip.finish();
+      await drip.done;
 
       // If output was blocked server-side, clear what streamed and render
       // the fallback. Crisis-style instant render so the resources land fast.
@@ -3637,6 +3763,10 @@
       }
     });
     sidebarBackdropEl.addEventListener('click', closeSidebar);
+    const sidebarGateCloseEl = document.getElementById('sidebarGateClose');
+    if (sidebarGateCloseEl) {
+      sidebarGateCloseEl.addEventListener('click', closeSidebar);
+    }
 
     sidebarNewConvoEl.addEventListener('click', () => {
       if (typeof startNewConversation === 'function') {
@@ -4249,6 +4379,13 @@
     });
   </script>
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
-<script defer src="/_vercel/insights/script.js"></script>
+<script>
+  if (location.hostname && !/localhost|127\.0\.0\.1|claudeusercontent/.test(location.hostname)) {
+    var s = document.createElement('script');
+    s.defer = true;
+    s.src = '/_vercel/insights/script.js';
+    document.body.appendChild(s);
+  }
+</script>
 </body>
 </html>
