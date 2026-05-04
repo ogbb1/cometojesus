@@ -614,11 +614,11 @@ body.brand-chat {
   .brand-home .hero-inner {
     width: 100%;
     max-width: 350px;
-    margin: 0;
+    margin: 0 auto;
   }
 
   .brand-home .hero {
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .brand-home .nav-links {
