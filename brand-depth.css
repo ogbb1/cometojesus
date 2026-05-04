@@ -621,8 +621,12 @@ body.brand-chat {
     justify-content: center;
   }
 
+  /* On mobile keep the .nav-links flex container visible so the
+     enter (chat) CTA still renders. The text links inside it are
+     hidden by index.html's existing .nav-link { display: none } at
+     the 960px breakpoint — let that handle the link removal. */
   .brand-home .nav-links {
-    display: none;
+    gap: 8px;
   }
 
   .brand-home .hero-meta {
