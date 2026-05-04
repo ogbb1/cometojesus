@@ -78,6 +78,8 @@ body.brand-page::after {
   font-weight: 500;
   letter-spacing: 0;
   line-height: 1;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .brand-page .nav-brand::before {
@@ -99,6 +101,11 @@ body.brand-page::after {
 .brand-page .nav-back,
 .brand-page .back {
   letter-spacing: 0.14em;
+}
+
+.brand-page .nav-back {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .brand-page .nav-cta,
@@ -570,8 +577,33 @@ body.brand-chat {
 
 @media (max-width: 600px) {
   .brand-page .nav {
-    padding-left: 18px;
-    padding-right: 18px;
+    gap: 12px;
+    min-height: 76px;
+    padding: 12px 16px;
+  }
+
+  .brand-page .nav-brand {
+    gap: 8px;
+    font-size: 21px;
+  }
+
+  .brand-page .nav-brand::before {
+    width: 44px;
+    height: 30px;
+  }
+
+  .brand-page .nav-back {
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    line-height: 1.05;
+  }
+
+  .brand-page .nav-cta,
+  .brand-page .btn-primary,
+  .brand-page .price-cta,
+  .brand-page .tier-btn {
+    letter-spacing: 0.14em;
   }
 
   .brand-home .hero-headline {
@@ -602,7 +634,38 @@ body.brand-chat {
   }
 
   .brand-home .section-title {
-    font-size: 3rem;
+    font-size: 2.7rem;
+    line-height: 1.04;
+  }
+
+  .brand-home .voice-copy .section-title {
+    max-width: 100%;
+    font-size: 2.45rem;
+  }
+
+  .brand-home .voice-copy .section-lede {
+    font-size: 21px;
+    line-height: 1.48;
+  }
+
+  .brand-home .voice-note {
+    font-size: 18px;
+    line-height: 1.56;
+  }
+
+  .brand-home .voice-row {
+    padding: 22px 0;
+  }
+
+  .brand-home .voice-line {
+    font-size: 20px;
+    line-height: 1.42;
+    overflow-wrap: anywhere;
+  }
+
+  .brand-home .voice-line.him {
+    font-size: 24px;
+    line-height: 1.36;
   }
 
   .brand-home .faq-q {
@@ -620,7 +683,97 @@ body.brand-chat {
     font-size: 3.2rem;
   }
 
+  .brand-upgrade .tier-btn {
+    padding-left: 16px;
+    padding-right: 16px;
+    white-space: nowrap;
+  }
+
+  .brand-upgrade .tier-badge {
+    white-space: nowrap;
+  }
+
+  .brand-chat .gate {
+    padding: calc(20px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));
+  }
+
+  .brand-chat .gate-content {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .brand-chat .gate-body,
+  .brand-chat .gate-body.small {
+    max-width: 100%;
+    text-wrap: pretty;
+  }
+
+  .brand-chat .turnstile-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .brand-chat .gate-footer {
+    width: 100%;
+    line-height: 1.8;
+  }
+
   .brand-doc .wrap::before {
     display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-page .nav {
+    min-height: 68px;
+    padding: 10px 14px;
+  }
+
+  .brand-page .nav-brand {
+    gap: 7px;
+    font-size: 19px;
+  }
+
+  .brand-page .nav-brand::before {
+    width: 38px;
+    height: 26px;
+  }
+
+  .brand-page .nav-back {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+
+  .brand-home .section-title {
+    font-size: 2.45rem;
+  }
+
+  .brand-home .voice-copy .section-title {
+    font-size: 2.18rem;
+  }
+
+  .brand-page .btn-primary,
+  .brand-page .price-cta,
+  .brand-page .tier-btn {
+    font-size: 11px;
+    letter-spacing: 0.11em;
+  }
+
+  .brand-upgrade .tier-amount {
+    font-size: 40px;
+  }
+
+  .brand-upgrade .tier-btn {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .brand-chat .scripture-headline {
+    font-size: 38px;
+  }
+
+  .brand-chat .gate-title {
+    font-size: 20px;
   }
 }
