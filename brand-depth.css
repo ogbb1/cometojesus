@@ -288,8 +288,8 @@ body.brand-page::after {
 
 .brand-home .final {
   background:
-    radial-gradient(ellipse at 50% 100%, rgba(199, 155, 84, 0.34), transparent 44rem),
-    linear-gradient(180deg, #283028 0%, #181f1d 100%);
+    radial-gradient(ellipse at 50% 100%, rgba(255, 232, 178, 0.6), transparent 44rem),
+    linear-gradient(180deg, #1c1409 0%, #2d241a 60%, #3a2c18 100%);
   color: var(--ctj-paper);
 }
 
