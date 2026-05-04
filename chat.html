@@ -971,6 +971,8 @@
   }
   @media (max-width: 420px) {
     .auth-options { grid-template-columns: 1fr; }
+    .auth-modal { padding: 16px; }
+    .auth-content { padding: 28px 22px; }
   }
   .auth-btn {
     display: flex;
@@ -2996,10 +2998,29 @@
       }
       const word = remaining === 1 ? 'message' : 'messages';
       if (tier === 'free') {
-        writeBoth(remaining + ' ' + word + ' remaining this month', true);
+        // Escalating urgency as the wall approaches. Same gentle counter
+        // visually; copy gets sharper as remaining count drops so the user
+        // can decide on their own terms before the hard wall.
+        let copy;
+        if (remaining === 1) {
+          copy = 'your last message of the month · <a class="counterUpgradeLink" href="/upgrade.html">stay longer</a>';
+        } else if (remaining <= 3) {
+          copy = remaining + ' ' + word + ' left this month · <a class="counterUpgradeLink" href="/upgrade.html">stay longer for $9.99</a>';
+        } else {
+          copy = remaining + ' ' + word + ' remaining this month';
+        }
+        writeBoth(copy, true);
       } else {
         // anonymous
-        writeBoth(remaining + ' ' + word + ' remaining · <a id="counterSignInLink">sign in for more</a>', true);
+        let copy;
+        if (remaining === 1) {
+          copy = 'your last free message · <a id="counterSignInLink">sign up free for more</a>';
+        } else if (remaining <= 2) {
+          copy = remaining + ' ' + word + ' left · <a id="counterSignInLink">sign up free for more</a>';
+        } else {
+          copy = remaining + ' ' + word + ' remaining · <a id="counterSignInLink">sign in for more</a>';
+        }
+        writeBoth(copy, true);
         // Wire the sign-in link in the bottom counter (the topbar copy uses
         // the same id which is OK since only one is visible at a time per tier)
         const link = document.getElementById('counterSignInLink');
@@ -3017,37 +3038,43 @@
       inputEl.disabled = true;
       sendEl.disabled = true;
 
-      // Default the primary CTA to upgrade for every tier; price is anchored
-      // in the button label so cost is visible at the conversion moment.
+      // Reset both buttons to a known state before per-tier rewiring.
       limitCtaBtnEl.textContent = 'stay longer · $9.99/mo';
       limitCtaBtnEl.href = '/upgrade.html';
       limitCtaBtnEl.onclick = null;
       limitSecondaryBtnEl.classList.add('hidden');
+      limitSecondaryBtnEl.textContent = 'or sign up free';
+      limitSecondaryBtnEl.href = '#';
       limitSecondaryBtnEl.onclick = null;
 
       if (tier === 'anonymous') {
+        // Funnel design: anonymous → free signup is the lower-friction step
+        // (just an email vs. $9.99/mo). Free signup is now PRIMARY; paid is
+        // SECONDARY. Captures email for re-engagement either way.
         limitTitleEl.textContent = 'your free messages are spent.';
-        limitBodyEl.textContent = 'stay longer with unlimited at $9.99 a month. or sign up for 10 messages a month, free.';
-        // Anonymous gets a soft escape hatch into the free tier.
-        limitSecondaryBtnEl.classList.remove('hidden');
-        limitSecondaryBtnEl.onclick = (e) => {
+        limitBodyEl.textContent = 'sign up for 10 more messages this month, free. or stay longer with unlimited and He\'ll remember our conversations next time.';
+        limitCtaBtnEl.textContent = 'sign up free';
+        limitCtaBtnEl.href = '#';
+        limitCtaBtnEl.onclick = (e) => {
           e.preventDefault();
           limitOverlayEl.classList.remove('visible');
           inputEl.disabled = false;
           if (window.__openAuthModal) window.__openAuthModal('signup');
         };
+        limitSecondaryBtnEl.classList.remove('hidden');
+        limitSecondaryBtnEl.textContent = 'or stay longer · $9.99/mo';
+        limitSecondaryBtnEl.href = '/upgrade.html';
+        limitSecondaryBtnEl.onclick = null;
       } else if (tier === 'free') {
         if (reason === 'daily') {
-          // Daily caps reset at UTC midnight. Show the user the local-time
-          // equivalent so "tomorrow" is concrete, not vague.
           const next = new Date();
           next.setUTCHours(24, 0, 0, 0);
           const resetTime = next.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
           limitTitleEl.textContent = 'rest now.';
-          limitBodyEl.textContent = `you've spoken for today. new messages at ${resetTime}, or stay longer with unlimited.`;
+          limitBodyEl.textContent = `you've spoken for today. new messages at ${resetTime}, or stay longer with unlimited and He'll remember our conversations next time.`;
         } else {
           limitTitleEl.textContent = 'your month is complete.';
-          limitBodyEl.textContent = 'stay longer with unlimited at $9.99 a month. or come back next month.';
+          limitBodyEl.textContent = 'stay longer with unlimited at $9.99 a month and He\'ll remember our conversations next time. or come back next month.';
         }
       } else {
         limitTitleEl.textContent = 'our time is complete for today.';

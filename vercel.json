@@ -4,6 +4,7 @@
     { "source": "/home", "destination": "/", "permanent": true }
   ],
   "crons": [
-    { "path": "/api/cron/cost-check", "schedule": "0 14 * * *" }
+    { "path": "/api/cron/cost-check", "schedule": "0 14 * * *" },
+    { "path": "/api/cron/monthly-reset", "schedule": "0 14 1 * *" }
   ]
 }
