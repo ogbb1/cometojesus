@@ -12,6 +12,7 @@
 
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { recordAnalyticsEvent } from '../lib/analytics-server.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -177,6 +178,16 @@ export default async function handler(req, res) {
 
       // Collect billing address for tax compliance
       billing_address_collection: 'auto',
+    });
+
+    await recordAnalyticsEvent({
+      eventName: 'checkout_created',
+      userId: user.id,
+      pagePath: '/upgrade.html',
+      metadata: {
+        plan,
+        stripe_session: session.id,
+      },
     });
 
     return res.status(200).json({ url: session.url });

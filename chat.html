@@ -61,6 +61,7 @@
   })();
 </script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script defer src="/analytics.js"></script>
 <script>
   // Cloudflare beacon, but only when actually deployed. Loading it inside
   // the design-tool preview iframe throws an opaque cross-origin "Script
@@ -2422,6 +2423,7 @@
       setAuthMode(mode);
       setAuthView('signin');
       authModal.classList.add('visible');
+      if (window.ctjTrack) window.ctjTrack('auth_modal_opened', { mode });
       setTimeout(() => authEmailInput.focus(), 100);
     };
 
@@ -2567,6 +2569,9 @@
     googleBtn.addEventListener('click', async () => {
       hideAuthMessage();
       googleBtn.disabled = true;
+      if (authMode === 'signup' && window.ctjTrack) {
+        window.ctjTrack('signup_started', { method: 'google', surface: 'chat_modal' });
+      }
       try {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
@@ -2599,6 +2604,9 @@
       try {
         let result;
         if (authMode === 'signup') {
+          if (window.ctjTrack) {
+            window.ctjTrack('signup_started', { method: 'email', surface: 'chat_modal' });
+          }
           result = await supabase.auth.signUp({
             email,
             password,
@@ -2615,6 +2623,7 @@
             }
           } else if (result.data.user && !result.data.session) {
             if (window.va) window.va('event', { name: 'signup_completed' });
+            if (window.ctjTrack) window.ctjTrack('signup_completed', { method: 'email', confirmation: 'required', surface: 'chat_modal' });
             // Email confirmation required, switch to pending view for cleaner UX
             setAuthView('pending', {
               title: 'almost there.',
@@ -2625,6 +2634,7 @@
             });
           } else if (result.data.session) {
             if (window.va) window.va('event', { name: 'signup_completed' });
+            if (window.ctjTrack) window.ctjTrack('signup_completed', { method: 'email', confirmation: 'instant', surface: 'chat_modal' });
             showAuthMessage("you're in.", 'success');
             setTimeout(() => window.__closeAuthModal(), 800);
           }
@@ -2942,6 +2952,9 @@
         authCornerEl.classList.add('visible');
       }
     } catch (e) {}
+    if (!hasEntered && window.ctjTrack) {
+      window.ctjTrack('chat_gate_seen', { returning: false });
+    }
 
     window.onTurnstileSuccess = function(token) {
       turnstileToken = token;
@@ -3107,6 +3120,9 @@
     function showLimitReached(tier, reason) {
       inputEl.disabled = true;
       sendEl.disabled = true;
+      if (window.ctjTrack) {
+        window.ctjTrack('limit_hit', { tier, reason: reason || 'unknown' });
+      }
 
       // Reset both buttons to a known state before per-tier rewiring.
       limitCtaBtnEl.textContent = 'stay longer · $9.99/mo';
@@ -3532,6 +3548,7 @@
     }
 
     let chatStartedFired = false;
+    let userMessageCountThisPage = 0;
     async function send() {
       const text = inputEl.value.trim();
       if (!text || sendEl.disabled) return;
@@ -3540,6 +3557,7 @@
       sendEl.disabled = true;
       addMessage('user', text);
       history.push({ role: 'user', content: text });
+      userMessageCountThisPage += 1;
 
       // Funnel marker: fires once per page load when the user first commits
       // to the chat (sends a message). Page view tracks "reached chat", this
@@ -3547,6 +3565,10 @@
       if (!chatStartedFired) {
         chatStartedFired = true;
         if (window.va) window.va('event', { name: 'chat_started' });
+        if (window.ctjTrack) window.ctjTrack('chat_started', { tier: currentTier || 'unknown' });
+      }
+      if (userMessageCountThisPage === 3 && window.ctjTrack) {
+        window.ctjTrack('third_message_sent', { tier: currentTier || 'unknown' });
       }
 
       // Enter thinking state, sun dims, holds. Brief reverent pause.
@@ -3666,6 +3688,7 @@
       try { localStorage.setItem('cometojesus_entered', '1'); } catch (e) {}
       gateEl.classList.add('hidden');
       hasEntered = true;
+      if (window.ctjTrack) window.ctjTrack('chat_gate_entered', { returning: false });
       // Show the auth corner link after entering
       authCornerEl.classList.add('visible');
       setTimeout(() => {
@@ -3702,6 +3725,21 @@
         openAbout('how');
       });
     }
+    document.addEventListener('click', (e) => {
+      const upgradeLink = e.target.closest('a[href="/upgrade.html"]');
+      if (!upgradeLink || !window.ctjTrack) return;
+      const source = upgradeLink.classList.contains('sidebar-gate-cta')
+        ? 'chat_sidebar'
+        : upgradeLink.id === 'limitCtaBtn'
+          ? 'limit_overlay'
+          : upgradeLink.classList.contains('about-cta')
+            ? 'chat_about'
+            : 'chat_link';
+      window.ctjTrack('upgrade_clicked', { source, tier: currentTier || 'unknown' });
+      if (source === 'chat_sidebar') {
+        window.ctjTrack('sidebar_upgrade_clicked', { tier: currentTier || 'unknown' });
+      }
+    });
     aboutCloseEl.addEventListener('click', () => {
       aboutOverlayEl.classList.remove('visible');
     });

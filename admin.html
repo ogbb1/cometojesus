@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>admin. · Come to Jesus.</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="/cometojesus-favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/cometojesus-favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/cometojesus-touch-icon-180.png">
+<meta name="theme-color" content="#f4eadb">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root {
+    --bg: #f4eadb;
+    --paper: #fbf5e7;
+    --paper-soft: rgba(255, 252, 244, 0.72);
+    --ink: #1c1409;
+    --ink-mid: #3a2c1f;
+    --ink-soft: #6b5a47;
+    --muted: #9a8c76;
+    --rule: rgba(28, 20, 9, 0.12);
+    --accent: #7a5a30;
+    --olive: #48543b;
+    --clay: #9c5b43;
+    --gold: #c79b54;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-body: "Cormorant Garamond", Georgia, serif;
+    --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: var(--font-body);
+    background:
+      radial-gradient(ellipse at 16% 0%, rgba(72, 84, 59, 0.16), transparent 28rem),
+      radial-gradient(ellipse at 84% 4%, rgba(156, 91, 67, 0.12), transparent 30rem),
+      linear-gradient(180deg, #f8efdf 0%, #eadcc4 100%);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 60px;
+  }
+
+  .topbar {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 24px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 24px;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .brand::before {
+    content: "";
+    width: 48px;
+    height: 32px;
+    background: url("/cometojesus-invitation-mark-transparent.png") center / contain no-repeat;
+    mix-blend-mode: multiply;
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .select,
+  .button {
+    min-height: 40px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: rgba(255, 252, 244, 0.78);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 13px;
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .button.primary {
+    color: var(--bg);
+    border-color: var(--ink);
+    background: linear-gradient(135deg, #2b2116, var(--ink));
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 28px;
+    align-items: end;
+    padding: 44px 0 34px;
+    border-top: 1px solid var(--rule);
+  }
+  .eyebrow {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(52px, 8vw, 98px);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 0.95;
+    letter-spacing: 0;
+    max-width: 10ch;
+  }
+  .hero-note {
+    color: var(--ink-soft);
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.45;
+    max-width: 34ch;
+    justify-self: end;
+  }
+
+  .notice {
+    display: none;
+    margin: 0 0 22px;
+    padding: 16px 18px;
+    border: 1px solid rgba(156, 91, 67, 0.3);
+    border-left: 4px solid var(--clay);
+    border-radius: 8px;
+    background: rgba(255, 252, 244, 0.74);
+    color: var(--ink-mid);
+    font-size: 17px;
+    line-height: 1.45;
+  }
+  .notice.visible { display: block; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .card {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--paper-soft);
+    box-shadow: 0 14px 36px rgba(30, 22, 12, 0.08);
+  }
+  .stat {
+    padding: 18px;
+    min-height: 124px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: linear-gradient(90deg, var(--olive), var(--gold), var(--clay));
+  }
+  .stat-label {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 44px;
+    line-height: 1;
+    font-weight: 500;
+    margin-top: 14px;
+  }
+  .stat-sub {
+    color: var(--ink-soft);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    margin-top: 10px;
+    line-height: 1.35;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .panel {
+    padding: 22px;
+  }
+  .panel h2 {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 500;
+    font-style: italic;
+    margin-bottom: 18px;
+  }
+
+  .funnel {
+    display: grid;
+    gap: 12px;
+  }
+  .funnel-row {
+    display: grid;
+    grid-template-columns: 150px 1fr 72px;
+    gap: 12px;
+    align-items: center;
+  }
+  .funnel-label {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .bar-track {
+    height: 12px;
+    border-radius: 99px;
+    background: rgba(28, 20, 9, 0.08);
+    overflow: hidden;
+  }
+  .bar {
+    min-width: 2px;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--olive), var(--gold));
+  }
+  .funnel-count {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    color: var(--ink-mid);
+    text-align: right;
+  }
+
+  .chart {
+    display: grid;
+    grid-template-columns: repeat(var(--days, 1), minmax(8px, 1fr));
+    gap: 6px;
+    height: 180px;
+    align-items: end;
+    padding-top: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .day {
+    display: grid;
+    align-items: end;
+    gap: 3px;
+    height: 100%;
+  }
+  .day-bar {
+    width: 100%;
+    min-height: 2px;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--clay), var(--gold));
+  }
+  .day-label {
+    margin-top: 8px;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .list {
+    display: grid;
+    gap: 10px;
+  }
+  .list-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid rgba(28, 20, 9, 0.08);
+  }
+  .list-row:first-child { border-top: 0; }
+  .list-title {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  .list-meta {
+    margin-top: 4px;
+    font-size: 15px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 99px;
+    background: rgba(72, 84, 59, 0.12);
+    color: var(--olive);
+    padding: 5px 9px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .empty,
+  .loading {
+    color: var(--ink-soft);
+    font-size: 18px;
+    font-style: italic;
+    padding: 18px 0;
+  }
+  .error {
+    color: #9c3f32;
+  }
+
+  @media (max-width: 860px) {
+    .hero,
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .hero-note {
+      justify-self: start;
+    }
+    .stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .shell {
+      width: min(100% - 24px, 1180px);
+      padding-top: 18px;
+    }
+    .topbar {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .top-actions {
+      justify-content: flex-start;
+      width: 100%;
+    }
+    .stats {
+      grid-template-columns: 1fr;
+    }
+    .panel {
+      padding: 18px;
+    }
+    .funnel-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .funnel-count {
+      text-align: left;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="shell">
+    <nav class="topbar">
+      <a href="/" class="brand">come to Jesus.</a>
+      <div class="top-actions">
+        <select class="select" id="rangeSelect" aria-label="date range">
+          <option value="7">7 days</option>
+          <option value="30" selected>30 days</option>
+          <option value="90">90 days</option>
+        </select>
+        <button class="button" id="refreshBtn" type="button"><i class="fa-solid fa-rotate"></i>refresh</button>
+        <button class="button primary" id="signOutBtn" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i>sign out</button>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">admin</div>
+        <h1>what is happening.</h1>
+      </div>
+      <p class="hero-note">Private funnel analytics for the site. No chat text, no prompts, no generated replies.</p>
+    </section>
+
+    <div class="notice" id="notice"></div>
+
+    <section class="stats" id="stats">
+      <div class="card stat"><div class="loading">loading...</div></div>
+      <div class="card stat"><div class="loading">loading...</div></div>
+      <div class="card stat"><div class="loading">loading...</div></div>
+      <div class="card stat"><div class="loading">loading...</div></div>
+    </section>
+
+    <section class="grid">
+      <div class="card panel">
+        <h2>funnel</h2>
+        <div class="funnel" id="funnel"></div>
+      </div>
+      <div class="card panel">
+        <h2>daily pulse</h2>
+        <div class="chart" id="chart"></div>
+      </div>
+      <div class="card panel">
+        <h2>top pages</h2>
+        <div class="list" id="topPages"></div>
+      </div>
+      <div class="card panel">
+        <h2>referrers</h2>
+        <div class="list" id="topReferrers"></div>
+      </div>
+      <div class="card panel">
+        <h2>paid users</h2>
+        <div class="list" id="subscriptions"></div>
+      </div>
+      <div class="card panel">
+        <h2>top spend</h2>
+        <div class="list" id="topSpenders"></div>
+      </div>
+      <div class="card panel">
+        <h2>recent events</h2>
+        <div class="list" id="recentEvents"></div>
+      </div>
+    </section>
+  </main>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const SUPABASE_URL = 'https://hatyoorjnakvgtuvwzhv.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhdHlvb3JqbmFrdmd0dXZ3emh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5OTExMjgsImV4cCI6MjA5MjU2NzEyOH0.OXtoqNb8ikORBfoOKiweJd-xRdp8FdBsorUhfupWYXg';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  });
+
+  const els = {
+    notice: document.getElementById('notice'),
+    stats: document.getElementById('stats'),
+    funnel: document.getElementById('funnel'),
+    chart: document.getElementById('chart'),
+    topPages: document.getElementById('topPages'),
+    topReferrers: document.getElementById('topReferrers'),
+    subscriptions: document.getElementById('subscriptions'),
+    topSpenders: document.getElementById('topSpenders'),
+    recentEvents: document.getElementById('recentEvents'),
+    range: document.getElementById('rangeSelect'),
+    refresh: document.getElementById('refreshBtn'),
+    signOut: document.getElementById('signOutBtn'),
+  };
+
+  function fmt(n) {
+    return new Intl.NumberFormat().format(n || 0);
+  }
+  function money(n) {
+    return '$' + Number(n || 0).toFixed(2);
+  }
+  function shortDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderStats(summary) {
+    const cards = [
+      ['visitors', fmt(summary.visitors), `${fmt(summary.pageViews)} page views`],
+      ['chat starts', fmt(summary.chatStarts), `${fmt(summary.chatMessages)} API replies`],
+      ['checkout starts', fmt(summary.checkoutStarts), `${fmt(summary.subscriptionCompletions)} completions tracked`],
+      ['paid users', fmt(summary.activePaidUsers), `${summary.monthlyPaidUsers} monthly · ${summary.annualPaidUsers} annual`],
+      ['limit hits', fmt(summary.limitHits), 'upgrade moments'],
+      ['estimated spend', money(summary.estimatedSpendDollars), 'selected range'],
+      ['tracked events', fmt(summary.trackedEvents), 'first-party events'],
+      ['conversion', conversionText(summary), 'chat start → paid'],
+    ];
+    els.stats.innerHTML = cards.map(([label, value, sub]) => `
+      <article class="card stat">
+        <div class="stat-label">${escapeHtml(label)}</div>
+        <div>
+          <div class="stat-value">${escapeHtml(value)}</div>
+          <div class="stat-sub">${escapeHtml(sub)}</div>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  function conversionText(summary) {
+    if (!summary.chatStarts) return '0%';
+    return Math.round((summary.subscriptionCompletions / summary.chatStarts) * 100) + '%';
+  }
+
+  function renderFunnel(funnel) {
+    const max = Math.max(...funnel.map(row => row.unique || row.count || 0), 1);
+    els.funnel.innerHTML = funnel.map(row => {
+      const value = row.unique || row.count || 0;
+      const width = Math.max(2, Math.round((value / max) * 100));
+      return `
+        <div class="funnel-row">
+          <div class="funnel-label">${escapeHtml(row.label)}</div>
+          <div class="bar-track"><div class="bar" style="width:${width}%"></div></div>
+          <div class="funnel-count">${fmt(value)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderChart(daily) {
+    if (!daily.length) {
+      els.chart.innerHTML = '<div class="empty">no data yet.</div>';
+      return;
+    }
+    const max = Math.max(...daily.map(day => day.pageViews || day.visitors || 0), 1);
+    els.chart.style.setProperty('--days', daily.length);
+    els.chart.innerHTML = daily.map(day => {
+      const value = day.pageViews || day.visitors || 0;
+      const height = Math.max(2, Math.round((value / max) * 100));
+      const label = day.date.slice(5).replace('-', '/');
+      return `
+        <div class="day" title="${escapeHtml(day.date)} · ${fmt(value)} views">
+          <div class="day-bar" style="height:${height}%"></div>
+          <div class="day-label">${escapeHtml(label)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderList(el, rows, renderRow) {
+    if (!rows || !rows.length) {
+      el.innerHTML = '<div class="empty">nothing here yet.</div>';
+      return;
+    }
+    el.innerHTML = rows.map(renderRow).join('');
+  }
+
+  function render(data) {
+    if (!data.setup.analyticsEventsTable) {
+      els.notice.classList.add('visible');
+      els.notice.innerHTML = 'The admin page is deployed, but the <strong>analytics_events</strong> table is not live yet. Run the new Supabase migration, then refresh.';
+    } else {
+      els.notice.classList.remove('visible');
+    }
+
+    renderStats(data.summary);
+    renderFunnel(data.funnel || []);
+    renderChart(data.daily || []);
+
+    renderList(els.topPages, data.topPages, row => `
+      <div class="list-row">
+        <div>
+          <div class="list-title">${escapeHtml(row.name)}</div>
+          <div class="list-meta">page views and funnel events</div>
+        </div>
+        <span class="pill">${fmt(row.count)}</span>
+      </div>
+    `);
+
+    renderList(els.topReferrers, data.topReferrers, row => `
+      <div class="list-row">
+        <div>
+          <div class="list-title">${escapeHtml(row.name)}</div>
+          <div class="list-meta">where people came from</div>
+        </div>
+        <span class="pill">${fmt(row.count)}</span>
+      </div>
+    `);
+
+    renderList(els.subscriptions, data.subscriptions, row => `
+      <div class="list-row">
+        <div>
+          <div class="list-title">${escapeHtml(row.email || row.userId || 'unknown user')}</div>
+          <div class="list-meta">${escapeHtml(row.plan || 'unknown plan')} · renews ${escapeHtml(shortDate(row.currentPeriodEnd) || 'unknown')}</div>
+        </div>
+        <span class="pill">${escapeHtml(row.status)}</span>
+      </div>
+    `);
+
+    renderList(els.topSpenders, data.topSpenders, row => `
+      <div class="list-row">
+        <div>
+          <div class="list-title">${escapeHtml(row.email || row.userId || 'anonymous')}</div>
+          <div class="list-meta">${fmt(row.calls)} replies in range</div>
+        </div>
+        <span class="pill">${money(row.dollars)}</span>
+      </div>
+    `);
+
+    renderList(els.recentEvents, data.recentEvents, row => `
+      <div class="list-row">
+        <div>
+          <div class="list-title">${escapeHtml(row.event)}</div>
+          <div class="list-meta">${escapeHtml(row.page || '')} · ${escapeHtml(shortDate(row.when))}</div>
+        </div>
+        <span class="pill">${escapeHtml(row.device || 'web')}</span>
+      </div>
+    `);
+  }
+
+  async function loadDashboard() {
+    els.notice.classList.remove('visible');
+    els.refresh.disabled = true;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/login.html?redirect=/admin.html';
+        return;
+      }
+
+      const response = await fetch(`/api/admin-analytics?days=${encodeURIComponent(els.range.value)}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (response.status === 403) {
+        els.notice.classList.add('visible');
+        els.notice.innerHTML = '<strong>not authorized.</strong> This dashboard is locked to the admin email.';
+        els.stats.innerHTML = '';
+        document.querySelector('.grid').style.display = 'none';
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('admin analytics failed');
+      }
+
+      render(await response.json());
+    } catch (err) {
+      els.notice.classList.add('visible');
+      els.notice.textContent = 'Could not load analytics. Try refreshing in a moment.';
+      els.notice.classList.add('error');
+    } finally {
+      els.refresh.disabled = false;
+    }
+  }
+
+  els.refresh.addEventListener('click', loadDashboard);
+  els.range.addEventListener('change', loadDashboard);
+  els.signOut.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/login.html?redirect=/admin.html';
+  });
+
+  loadDashboard();
+</script>
+</body>
+</html>

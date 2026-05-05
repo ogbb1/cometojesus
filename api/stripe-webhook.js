@@ -20,6 +20,7 @@
 
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { recordAnalyticsEvent } from '../lib/analytics-server.js';
 
 // Vercel needs raw body for signature verification.
 // This config tells Vercel NOT to parse the body as JSON.
@@ -171,10 +172,19 @@ async function handleCheckoutCompleted(session) {
   }
 
   await upsertSubscription({ userId, subscription });
+  await recordAnalyticsEvent({
+    eventName: 'subscription_completed',
+    userId,
+    pagePath: '/upgrade.html',
+    metadata: {
+      plan: planTypeFromPriceId(subscription.items?.data?.[0]?.price?.id) || 'unknown',
+      status: subscription.status,
+    },
+  });
   console.log('[stripe-webhook] checkout.session.completed handled for user', userId);
 }
 
-async function handleSubscriptionEvent(subscription) {
+async function handleSubscriptionEvent(subscription, eventType) {
   const userId = await resolveUserId(subscription.customer, subscription);
   if (!userId) {
     console.error('subscription event: cannot resolve user_id', {
@@ -184,6 +194,16 @@ async function handleSubscriptionEvent(subscription) {
     return;
   }
   await upsertSubscription({ userId, subscription });
+  if (eventType === 'customer.subscription.deleted') {
+    await recordAnalyticsEvent({
+      eventName: 'subscription_deleted',
+      userId,
+      pagePath: '/upgrade.html',
+      metadata: {
+        status: subscription.status,
+      },
+    });
+  }
 }
 
 async function handleInvoiceEvent(invoice, eventType) {
@@ -220,6 +240,14 @@ async function handleInvoiceEvent(invoice, eventType) {
 
   if (eventType === 'invoice.payment_failed') {
     console.warn('[stripe-webhook] payment failed for user', userId, 'subscription', subscription.id);
+    await recordAnalyticsEvent({
+      eventName: 'subscription_payment_failed',
+      userId,
+      pagePath: '/upgrade.html',
+      metadata: {
+        status: subscription.status,
+      },
+    });
     // TODO future: send email to user warning them card was declined
   }
 }
@@ -264,7 +292,7 @@ export default async function handler(req, res) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
-        await handleSubscriptionEvent(event.data.object);
+        await handleSubscriptionEvent(event.data.object, event.type);
         break;
 
       case 'invoice.payment_succeeded':

@@ -43,6 +43,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script defer src="/analytics.js"></script>
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
 
 <style>
@@ -568,10 +569,16 @@
 
   async function startCheckout(plan) {
     clearErr();
+    if (window.ctjTrack) {
+      window.ctjTrack('checkout_intent', { plan });
+      window.ctjTrack('upgrade_clicked', { source: 'upgrade_page', plan });
+    }
+
     const { data: sessionData } = await supabase.auth.getSession();
     const session = sessionData?.session;
 
     if (!session) {
+      if (window.ctjTrack) window.ctjTrack('checkout_requires_auth', { plan });
       signinEl.classList.add('visible');
       sessionStorage.setItem('cometojesus:intendedPlan', plan);
       setTimeout(() => {
@@ -584,6 +591,7 @@
     loadingEl.classList.add('visible');
 
     try {
+      if (window.ctjTrack) window.ctjTrack('checkout_started', { plan });
       const r = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -608,6 +616,7 @@
 
       const { url } = await r.json();
       if (!url) throw new Error('no checkout url returned');
+      if (window.ctjTrack) window.ctjTrack('checkout_created', { plan });
       window.location.href = url;
     } catch (e) {
       console.error('checkout error:', e);

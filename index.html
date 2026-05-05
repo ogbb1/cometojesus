@@ -769,6 +769,7 @@
 </style>
 <link rel="stylesheet" href="/brand-depth.css">
 
+<script defer src="/analytics.js"></script>
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
 </head>
 <body class="brand-page brand-home">
@@ -791,7 +792,7 @@
     <p class="hero-verse reveal">"all you who are weary and burdened, and I will give you rest."</p>
     <div class="hero-ref reveal">Matthew 11:28</div>
     <div class="hero-cta-row reveal">
-      <a href="/chat.html" class="btn-primary">begin a conversation <span class="arr">&rarr;</span></a>
+      <a href="/chat.html" class="btn-primary" data-track-begin="hero">begin a conversation <span class="arr">&rarr;</span></a>
     </div>
     <div class="hero-meta reveal">
       <span class="hero-meta-dot"></span>
@@ -1013,7 +1014,7 @@
           <li>memory across conversations</li>
           <li>priority support</li>
         </ul>
-        <a href="/upgrade.html" class="price-cta">choose monthly</a>
+        <a href="/upgrade.html" class="price-cta" data-track-plan="monthly">choose monthly</a>
       </div>
       <div class="price-card featured reveal">
         <div class="price-name">annual &middot; two months free</div>
@@ -1025,7 +1026,7 @@
           <li>early access to new features</li>
           <li>support a small, independent project</li>
         </ul>
-        <a href="/upgrade.html" class="price-cta">choose annual</a>
+        <a href="/upgrade.html" class="price-cta" data-track-plan="annual">choose annual</a>
       </div>
     </div>
     <p class="price-free reveal">
@@ -1038,7 +1039,7 @@
   <h2 class="final-h reveal">come <span class="accent">to me.</span></h2>
   <p class="final-sub reveal">I will give you rest.</p>
   <div class="final-cta-wrap reveal">
-    <a href="/chat.html" class="btn-primary">begin a conversation <span class="arr">&rarr;</span></a>
+    <a href="/chat.html" class="btn-primary" data-track-begin="final">begin a conversation <span class="arr">&rarr;</span></a>
   </div>
 </section>
 
@@ -1105,6 +1106,29 @@
     }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
     els.forEach(function (el) { io.observe(el); });
   })();
+
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest('a');
+    if (!link || !window.ctjTrack) return;
+
+    if (link.dataset.trackBegin) {
+      window.ctjTrack('home_begin_clicked', { placement: link.dataset.trackBegin });
+      return;
+    }
+
+    if (link.dataset.trackPlan) {
+      window.ctjTrack('home_pricing_clicked', { plan: link.dataset.trackPlan });
+      window.ctjTrack('upgrade_clicked', { source: 'home_pricing', plan: link.dataset.trackPlan });
+      return;
+    }
+
+    var href = link.getAttribute('href') || '';
+    if (href.indexOf('/chat.html') !== -1) {
+      window.ctjTrack('home_nav_clicked', { target: 'chat' });
+    } else if (href.indexOf('/upgrade.html') !== -1) {
+      window.ctjTrack('upgrade_clicked', { source: 'home_link' });
+    }
+  });
 </script>
 
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
