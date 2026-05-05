@@ -79,11 +79,13 @@ export default async function handler(req, res) {
       limitHits: 0,
       checkoutStarts: 0,
       subscriptionCompletions: 0,
+      signupCompletions: 0,
       chatMessages: 0,
       estimatedSpendDollars: 0,
       activePaidUsers: 0,
       monthlyPaidUsers: 0,
       annualPaidUsers: 0,
+      estimatedMrrDollars: 0,
     },
     funnel: [],
     eventsByName: [],
@@ -143,6 +145,7 @@ export default async function handler(req, res) {
         visitors: new Set(),
         pageViews: 0,
         chatStarts: 0,
+        signups: 0,
         checkoutStarts: 0,
         subscriptions: 0,
       };
@@ -150,6 +153,7 @@ export default async function handler(req, res) {
     if (identity) daily[day].visitors.add(identity);
     if (name === 'page_view') daily[day].pageViews += 1;
     if (name === 'chat_started') daily[day].chatStarts += 1;
+    if (name === 'signup_completed') daily[day].signups += 1;
     if (name === 'checkout_started') daily[day].checkoutStarts += 1;
     if (name === 'subscription_completed') daily[day].subscriptions += 1;
 
@@ -163,15 +167,31 @@ export default async function handler(req, res) {
   response.summary.limitHits = eventCounts.limit_hit || 0;
   response.summary.checkoutStarts = eventCounts.checkout_started || 0;
   response.summary.subscriptionCompletions = eventCounts.subscription_completed || 0;
+  response.summary.signupCompletions = eventCounts.signup_completed || 0;
   response.eventsByName = topEntries(eventCounts, 20);
   response.topPages = topEntries(pageCounts, 10);
   response.topReferrers = topEntries(referrerCounts, 10);
-  response.funnel = funnelEvents.map(([name, label]) => ({
-    name,
-    label,
-    count: eventCounts[name] || 0,
-    unique: funnelUniques[name]?.size || 0,
-  }));
+
+  // Funnel rows include conversionFromPrevPct (% of the previous step that
+  // made it to this step) and dropoffPct so the dashboard can render the
+  // leak between each pair of steps without recomputing it client-side.
+  let prevUnique = null;
+  response.funnel = funnelEvents.map(([name, label]) => {
+    const unique = funnelUniques[name]?.size || 0;
+    const conversionFromPrevPct = prevUnique && prevUnique > 0
+      ? Math.round((unique / prevUnique) * 100)
+      : null;
+    const row = {
+      name,
+      label,
+      count: eventCounts[name] || 0,
+      unique,
+      conversionFromPrevPct,
+      dropoffPct: conversionFromPrevPct == null ? null : 100 - conversionFromPrevPct,
+    };
+    prevUnique = unique;
+    return row;
+  });
   response.daily = Object.values(daily)
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((row) => ({ ...row, visitors: row.visitors.size }));
@@ -229,6 +249,16 @@ export default async function handler(req, res) {
     response.summary.activePaidUsers = paid.length;
     response.summary.monthlyPaidUsers = paid.filter((sub) => sub.plan_type === 'monthly').length;
     response.summary.annualPaidUsers = paid.filter((sub) => sub.plan_type === 'annual').length;
+
+    // Estimated MRR: monthly subs × $9.99 + annual subs × ($99.99 / 12).
+    // Snapshot only — based on currently active subscriptions, not historical
+    // billing events. For a proper MRR trend we'd need to track the
+    // subscription lifecycle table over time. This is the accurate
+    // "if everyone paid this month at current pricing" number.
+    const monthlyMrr = paid.filter((sub) => sub.plan_type === 'monthly').length * 9.99;
+    const annualMrr = paid.filter((sub) => sub.plan_type === 'annual').length * (99.99 / 12);
+    response.summary.estimatedMrrDollars = Math.round((monthlyMrr + annualMrr) * 100) / 100;
+
     response.subscriptions = paid.slice(0, 20).map((sub) => ({
       email: emailsByUser[sub.user_id] || null,
       userId: sub.user_id,

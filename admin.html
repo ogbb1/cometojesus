@@ -320,34 +320,83 @@
     color: var(--ink-mid);
     text-align: right;
   }
-
-  .chart {
-    display: grid;
-    grid-template-columns: repeat(var(--days, 1), minmax(8px, 1fr));
-    gap: 6px;
-    height: 180px;
-    align-items: end;
-    padding-top: 12px;
-    border-bottom: 1px solid var(--rule);
-  }
-  .day {
-    display: grid;
-    align-items: end;
-    gap: 3px;
-    height: 100%;
-  }
-  .day-bar {
-    width: 100%;
-    min-height: 2px;
-    border-radius: 4px 4px 0 0;
-    background: linear-gradient(180deg, var(--clay), var(--gold));
-  }
-  .day-label {
-    margin-top: 8px;
+  /* Step-to-step conversion % shown between funnel rows. Reads as a quiet
+     marginal annotation (not a row of its own) so the eye still tracks
+     down the bars. Red-tint when the dropoff is severe (>60%). */
+  .funnel-conv {
+    grid-column: 2 / 3;
     font-family: var(--font-ui);
     font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--muted);
-    text-align: center;
+    padding-left: 4px;
+    margin-top: -4px;
+    margin-bottom: -4px;
+  }
+  .funnel-conv.warn { color: var(--clay); }
+
+  /* Multi-series daily chart. SVG-based so we can layer 4 lines (visitors,
+     chats, signups, subscriptions) without dependencies. */
+  .chart {
+    position: relative;
+    width: 100%;
+  }
+  .chart svg {
+    display: block;
+    width: 100%;
+    height: 220px;
+  }
+  .chart .axis-line {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+  .chart .grid-line {
+    stroke: var(--rule);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+    opacity: 0.55;
+  }
+  .chart .series-line {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .chart .series-dot {
+    stroke: var(--paper);
+    stroke-width: 1.5;
+  }
+  .chart .x-label {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    fill: var(--muted);
+    text-anchor: middle;
+  }
+  .chart .y-label {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    fill: var(--muted);
+    text-anchor: end;
+  }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 10px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 99px;
   }
 
   .list {
@@ -585,11 +634,11 @@
     const cards = [
       ['visitors', fmt(summary.visitors), `${fmt(summary.pageViews)} page views`],
       ['chat starts', fmt(summary.chatStarts), `${fmt(summary.chatMessages)} API replies`],
-      ['checkout starts', fmt(summary.checkoutStarts), `${fmt(summary.subscriptionCompletions)} completions tracked`],
+      ['signups', fmt(summary.signupCompletions || 0), 'free accounts'],
       ['paid users', fmt(summary.activePaidUsers), `${summary.monthlyPaidUsers} monthly · ${summary.annualPaidUsers} annual`],
+      ['estimated MRR', money(summary.estimatedMrrDollars || 0), 'monthly recurring'],
       ['limit hits', fmt(summary.limitHits), 'upgrade moments'],
       ['estimated spend', money(summary.estimatedSpendDollars), 'selected range'],
-      ['tracked events', fmt(summary.trackedEvents), 'first-party events'],
       ['conversion', conversionText(summary), 'chat start → paid'],
     ];
     els.stats.innerHTML = cards.map(([label, value, sub]) => `
@@ -610,37 +659,107 @@
 
   function renderFunnel(funnel) {
     const max = Math.max(...funnel.map(row => row.unique || row.count || 0), 1);
-    els.funnel.innerHTML = funnel.map(row => {
+    const blocks = [];
+    funnel.forEach((row, i) => {
       const value = row.unique || row.count || 0;
       const width = Math.max(2, Math.round((value / max) * 100));
-      return `
+      // Conversion % from the previous step is annotated BEFORE this row
+      // (skip on row 0 — there's no prior step to convert from).
+      if (i > 0 && row.conversionFromPrevPct != null) {
+        const warn = row.conversionFromPrevPct < 40 ? ' warn' : '';
+        blocks.push(`
+          <div class="funnel-row">
+            <div></div>
+            <div class="funnel-conv${warn}">↳ ${row.conversionFromPrevPct}% from prev · ${row.dropoffPct}% drop</div>
+            <div></div>
+          </div>
+        `);
+      }
+      blocks.push(`
         <div class="funnel-row">
           <div class="funnel-label">${escapeHtml(row.label)}</div>
           <div class="bar-track"><div class="bar" style="width:${width}%"></div></div>
           <div class="funnel-count">${fmt(value)}</div>
         </div>
-      `;
-    }).join('');
+      `);
+    });
+    els.funnel.innerHTML = blocks.join('');
   }
 
+  // Multi-series daily chart. Renders as SVG so we can layer 4 lines
+  // (visitors / chats / signups / subscriptions) without dependencies.
+  // Y-axis auto-scales to the max value across all series. X-axis labels
+  // thinned out so they don't crowd at the 30/60/90 day ranges.
   function renderChart(daily) {
     if (!daily.length) {
       els.chart.innerHTML = '<div class="empty">no data yet.</div>';
       return;
     }
-    const max = Math.max(...daily.map(day => day.pageViews || day.visitors || 0), 1);
-    els.chart.style.setProperty('--days', daily.length);
-    els.chart.innerHTML = daily.map(day => {
-      const value = day.pageViews || day.visitors || 0;
-      const height = Math.max(2, Math.round((value / max) * 100));
-      const label = day.date.slice(5).replace('-', '/');
-      return `
-        <div class="day" title="${escapeHtml(day.date)} · ${fmt(value)} views">
-          <div class="day-bar" style="height:${height}%"></div>
-          <div class="day-label">${escapeHtml(label)}</div>
-        </div>
-      `;
+
+    const series = [
+      { key: 'visitors', label: 'visitors', color: '#48543b' /* olive */ },
+      { key: 'chatStarts', label: 'chat starts', color: '#c79b54' /* gold */ },
+      { key: 'signups', label: 'signups', color: '#9c5b43' /* clay */ },
+      { key: 'subscriptions', label: 'subscriptions', color: '#7a5a30' /* accent */ },
+    ];
+
+    const W = 560;
+    const H = 220;
+    const padL = 36;
+    const padR = 16;
+    const padT = 12;
+    const padB = 28;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+
+    const maxVal = Math.max(
+      1,
+      ...daily.flatMap((d) => series.map((s) => d[s.key] || 0))
+    );
+    const stepX = daily.length > 1 ? innerW / (daily.length - 1) : 0;
+    const yScale = (v) => padT + innerH - (v / maxVal) * innerH;
+    const xScale = (i) => padL + i * stepX;
+
+    // Pick a few y-axis ticks (0, max/2, max).
+    const yTicks = [0, Math.round(maxVal / 2), maxVal];
+    const gridLines = yTicks.map((v) => {
+      const y = yScale(v);
+      return `<line class="grid-line" x1="${padL}" x2="${W - padR}" y1="${y}" y2="${y}" />` +
+             `<text class="y-label" x="${padL - 6}" y="${y + 3}">${fmt(v)}</text>`;
     }).join('');
+
+    // Thin x-labels: show first, last, and ~4 evenly spaced in between.
+    const labelInterval = Math.max(1, Math.floor(daily.length / 6));
+    const xLabels = daily.map((d, i) => {
+      const showLabel = i === 0 || i === daily.length - 1 || i % labelInterval === 0;
+      if (!showLabel) return '';
+      const txt = d.date.slice(5).replace('-', '/');
+      return `<text class="x-label" x="${xScale(i)}" y="${H - 8}">${escapeHtml(txt)}</text>`;
+    }).join('');
+
+    // Build polyline + dots per series.
+    const seriesSvg = series.map((s) => {
+      const points = daily.map((d, i) => `${xScale(i)},${yScale(d[s.key] || 0)}`).join(' ');
+      const dots = daily.map((d, i) => {
+        const v = d[s.key] || 0;
+        return `<circle class="series-dot" cx="${xScale(i)}" cy="${yScale(v)}" r="3" fill="${s.color}"><title>${escapeHtml(d.date)} · ${fmt(v)} ${s.label}</title></circle>`;
+      }).join('');
+      return `<polyline class="series-line" stroke="${s.color}" points="${points}" />${dots}`;
+    }).join('');
+
+    const legend = series.map((s) =>
+      `<div class="chart-legend-item"><span class="chart-legend-swatch" style="background:${s.color}"></span>${escapeHtml(s.label)}</div>`
+    ).join('');
+
+    els.chart.innerHTML = `
+      <div class="chart-legend">${legend}</div>
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+        ${gridLines}
+        <line class="axis-line" x1="${padL}" x2="${W - padR}" y1="${padT + innerH}" y2="${padT + innerH}" />
+        ${seriesSvg}
+        ${xLabels}
+      </svg>
+    `;
   }
 
   function renderList(el, rows, renderRow) {

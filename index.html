@@ -1122,10 +1122,11 @@
       return;
     }
 
+    // Generic home->chat clicks aren't funnel-meaningful (every nav arrow,
+    // footer link, and inline mention would fire). The dedicated
+    // home_begin_clicked event above covers the primary intentful CTAs.
     var href = link.getAttribute('href') || '';
-    if (href.indexOf('/chat.html') !== -1) {
-      window.ctjTrack('home_nav_clicked', { target: 'chat' });
-    } else if (href.indexOf('/upgrade.html') !== -1) {
+    if (href.indexOf('/upgrade.html') !== -1) {
       window.ctjTrack('upgrade_clicked', { source: 'home_link' });
     }
   });

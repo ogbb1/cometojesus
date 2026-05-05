@@ -12,7 +12,6 @@
 
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { recordAnalyticsEvent } from '../lib/analytics-server.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -180,15 +179,10 @@ export default async function handler(req, res) {
       billing_address_collection: 'auto',
     });
 
-    await recordAnalyticsEvent({
-      eventName: 'checkout_created',
-      userId: user.id,
-      pagePath: '/upgrade.html',
-      metadata: {
-        plan,
-        stripe_session: session.id,
-      },
-    });
+    // Funnel measurement uses the client-side checkout_started fire (user
+    // intent) plus the subscription_completed webhook (payment cleared).
+    // The interim checkout_created event was dropped — internal API success
+    // doesn't tell us anything the other two events don't.
 
     return res.status(200).json({ url: session.url });
   } catch (e) {

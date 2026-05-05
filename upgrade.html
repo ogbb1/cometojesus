@@ -569,8 +569,12 @@
 
   async function startCheckout(plan) {
     clearErr();
+    // upgrade_clicked = the funnel-meaningful intent. Internal state changes
+    // (auth detour, Stripe URL fetch) used to fire their own events but were
+    // dropped — checkout_started (Stripe session created) and
+    // subscription_completed (webhook payment confirmed) are the only two
+    // states that matter for conversion measurement.
     if (window.ctjTrack) {
-      window.ctjTrack('checkout_intent', { plan });
       window.ctjTrack('upgrade_clicked', { source: 'upgrade_page', plan });
     }
 
@@ -578,7 +582,6 @@
     const session = sessionData?.session;
 
     if (!session) {
-      if (window.ctjTrack) window.ctjTrack('checkout_requires_auth', { plan });
       signinEl.classList.add('visible');
       sessionStorage.setItem('cometojesus:intendedPlan', plan);
       setTimeout(() => {
@@ -616,7 +619,6 @@
 
       const { url } = await r.json();
       if (!url) throw new Error('no checkout url returned');
-      if (window.ctjTrack) window.ctjTrack('checkout_created', { plan });
       window.location.href = url;
     } catch (e) {
       console.error('checkout error:', e);

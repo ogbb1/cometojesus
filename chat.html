@@ -2486,7 +2486,8 @@
       setAuthMode(mode);
       setAuthView('signin');
       authModal.classList.add('visible');
-      if (window.ctjTrack) window.ctjTrack('auth_modal_opened', { mode });
+      // signup_started is the funnel-meaningful event, fired when user
+      // actually submits credentials. Modal opening is upstream noise.
       setTimeout(() => authEmailInput.focus(), 100);
     };
 
@@ -3805,9 +3806,6 @@
             ? 'chat_about'
             : 'chat_link';
       window.ctjTrack('upgrade_clicked', { source, tier: currentTier || 'unknown' });
-      if (source === 'chat_sidebar') {
-        window.ctjTrack('sidebar_upgrade_clicked', { tier: currentTier || 'unknown' });
-      }
     });
     aboutCloseEl.addEventListener('click', () => {
       aboutOverlayEl.classList.remove('visible');
