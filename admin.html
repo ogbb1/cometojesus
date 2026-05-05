@@ -40,6 +40,63 @@
       linear-gradient(180deg, #f8efdf 0%, #eadcc4 100%);
     -webkit-font-smoothing: antialiased;
   }
+  body.admin-auth-pending .shell,
+  body.admin-auth-blocked .shell {
+    display: none;
+  }
+  body.admin-ready .auth-screen {
+    display: none;
+  }
+
+  .auth-screen {
+    min-height: 100vh;
+    width: min(780px, calc(100% - 32px));
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 64px 0;
+  }
+  .auth-screen-card {
+    border-top: 1px solid var(--rule);
+    padding-top: 34px;
+  }
+  .auth-screen h1 {
+    font-family: var(--font-display);
+    font-size: clamp(52px, 11vw, 92px);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 0.95;
+    letter-spacing: 0;
+    margin-bottom: 24px;
+  }
+  .auth-screen p {
+    color: var(--ink-soft);
+    font-size: 22px;
+    font-style: italic;
+    line-height: 1.45;
+    max-width: 36ch;
+  }
+  .auth-screen-action {
+    display: none;
+    width: fit-content;
+    margin-top: 28px;
+    min-height: 40px;
+    border: 1px solid var(--ink);
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 12px 16px;
+  }
+  .auth-screen-action.visible {
+    display: inline-flex;
+  }
 
   .shell {
     width: min(1180px, calc(100% - 32px));
@@ -384,7 +441,16 @@
   }
 </style>
 </head>
-<body>
+<body class="admin-auth-pending">
+  <div class="auth-screen" id="authScreen" aria-live="polite">
+    <div class="auth-screen-card">
+      <div class="eyebrow">admin</div>
+      <h1 id="authScreenTitle">checking.</h1>
+      <p id="authScreenText">Making sure this is your account before showing the dashboard.</p>
+      <a class="auth-screen-action" id="authScreenAction" href="/">go home</a>
+    </div>
+  </div>
+
   <main class="shell">
     <nav class="topbar">
       <a href="/" class="brand">come to Jesus.</a>
@@ -471,6 +537,9 @@
     range: document.getElementById('rangeSelect'),
     refresh: document.getElementById('refreshBtn'),
     signOut: document.getElementById('signOutBtn'),
+    authTitle: document.getElementById('authScreenTitle'),
+    authText: document.getElementById('authScreenText'),
+    authAction: document.getElementById('authScreenAction'),
   };
 
   function fmt(n) {
@@ -489,6 +558,27 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  function setAuthScreen(title, text, actionHref, actionText) {
+    document.body.classList.remove('admin-ready');
+    document.body.classList.remove('admin-auth-pending');
+    document.body.classList.add('admin-auth-blocked');
+    els.authTitle.textContent = title;
+    els.authText.textContent = text;
+    if (actionHref) {
+      els.authAction.href = actionHref;
+      els.authAction.textContent = actionText || 'continue';
+      els.authAction.classList.add('visible');
+    } else {
+      els.authAction.classList.remove('visible');
+    }
+  }
+
+  function showDashboardShell() {
+    document.body.classList.remove('admin-auth-pending');
+    document.body.classList.remove('admin-auth-blocked');
+    document.body.classList.add('admin-ready');
   }
 
   function renderStats(summary) {
@@ -630,6 +720,8 @@
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
+        els.authTitle.textContent = 'sign in first.';
+        els.authText.textContent = 'Taking you to sign in, then back here if this is the admin account.';
         window.location.href = '/login.html?redirect=/admin.html';
         return;
       }
@@ -638,11 +730,15 @@
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
+      if (response.status === 401) {
+        els.authTitle.textContent = 'sign in first.';
+        els.authText.textContent = 'Taking you to sign in, then back here if this is the admin account.';
+        window.location.href = '/login.html?redirect=/admin.html';
+        return;
+      }
+
       if (response.status === 403) {
-        els.notice.classList.add('visible');
-        els.notice.innerHTML = '<strong>not authorized.</strong> This dashboard is locked to the admin email.';
-        els.stats.innerHTML = '';
-        document.querySelector('.grid').style.display = 'none';
+        setAuthScreen('not for this account.', 'This dashboard only opens for the admin email.', '/chat.html', 'back to chat');
         return;
       }
 
@@ -650,11 +746,10 @@
         throw new Error('admin analytics failed');
       }
 
+      showDashboardShell();
       render(await response.json());
     } catch (err) {
-      els.notice.classList.add('visible');
-      els.notice.textContent = 'Could not load analytics. Try refreshing in a moment.';
-      els.notice.classList.add('error');
+      setAuthScreen('could not load.', 'Try refreshing in a moment. If this keeps happening, check the admin API logs.', '/chat.html', 'back to chat');
     } finally {
       els.refresh.disabled = false;
     }

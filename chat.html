@@ -1859,6 +1859,7 @@
   <a href="/" class="home-corner" id="homeCorner"><i class="fa-solid fa-house"></i><span>home</span></a>
   <div class="auth-menu" id="authMenu">
     <button type="button" id="authMenuSettings"><i class="fa-solid fa-gear"></i>settings</button>
+    <button type="button" id="authMenuAdmin" style="display:none;"><i class="fa-solid fa-chart-line"></i>admin</button>
     <button type="button" id="authMenuSubscription" style="display:none;"><i class="fa-solid fa-credit-card"></i>subscription</button>
     <div class="auth-menu-divider"></div>
     <button type="button" id="authMenuSignOut"><i class="fa-solid fa-arrow-right-from-bracket"></i>sign out</button>
@@ -1907,6 +1908,12 @@
       <div class="settings-row" id="settingsPlanRow">
         <div class="settings-row-label">your plan</div>
         <div class="settings-row-desc" id="settingsPlanDesc">free.</div>
+      </div>
+
+      <div class="settings-row" id="settingsAdminRow" style="display:none;">
+        <div class="settings-row-label">admin</div>
+        <div class="settings-row-desc">private dashboard for site analytics.</div>
+        <button type="button" class="settings-action-btn" id="settingsAdminBtn"><i class="fa-solid fa-chart-line"></i>open</button>
       </div>
 
       <div class="settings-row" id="settingsEmailRow">
@@ -2175,6 +2182,49 @@
     let currentUser = null;
     let currentTier = 'anonymous';  // 'anonymous' | 'free' | 'paid'
     let authMode = 'signin';         // 'signin' | 'signup'
+    let currentIsAdmin = false;
+    let adminStatusUserId = null;
+
+    function setAdminEntryVisible(isVisible) {
+      const display = isVisible ? '' : 'none';
+      const menuAdmin = document.getElementById('authMenuAdmin');
+      const settingsAdminRow = document.getElementById('settingsAdminRow');
+      if (menuAdmin) menuAdmin.style.display = display;
+      if (settingsAdminRow) settingsAdminRow.style.display = display;
+    }
+
+    async function refreshAdminEntryVisibility() {
+      if (!currentUser || !currentSession?.access_token) {
+        currentIsAdmin = false;
+        adminStatusUserId = null;
+        setAdminEntryVisible(false);
+        return;
+      }
+
+      if (adminStatusUserId === currentUser.id) {
+        setAdminEntryVisible(currentIsAdmin);
+        return;
+      }
+
+      const checkingUserId = currentUser.id;
+      adminStatusUserId = checkingUserId;
+      setAdminEntryVisible(false);
+
+      try {
+        const response = await fetch('/api/admin-status', {
+          headers: { Authorization: 'Bearer ' + currentSession.access_token },
+        });
+        const data = response.ok ? await response.json() : { isAdmin: false };
+        if (!currentUser || currentUser.id !== checkingUserId) return;
+        currentIsAdmin = !!data.isAdmin;
+        setAdminEntryVisible(currentIsAdmin);
+      } catch (e) {
+        if (currentUser && currentUser.id === checkingUserId) {
+          currentIsAdmin = false;
+          setAdminEntryVisible(false);
+        }
+      }
+    }
 
     // Check session on page load
     (async () => {
@@ -2188,6 +2238,7 @@
         currentUser = session.user;
       }
       updateAuthUI();
+      refreshAdminEntryVisibility();
       // Fire sidebar + memory load immediately when we have a user, rather
       // than waiting for the polling interval at the bottom of the script.
       // Saves 300-600ms on every page load for signed-in users — they see
@@ -2238,6 +2289,7 @@
       currentUser = session?.user || null;
       if (!currentUser) currentTier = 'anonymous';
       updateAuthUI();
+      refreshAdminEntryVisibility();
     });
 
     function updateAuthUI() {
@@ -2693,6 +2745,12 @@
           try { showCurrentEmailInSettings(); } catch (e) {}
         }
       }
+    });
+
+    // Menu: admin dashboard — visible only after the server confirms admin email
+    document.getElementById('authMenuAdmin').addEventListener('click', () => {
+      document.getElementById('authMenu').classList.remove('visible');
+      if (currentIsAdmin) window.location.href = '/admin.html';
     });
 
     // Menu: subscription handler — opens Stripe customer portal (paid only)
@@ -4143,6 +4201,13 @@
     });
 
     // ========== SETTINGS: CHANGE EMAIL ==========
+    const settingsAdminBtn = document.getElementById('settingsAdminBtn');
+    if (settingsAdminBtn) {
+      settingsAdminBtn.addEventListener('click', () => {
+        if (currentIsAdmin) window.location.href = '/admin.html';
+      });
+    }
+
     const changeEmailBtn = document.getElementById('changeEmailBtn');
     const changeEmailForm = document.getElementById('changeEmailForm');
     const changeEmailInput = document.getElementById('changeEmailInput');
