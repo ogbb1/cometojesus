@@ -2184,6 +2184,11 @@
     let authMode = 'signin';         // 'signin' | 'signup'
     let currentIsAdmin = false;
     let adminStatusUserId = null;
+    const CLIENT_ADMIN_EMAILS = new Set(['ograbowski132@gmail.com']);
+
+    function isKnownAdminEmail(email) {
+      return CLIENT_ADMIN_EMAILS.has(String(email || '').trim().toLowerCase());
+    }
 
     function setAdminEntryVisible(isVisible) {
       const display = isVisible ? '' : 'none';
@@ -2201,6 +2206,12 @@
         return;
       }
 
+      const emailLooksAdmin = isKnownAdminEmail(currentUser.email);
+      if (emailLooksAdmin) {
+        currentIsAdmin = true;
+        setAdminEntryVisible(true);
+      }
+
       if (adminStatusUserId === currentUser.id) {
         setAdminEntryVisible(currentIsAdmin);
         return;
@@ -2208,7 +2219,7 @@
 
       const checkingUserId = currentUser.id;
       adminStatusUserId = checkingUserId;
-      setAdminEntryVisible(false);
+      if (!emailLooksAdmin) setAdminEntryVisible(false);
 
       try {
         const response = await fetch('/api/admin-status', {
@@ -2216,12 +2227,12 @@
         });
         const data = response.ok ? await response.json() : { isAdmin: false };
         if (!currentUser || currentUser.id !== checkingUserId) return;
-        currentIsAdmin = !!data.isAdmin;
+        currentIsAdmin = emailLooksAdmin || !!data.isAdmin;
         setAdminEntryVisible(currentIsAdmin);
       } catch (e) {
         if (currentUser && currentUser.id === checkingUserId) {
-          currentIsAdmin = false;
-          setAdminEntryVisible(false);
+          currentIsAdmin = emailLooksAdmin;
+          setAdminEntryVisible(currentIsAdmin);
         }
       }
     }
