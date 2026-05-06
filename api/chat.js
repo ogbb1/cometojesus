@@ -2692,7 +2692,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { messages, turnstileToken, conversationId, localTime } = req.body || {};
+  const { messages, turnstileToken, conversationId, localTime, source } = req.body || {};
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Invalid request' });
   }
@@ -2710,8 +2710,17 @@ export default async function handler(req, res) {
     console.log(`[bypass] test user recognized: ${bypassUser.id}`);
   }
 
-  // Turnstile verification — skipped for bypass users
-  if (!bypassUser) {
+  // Homepage inline chat skips Turnstile by design — the widget added too
+  // much friction (invisible-mode auto-execute proved unreliable across
+  // browsers). Bot prevention on this surface relies on the existing
+  // anonymous fingerprint cap (5 lifetime per fingerprint), the per-IP
+  // rate limit (30/min), the global daily message cap, and the daily
+  // spend cap. Real users get fast first messages; bots burn through
+  // fingerprints fast and hit the cap.
+  const isHomepageSource = source === 'homepage';
+
+  // Turnstile verification — skipped for bypass users and homepage source
+  if (!bypassUser && !isHomepageSource) {
     const tokenOk = await verifyTurnstileToken(turnstileToken, ip);
     if (!tokenOk) {
       return res.status(403).json({
