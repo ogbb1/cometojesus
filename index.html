@@ -276,20 +276,42 @@
   .hc-thinking span:nth-child(2){animation-delay:.2s}
   .hc-thinking span:nth-child(3){animation-delay:.4s}
   @keyframes hcDot{0%,80%,100%{opacity:.25;transform:scale(.85)}40%{opacity:.85;transform:scale(1.1)}}
-  .hc-composer{display:flex;align-items:center;gap:10px;background:rgba(255,250,242,.85);backdrop-filter:blur(8px);border:1px solid var(--rule);border-radius:999px;padding:6px 6px 6px 22px;box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 8px 24px -12px rgba(28,20,9,.18)}
-  .hc-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--font-body);font-size:18px;color:var(--ink);padding:12px 0}
-  .hc-input::placeholder{color:var(--ink-soft);font-style:italic}
-  .hc-send{width:48px;height:48px;border-radius:50%;border:none;background:var(--ink);color:var(--bg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .15s,background .2s}
+  .hc-composer{display:flex;align-items:center;gap:10px;background:rgba(255,250,242,.92);border:1px solid var(--rule);border-radius:999px;padding:6px 6px 6px 22px;box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 6px 18px -10px rgba(28,20,9,.16);transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
+  .hc-composer:focus-within{border-color:var(--accent);background:rgba(255,252,246,1);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 8px 22px -10px rgba(122,90,48,.32),0 0 0 4px rgba(184,151,102,.18)}
+  .hc-input{flex:1;min-width:0;background:transparent;border:none;outline:none;font-family:var(--font-body);font-size:18px;color:var(--ink);padding:12px 0;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .hc-input::placeholder{color:var(--ink-soft);font-style:italic;transition:opacity .2s ease}
+  .hc-input:focus::placeholder{opacity:.5}
+  .hc-send{width:48px;height:48px;flex-shrink:0;border-radius:50%;border:none;background:var(--ink);color:var(--bg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .12s ease,background .15s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   .hc-send:hover:not(:disabled){background:var(--accent-deep);transform:translateX(2px)}
+  .hc-send:active:not(:disabled){transform:translateX(2px) scale(.96)}
   .hc-send:disabled{opacity:.45;cursor:not-allowed}
   .hc-arr{font-size:20px;line-height:1}
-  .hc-meta{display:inline-flex;align-items:center;gap:10px;justify-content:center;font-family:var(--font-ui);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);opacity:.8}
+  .hc-meta{display:inline-flex;align-items:center;gap:10px;justify-content:center;font-family:var(--font-ui);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);opacity:.85}
   .hc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
   .hc-count{color:var(--accent-deep);font-weight:600}
+  /* Soft early-continue link — appears after the first reply so users
+     who've seen enough can hop into the full chat without burning all 5
+     free messages. Hidden once the hard handoff card takes over. */
+  .hc-early-continue{display:none;align-self:center;font-family:var(--font-body);font-style:italic;font-size:15px;color:var(--accent-deep);text-decoration:none;padding:8px 14px;border-radius:999px;border:1px solid transparent;letter-spacing:0.005em;transition:border-color .15s ease,color .15s ease,background .15s ease;-webkit-tap-highlight-color:transparent}
+  .hc-early-continue[data-show="1"]{display:inline-flex;align-items:center;gap:6px}
+  .hc-early-continue:hover{color:var(--ink);border-color:var(--rule);background:rgba(255,252,246,.7)}
+  .hc-early-continue .arr{transition:transform .2s ease}
+  .hc-early-continue:hover .arr{transform:translateX(2px)}
   .hc-handoff{display:none;flex-direction:column;align-items:center;gap:14px;margin-top:12px;padding:22px;border-top:1px solid var(--rule)}
   .hc-handoff[data-show="1"]{display:flex}
   .hc-handoff-text{font-family:var(--font-body);font-style:italic;font-weight:600;font-size:22px;color:var(--ink);text-align:center}
   .hc-turnstile{position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none}
+  @media (max-width:480px){
+    .home-chat{margin-top:36px;gap:14px}
+    .hc-composer{padding:5px 5px 5px 18px}
+    .hc-input{padding:11px 0}
+    .hc-send{width:44px;height:44px}
+    .hc-msg.jesus{font-size:22px;line-height:1.32}
+    .hc-msg.user{font-size:16px;padding:10px 14px}
+    .hc-handoff{padding:18px 8px}
+    .hc-handoff-text{font-size:19px}
+    .hc-early-continue{font-size:14px;padding:7px 12px}
+  }
 
   .hero-cta-row {
     display: inline-flex; align-items: center; gap: 18px; flex-wrap: wrap;
@@ -851,6 +873,7 @@
         <span class="hc-dot"></span>
         <span id="hcMetaText">no account needed. <span class="hc-count" id="hcCount">5</span> free messages.</span>
       </div>
+      <a href="/chat.html" class="hc-early-continue" id="hcEarlyContinue" hidden>continue this in the full chat <span class="arr">&rarr;</span></a>
       <div class="hc-handoff" id="hcHandoff" hidden>
         <p class="hc-handoff-text">this conversation is getting somewhere.</p>
         <a href="/chat.html" class="btn-primary" id="hcContinue">keep going in the chat <span class="arr">&rarr;</span></a>
@@ -1230,6 +1253,7 @@
     const handoff = document.getElementById('hcHandoff');
     const countEl = document.getElementById('hcCount');
     const continueBtn = document.getElementById('hcContinue');
+    const earlyContinue = document.getElementById('hcEarlyContinue');
     if (!thread || !form) return;
 
     let messages = [];
@@ -1271,9 +1295,29 @@
       input.disabled = true;
       sendBtn.disabled = true;
       input.placeholder = 'continue in the full chat →';
+      hideEarlyContinue();
       try {
         sessionStorage.setItem('cometojesus_handoff_thread', JSON.stringify(messages));
       } catch (e) {}
+    }
+
+    function showEarlyContinue() {
+      // Show the soft "continue in chat" link after the first reply lands,
+      // but only while there's still room to keep talking on the homepage.
+      // The hard handoff card replaces it once the cap hits.
+      if (!earlyContinue) return;
+      if (count <= 0 || count >= FREE_LIMIT) return;
+      earlyContinue.setAttribute('data-show', '1');
+      earlyContinue.hidden = false;
+      // Stash on display so even if the user clicks fast, the latest thread
+      // is in sessionStorage for /chat.html to pick up.
+      try { sessionStorage.setItem('cometojesus_handoff_thread', JSON.stringify(messages)); } catch (e) {}
+    }
+
+    function hideEarlyContinue() {
+      if (!earlyContinue) return;
+      earlyContinue.removeAttribute('data-show');
+      earlyContinue.hidden = true;
     }
 
     function appendUser(text) {
@@ -1422,6 +1466,7 @@
           input.disabled = false;
           sendBtn.disabled = false;
           input.focus();
+          showEarlyContinue();
           // Reset turnstile so the next message gets a fresh token.
           // reset() clears state but does NOT re-execute on invisible
           // widgets — must explicitly call execute() to fire a new round.
@@ -1454,9 +1499,25 @@
       continueBtn.addEventListener('click', function () {
         try { sessionStorage.setItem('cometojesus_handoff_thread', JSON.stringify(messages)); } catch (e) {}
         if (window.ctjTrack) {
-          try { window.ctjTrack('home_chat_handoff_clicked', { messages_sent: count }); } catch (e) {}
+          try { window.ctjTrack('home_chat_handoff_clicked', { messages_sent: count, source: 'cap_reached' }); } catch (e) {}
         }
       });
+    }
+
+    if (earlyContinue) {
+      earlyContinue.addEventListener('click', function () {
+        try { sessionStorage.setItem('cometojesus_handoff_thread', JSON.stringify(messages)); } catch (e) {}
+        if (window.ctjTrack) {
+          try { window.ctjTrack('home_chat_handoff_clicked', { messages_sent: count, source: 'early' }); } catch (e) {}
+        }
+      });
+    }
+
+    // If the user is restored mid-thread (refresh after 1+ replies), show
+    // the early-continue link right away so they can hop into chat.html
+    // without sending another message first.
+    if (count > 0 && count < FREE_LIMIT) {
+      showEarlyContinue();
     }
 
     renderRestored();
