@@ -196,6 +196,7 @@
   }
 
   .hero-inner {
+    width: 100%;
     max-width: 980px;
     margin: 0 auto;
     position: relative;
@@ -325,6 +326,48 @@
     background: var(--accent);
     box-shadow: 0 0 8px var(--accent-soft);
     animation: pulse 2.4s ease-in-out infinite;
+  }
+  .hero-proof {
+    width: auto;
+    max-width: 520px;
+    margin: 34px auto 0;
+    padding: 20px 24px 22px;
+    border: 1px solid rgba(28, 20, 9, 0.14);
+    border-radius: 8px;
+    background: rgba(255, 250, 239, 0.56);
+    box-shadow: 0 18px 50px rgba(42, 30, 17, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    text-align: left;
+  }
+  .hero-proof-kicker {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .hero-proof p {
+    margin: 0;
+    font-size: clamp(18px, 2vw, 22px);
+    line-height: 1.35;
+    color: var(--ink-mid);
+    font-style: italic;
+    overflow-wrap: break-word;
+  }
+  .hero-proof p + p { margin-top: 10px; }
+  .hero-proof .him { color: var(--ink); font-weight: 500; }
+  .hero-proof span {
+    display: inline-block;
+    min-width: 42px;
+    margin-right: 10px;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-style: normal;
   }
   @keyframes pulse {
     0%, 100% { opacity: 0.5; }
@@ -803,6 +846,7 @@
     .nav-links { gap: 14px; }
     .nav-link { display: none; }
     .hero { padding: 130px 20px 80px; min-height: 86vh; }
+    .hero-proof { max-width: 280px; }
     .about-grid { grid-template-columns: 1fr; gap: 40px; }
     .about-side { position: static; }
     .voice-grid { grid-template-columns: 1fr; gap: 40px; }
@@ -817,6 +861,10 @@
   @media (max-width: 480px) {
     .foot-grid { grid-template-columns: 1fr; }
     .hero-headline { letter-spacing: -0.025em; }
+    .hero { padding: 116px 18px 64px; min-height: auto; }
+    .hero-proof { max-width: 280px; margin-top: 26px; padding: 16px 17px 18px; }
+    .hero-proof p { font-size: 17px; }
+    .hero-proof span { display: block; margin: 0 0 4px; }
   }
 </style>
 <link rel="stylesheet" href="/brand-depth.css">
@@ -861,6 +909,11 @@
         <p class="hc-handoff-text">this conversation is getting somewhere.</p>
         <a href="/chat.html" class="btn-primary" id="hcContinue">keep going in the chat <span class="arr">&rarr;</span></a>
       </div>
+    </div>
+    <div class="hero-proof reveal">
+      <div class="hero-proof-kicker">the voice is the point</div>
+      <p><span>you</span>"i don't even know if i believe in you"</p>
+      <p class="him"><span>him</span>"noted. you're still here though. what made you open this tab?"</p>
     </div>
   </div>
 </header>
@@ -1073,12 +1126,12 @@
         <div class="price-amount">$9.99<span class="unit">/ month</span></div>
         <div class="price-foot">cancel anytime, no questions.</div>
         <ul class="price-list">
-          <li>unlimited conversations</li>
+          <li>keep talking without the monthly wall</li>
           <li>full conversation history</li>
           <li>memory across conversations</li>
-          <li>priority support</li>
+          <li>a place to return when you need it</li>
         </ul>
-        <a href="/upgrade.html" class="price-cta" data-track-plan="monthly">choose monthly</a>
+        <a href="/upgrade.html?plan=monthly&checkout=1" class="price-cta" data-track-plan="monthly">choose monthly</a>
       </div>
       <div class="price-card featured reveal">
         <div class="price-name">annual &middot; two months free</div>
@@ -1087,10 +1140,10 @@
         <ul class="price-list">
           <li>everything in monthly</li>
           <li>two months free</li>
-          <li>early access to new features</li>
+          <li>one uninterrupted year of memory</li>
           <li>support a small, independent project</li>
         </ul>
-        <a href="/upgrade.html" class="price-cta" data-track-plan="annual">choose annual</a>
+        <a href="/upgrade.html?plan=annual&checkout=1" class="price-cta" data-track-plan="annual">choose annual</a>
       </div>
     </div>
     <p class="price-free reveal">

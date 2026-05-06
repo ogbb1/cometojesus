@@ -169,7 +169,7 @@ export default async function handler(req, res) {
       },
 
       // Where to send the user after they pay or cancel
-      success_url: `${SITE_URL}/?upgraded=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${SITE_URL}/chat.html?upgraded=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/upgrade.html?canceled=true`,
 
       // Allow promo codes if you want to run promotions later

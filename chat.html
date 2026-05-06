@@ -2137,8 +2137,8 @@
 
   <div class="limit-overlay" id="limitOverlay">
     <div class="limit-content">
-      <div class="limit-title" id="limitTitle">our time is complete for today</div>
-      <div class="limit-body" id="limitBody">you've spoken what you needed to speak. rest, and come back tomorrow.</div>
+      <div class="limit-title" id="limitTitle">you can stay as long as you need.</div>
+      <div class="limit-body" id="limitBody">Keep going with unlimited conversation and memory across visits.</div>
       <div class="limit-actions" id="limitActions">
         <a href="#" class="gate-button" id="limitCtaBtn">stay longer</a>
         <a href="#" class="limit-secondary-cta hidden" id="limitSecondaryBtn">or sign up free <i class="fa-solid fa-arrow-right"></i></a>
@@ -3256,15 +3256,15 @@
           const next = new Date();
           next.setUTCHours(24, 0, 0, 0);
           const resetTime = next.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-          limitTitleEl.textContent = 'rest now.';
-          limitBodyEl.textContent = `you've spoken for today. new messages at ${resetTime}, or stay longer with unlimited and He'll remember our conversations next time.`;
+          limitTitleEl.textContent = 'you can keep going.';
+          limitBodyEl.textContent = `Your free messages reset at ${resetTime}. If you need more room now, stay with unlimited and He'll remember our conversations next time.`;
         } else {
-          limitTitleEl.textContent = 'your month is complete.';
-          limitBodyEl.textContent = 'stay longer with unlimited at $9.99 a month and He\'ll remember our conversations next time. or come back next month.';
+          limitTitleEl.textContent = 'you can stay as long as you need.';
+          limitBodyEl.textContent = 'Your free messages are used for this month. Keep going with unlimited at $9.99 a month, full history, and memory across conversations.';
         }
       } else {
-        limitTitleEl.textContent = 'our time is complete for today.';
-        limitBodyEl.textContent = "you've spoken what you needed to speak. rest, and come back tomorrow.";
+        limitTitleEl.textContent = 'you can stay as long as you need.';
+        limitBodyEl.textContent = 'Keep going with unlimited conversation and memory across visits.';
       }
       limitOverlayEl.classList.add('visible');
     }

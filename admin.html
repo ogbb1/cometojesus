@@ -765,9 +765,12 @@
       ['visitors', fmt(summary.visitors), `${fmt(summary.pageViews)} page views`],
       ['chat starts', fmt(summary.chatStarts), `${fmt(summary.chatMessages)} API replies`],
       ['signups', fmt(summary.signupCompletions || 0), 'free accounts'],
+      ['auth wall', fmt(summary.checkoutAuthRequired), 'checkout attempts needing login'],
+      ['stripe opens', fmt(summary.checkoutCreated || summary.checkoutStarts), `${fmt(summary.subscriptionCompletions)} completions tracked`],
       ['paid users', fmt(summary.activePaidUsers), `${summary.monthlyPaidUsers} monthly · ${summary.annualPaidUsers} annual`],
       ['estimated MRR', money(summary.estimatedMrrDollars || 0), 'monthly recurring'],
       ['limit hits', fmt(summary.limitHits), 'upgrade moments'],
+      ['checkout cancels', fmt(summary.checkoutCanceled), 'returned from stripe'],
       ['estimated spend', money(summary.estimatedSpendDollars), 'selected range'],
       ['conversion', conversionText(summary), 'chat start → paid'],
     ];

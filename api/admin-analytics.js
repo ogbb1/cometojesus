@@ -77,7 +77,10 @@ export default async function handler(req, res) {
       trackedEvents: 0,
       chatStarts: 0,
       limitHits: 0,
+      checkoutAuthRequired: 0,
       checkoutStarts: 0,
+      checkoutCreated: 0,
+      checkoutCanceled: 0,
       subscriptionCompletions: 0,
       signupCompletions: 0,
       chatMessages: 0,
@@ -128,7 +131,10 @@ export default async function handler(req, res) {
     ['chat_started', 'sent first message'],
     ['limit_hit', 'hit limit'],
     ['upgrade_clicked', 'upgrade clicked'],
+    ['checkout_requires_auth', 'auth required'],
     ['checkout_started', 'checkout started'],
+    ['checkout_created', 'stripe opened'],
+    ['checkout_canceled', 'checkout canceled'],
     ['subscription_completed', 'subscribed'],
   ];
   const funnelUniques = Object.fromEntries(funnelEvents.map(([name]) => [name, new Set()]));
@@ -178,7 +184,10 @@ export default async function handler(req, res) {
   response.summary.trackedEvents = events.length;
   response.summary.chatStarts = eventCounts.chat_started || 0;
   response.summary.limitHits = eventCounts.limit_hit || 0;
+  response.summary.checkoutAuthRequired = eventCounts.checkout_requires_auth || 0;
   response.summary.checkoutStarts = eventCounts.checkout_started || 0;
+  response.summary.checkoutCreated = eventCounts.checkout_created || 0;
+  response.summary.checkoutCanceled = eventCounts.checkout_canceled || 0;
   response.summary.subscriptionCompletions = eventCounts.subscription_completed || 0;
   response.summary.signupCompletions = eventCounts.signup_completed || 0;
   response.eventsByName = topEntries(eventCounts, 20);

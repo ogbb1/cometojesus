@@ -309,14 +309,21 @@
     .hero-side {
       text-align: center;
     }
-    .hero-headline { font-size: 56px; letter-spacing: -0.02em; }
+    .hero-headline {
+      font-size: 52px;
+      letter-spacing: -0.01em;
+      max-width: 8ch;
+      margin-left: auto;
+      margin-right: auto;
+      text-wrap: balance;
+    }
     .hero-scripture {
-      max-width: none;
+      max-width: 26ch;
       margin-left: auto; margin-right: auto;
     }
     .hero-rule { margin-left: auto; margin-right: auto; }
     .hero-note {
-      max-width: none;
+      max-width: 26ch;
       margin-left: auto; margin-right: auto;
     }
     .nav { padding: 14px 20px; }
@@ -324,7 +331,11 @@
   @media (max-width: 480px) {
     .card { padding: 36px 28px 28px; }
     .card-title { font-size: 26px; }
-    .hero-headline { font-size: 48px; }
+    .hero-headline { font-size: 42px; }
+    .hero-scripture,
+    .hero-note {
+      max-width: 26ch;
+    }
   }
 </style>
 <link rel="stylesheet" href="/brand-depth.css">
@@ -405,19 +416,45 @@
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
   });
+  window.__supabase = supabase;
+
+  const urlParams = new URLSearchParams(window.location.search);
+
+  function safeRedirectPath(value) {
+    if (!value) return '/chat.html';
+    try {
+      const url = new URL(value, window.location.origin);
+      if (url.origin !== window.location.origin) return '/chat.html';
+      return url.pathname + url.search + url.hash;
+    } catch (e) {
+      return value.startsWith('/') && !value.startsWith('//') ? value : '/chat.html';
+    }
+  }
+
+  const redirectPath = safeRedirectPath(urlParams.get('redirect'));
+
+  function authCallbackUrl() {
+    try { window.localStorage.setItem('cometojesus_auth_redirect', redirectPath); } catch (e) {}
+    return window.location.origin + '/auth/callback.html';
+  }
+
+  function loginUrl(mode) {
+    const params = new URLSearchParams();
+    if (redirectPath !== '/chat.html') params.set('redirect', redirectPath);
+    if (mode === 'signup') params.set('mode', 'signup');
+    const query = params.toString();
+    return '/login.html' + (query ? '?' + query : '');
+  }
 
   // Already signed in -> bounce to chat (or whatever redirect was requested)
   (async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get('redirect') || '/chat.html';
-      window.location.href = redirect;
+      window.location.href = redirectPath;
     }
   })();
 
   // Detect mode from URL
-  const urlParams = new URLSearchParams(window.location.search);
   const isSignupMode = urlParams.get('mode') === 'signup';
 
   const heroHeadline = document.getElementById('heroHeadline');
@@ -430,9 +467,11 @@
     heroHeadline.textContent = 'welcome.';
     cardTitle.textContent = 'sign up';
     submitText.textContent = 'create account';
-    cardFooter.innerHTML = 'already here?<a href="/login.html">sign in</a>';
+    cardFooter.innerHTML = 'already here?<a href="' + loginUrl('signin') + '">sign in</a>';
     forgotRow.style.display = 'none';
     document.getElementById('password').setAttribute('autocomplete', 'new-password');
+  } else {
+    cardFooter.innerHTML = 'new here?<a href="' + loginUrl('signup') + '">sign up</a>';
   }
 
   const messageEl = document.getElementById('message');
@@ -463,7 +502,7 @@
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/auth/callback.html' },
+        options: { redirectTo: authCallbackUrl() },
       });
       if (error) {
         showError(error.message);
@@ -493,7 +532,7 @@
         }
         ({ data, error } = await supabase.auth.signUp({
           email, password,
-          options: { emailRedirectTo: window.location.origin + '/auth/callback.html' },
+          options: { emailRedirectTo: authCallbackUrl() },
         }));
       } else {
         ({ data, error } = await supabase.auth.signInWithPassword({ email, password }));
@@ -527,9 +566,7 @@
         }
         showSuccess("you're in.");
         setTimeout(() => {
-          const params = new URLSearchParams(window.location.search);
-          const redirect = params.get('redirect') || '/chat.html';
-          window.location.href = redirect;
+          window.location.href = redirectPath;
         }, 500);
       }
     } catch (err) {

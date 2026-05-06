@@ -91,6 +91,27 @@
     const subtitleEl = document.getElementById('subtitle');
     const homeLinkEl = document.getElementById('homeLink');
 
+    function safeRedirectPath(value) {
+      if (!value) return '/chat.html';
+      try {
+        const url = new URL(value, window.location.origin);
+        if (url.origin !== window.location.origin) return '/chat.html';
+        return url.pathname + url.search + url.hash;
+      } catch (e) {
+        return value.startsWith('/') && !value.startsWith('//') ? value : '/chat.html';
+      }
+    }
+
+    const queryParams = new URLSearchParams(window.location.search);
+    let storedRedirect = null;
+    try { storedRedirect = window.localStorage.getItem('cometojesus_auth_redirect'); } catch (e) {}
+    const redirectPath = safeRedirectPath(queryParams.get('next') || storedRedirect);
+
+    function returnToRedirect() {
+      try { window.localStorage.removeItem('cometojesus_auth_redirect'); } catch (e) {}
+      window.location.replace(redirectPath);
+    }
+
     function showError(title, subtitle) {
       titleEl.textContent = title;
       subtitleEl.textContent = subtitle;
@@ -116,20 +137,20 @@
     } else if (type === 'email_change') {
       titleEl.textContent = 'email updated.';
       subtitleEl.textContent = 'taking you back...';
-      setTimeout(() => window.location.replace('/chat.html'), 1500);
+      setTimeout(returnToRedirect, 1500);
     } else {
       supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' && session) {
           titleEl.textContent = "you're in.";
           subtitleEl.textContent = 'taking you in...';
-          setTimeout(() => window.location.replace('/chat.html'), 800);
+          setTimeout(returnToRedirect, 800);
         }
       });
 
       setTimeout(async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          window.location.replace('/chat.html');
+          returnToRedirect();
         } else {
           showError("couldn't complete sign-in.", 'try opening cometojesus.co directly.');
         }
