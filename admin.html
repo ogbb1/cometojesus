@@ -298,6 +298,102 @@
     border-radius: 4px;
   }
 
+  /* Section header — groups related panels under a plain-English question */
+  .section-h {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-style: italic;
+    color: var(--ink-mid);
+    margin: 28px 0 12px;
+    padding: 0 4px;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  /* Traffic source bars — wide horizontal rows with name, % bar, count */
+  .source-list { display: flex; flex-direction: column; gap: 12px; }
+  .source-row {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+  }
+  .source-name {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    text-transform: lowercase;
+  }
+  .source-name.direct { color: var(--ink-soft); font-style: italic; }
+  .source-bar-track {
+    height: 18px;
+    border-radius: 99px;
+    background: rgba(28, 20, 9, 0.07);
+    overflow: hidden;
+    position: relative;
+  }
+  .source-bar {
+    min-width: 2px;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--source-color, var(--olive));
+    transition: width .35s ease;
+  }
+  .source-stats {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: var(--ink-mid);
+    text-align: right;
+    white-space: nowrap;
+    min-width: 110px;
+  }
+  .source-stats .pct {
+    font-weight: 600;
+    color: var(--ink);
+    margin-right: 6px;
+  }
+  .source-empty {
+    padding: 18px;
+    border: 1px dashed var(--rule);
+    border-radius: 8px;
+    background: rgba(255, 252, 244, 0.4);
+    color: var(--ink-soft);
+    font-style: italic;
+    line-height: 1.55;
+  }
+  .source-empty strong { color: var(--ink); font-style: normal; font-weight: 600; }
+  .source-empty code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    background: rgba(28, 20, 9, 0.07);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-style: normal;
+    word-break: break-all;
+  }
+  .source-totals {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .source-totals strong { color: var(--ink-mid); font-weight: 600; }
+
+  @media (max-width: 720px) {
+    .source-row {
+      grid-template-columns: 1fr auto;
+      gap: 6px 14px;
+    }
+    .source-bar-track {
+      grid-column: 1 / -1;
+    }
+  }
+
   .funnel {
     display: grid;
     gap: 12px;
@@ -545,6 +641,19 @@
       <div class="card stat"><div class="loading">loading...</div></div>
     </section>
 
+    <div class="section-h">where are visitors coming from?</div>
+    <section class="grid">
+      <div class="card panel" style="grid-column: 1 / -1;">
+        <h2>traffic sources</h2>
+        <div id="topSources"></div>
+        <div class="source-totals" id="topSourcesTotals" style="display:none;">
+          <span><strong id="sourceTotalAttributed">0</strong> attributed visitors</span>
+          <span><strong id="sourceTotalUnattributed">0</strong> not yet tagged</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-h">are visitors becoming customers?</div>
     <section class="grid">
       <div class="card panel">
         <h2>funnel</h2>
@@ -554,22 +663,25 @@
         <h2>daily pulse</h2>
         <div class="chart" id="chart"></div>
       </div>
-      <div class="card panel">
-        <h2>top pages</h2>
-        <div class="list" id="topPages"></div>
-      </div>
-      <div class="card panel">
-        <h2>where visitors came from</h2>
-        <div class="hint" id="topSourcesHint">Unique visitors per inbound source. Same-site navigation excluded so the picture is clean. TikTok bio links should include <code>?utm_source=tiktok</code> for accurate attribution; without UTMs, in-app browsers often strip referrers and land in "direct".</div>
-        <div class="list" id="topSources"></div>
-      </div>
+    </section>
+
+    <div class="section-h">what is the money looking like?</div>
+    <section class="grid">
       <div class="card panel">
         <h2>paid users</h2>
         <div class="list" id="subscriptions"></div>
       </div>
       <div class="card panel">
-        <h2>top spend</h2>
+        <h2>top spend (your AI cost)</h2>
         <div class="list" id="topSpenders"></div>
+      </div>
+    </section>
+
+    <div class="section-h">what did people do?</div>
+    <section class="grid">
+      <div class="card panel">
+        <h2>top pages</h2>
+        <div class="list" id="topPages"></div>
       </div>
       <div class="card panel">
         <h2>recent events</h2>
@@ -595,6 +707,9 @@
     chart: document.getElementById('chart'),
     topPages: document.getElementById('topPages'),
     topSources: document.getElementById('topSources'),
+    topSourcesTotals: document.getElementById('topSourcesTotals'),
+    sourceTotalAttributed: document.getElementById('sourceTotalAttributed'),
+    sourceTotalUnattributed: document.getElementById('sourceTotalUnattributed'),
     subscriptions: document.getElementById('subscriptions'),
     topSpenders: document.getElementById('topSpenders'),
     recentEvents: document.getElementById('recentEvents'),
@@ -785,6 +900,84 @@
     el.innerHTML = rows.map(renderRow).join('');
   }
 
+  // Visual horizontal-bar attribution. Plain English: "this many visitors
+  // came from each source, here's their share". Empty state actually
+  // teaches the user how to fix their tracking (UTM-tag bio links).
+  const SOURCE_COLORS = {
+    tiktok:    '#000000',
+    instagram: '#c26d8c',
+    facebook:  '#3a5998',
+    youtube:   '#c4302b',
+    google:    '#4285f4',
+    twitter:   '#1da1f2',
+    'twitter/x': '#1da1f2',
+    threads:   '#1c1409',
+    reddit:    '#ff4500',
+    direct:    '#9a8c76',
+    internal:  '#9a8c76',
+  };
+  const SOURCE_DESCRIPTIONS = {
+    direct: 'typed the URL, bookmark, or app stripped the referrer',
+    tiktok: 'tapped a tiktok link or bio',
+    instagram: 'tapped an instagram link or bio',
+    facebook: 'came from facebook',
+    google: 'came from a google search',
+    youtube: 'tapped a youtube link or description',
+    'twitter/x': 'tapped a tweet or x post',
+    threads: 'tapped a threads post',
+    reddit: 'came from reddit',
+  };
+  function sourceColor(name) {
+    if (SOURCE_COLORS[name]) return SOURCE_COLORS[name];
+    // Stable per-name pastel for unknown sources
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0;
+    return `hsl(${Math.abs(h) % 360}, 38%, 48%)`;
+  }
+  function renderTopSources(rows, summary) {
+    const el = els.topSources;
+    const totals = els.topSourcesTotals;
+    if (!rows || !rows.length) {
+      el.innerHTML = `
+        <div class="source-empty">
+          <p style="margin-bottom:10px;"><strong>No traffic sources yet for this range.</strong></p>
+          <p>Two things to know:</p>
+          <p style="margin-top:6px;">1. <strong>Most TikTok traffic shows up as <em>direct</em></strong> — TikTok's in-app browser strips the referrer header. The fix is to UTM-tag your bio link so we can see where they came from:</p>
+          <p style="margin-top:6px;"><code>https://cometojesus.co/?utm_source=tiktok&utm_medium=bio</code></p>
+          <p style="margin-top:10px;">2. <strong>Visitors who landed before today</strong> were tracked under the old logic and may not show here. New visits from now on will populate properly.</p>
+        </div>
+      `;
+      if (totals) totals.style.display = 'none';
+      return;
+    }
+    el.innerHTML = `<div class="source-list">${rows.map((row) => {
+      const color = sourceColor(row.name);
+      const isDirect = row.name === 'direct';
+      const description = SOURCE_DESCRIPTIONS[row.name] || `tagged as ${row.name}`;
+      return `
+        <div class="source-row" title="${escapeHtml(description)}">
+          <div>
+            <div class="source-name${isDirect ? ' direct' : ''}">${escapeHtml(row.name)}</div>
+          </div>
+          <div class="source-bar-track">
+            <div class="source-bar" style="--source-color:${color}; width:${row.share || 0}%"></div>
+          </div>
+          <div class="source-stats">
+            <span class="pct">${row.share || 0}%</span>
+            <span>${fmt(row.count)} ${row.count === 1 ? 'visitor' : 'visitors'}</span>
+          </div>
+        </div>
+      `;
+    }).join('')}</div>`;
+    if (totals) {
+      const attributed = summary.attributedVisitors || 0;
+      const unattributed = summary.unattributedVisitors || 0;
+      els.sourceTotalAttributed.textContent = fmt(attributed);
+      els.sourceTotalUnattributed.textContent = fmt(unattributed);
+      totals.style.display = (attributed || unattributed) ? 'flex' : 'none';
+    }
+  }
+
   function render(data) {
     if (!data.setup.analyticsEventsTable) {
       els.notice.classList.add('visible');
@@ -807,15 +1000,7 @@
       </div>
     `);
 
-    renderList(els.topSources, data.topSources || data.topReferrers, row => `
-      <div class="list-row">
-        <div>
-          <div class="list-title">${escapeHtml(row.name)}</div>
-          <div class="list-meta">${row.name === 'direct' ? 'no referrer (typed URL, bookmarks, in-app browsers stripping referrer)' : 'unique visitors from ' + escapeHtml(row.name)}</div>
-        </div>
-        <span class="pill">${fmt(row.count)}</span>
-      </div>
-    `);
+    renderTopSources(data.topSources || data.topReferrers || [], data.summary || {});
 
     renderList(els.subscriptions, data.subscriptions, row => `
       <div class="list-row">

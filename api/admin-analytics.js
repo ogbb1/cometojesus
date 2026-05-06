@@ -191,11 +191,21 @@ export default async function handler(req, res) {
   for (const key of Object.keys(sourceVisitors)) {
     sourceCounts[key] = sourceVisitors[key].size;
   }
-  response.topSources = topEntries(sourceCounts, 12);
+  const totalAttributed = Object.values(sourceCounts).reduce((a, b) => a + b, 0);
+  // Each source row carries `share` (% of attributed visitors) so the
+  // dashboard can render a horizontal bar without recomputing it.
+  response.topSources = topEntries(sourceCounts, 12).map((row) => ({
+    ...row,
+    share: totalAttributed ? Math.round((row.count / totalAttributed) * 100) : 0,
+  }));
   // Keep topReferrers field name for backward compat with any older
   // dashboard render — same shape, same data.
   response.topReferrers = response.topSources;
-  response.summary.attributedVisitors = Object.values(sourceCounts).reduce((a, b) => a + b, 0);
+  response.summary.attributedVisitors = totalAttributed;
+  // unattributed = identities seen but never tied to a source row
+  // (typically because their only events predate the entry_source change
+  // AND had a null referrer_host). Useful "data quality" signal.
+  response.summary.unattributedVisitors = Math.max(0, uniqueVisitors.size - totalAttributed);
 
   // Funnel rows include conversionFromPrevPct (% of the previous step that
   // made it to this step) and dropoffPct so the dashboard can render the
