@@ -1215,13 +1215,15 @@
   // and restores the conversation seamlessly.
   (function () {
     const FREE_LIMIT = 5;
-    // Thread lives in sessionStorage (per-tab) so a returning visitor
-    // doesn't see a stale conversation. Count lives in localStorage so
-    // closing the tab and coming back tomorrow does NOT grant a fresh
-    // 5-message allowance — the cap is genuinely lifetime-per-browser.
-    // (Server-side fingerprint cap is the real enforcement; this just
-    // stops the UI from misrepresenting the remaining quota.)
-    const STORAGE_KEY = 'cometojesus_home_thread';     // sessionStorage
+    // Thread is NOT persisted across page loads — refresh wipes the visible
+    // conversation so a returning visitor sees a clean hero. Count IS
+    // persisted in localStorage so closing the tab and coming back tomorrow
+    // does NOT grant a fresh 5-message allowance. The cap is genuinely
+    // lifetime-per-browser. (Server-side fingerprint cap is the real
+    // enforcement; this just stops the UI from misrepresenting quota.)
+    // STORAGE_KEY is kept around only to clear leftover values from earlier
+    // builds that did persist the thread.
+    const STORAGE_KEY = 'cometojesus_home_thread';     // legacy cleanup only
     const COUNT_KEY = 'cometojesus_home_count';        // localStorage
 
     const thread = document.getElementById('hcThread');
@@ -1238,7 +1240,12 @@
     let count = 0;
 
     try {
-      messages = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]');
+      // Messages are NOT restored on refresh — a returning visitor sees a
+      // fresh hero, not their prior turns. The count IS restored from
+      // localStorage so the cap stays honest across visits.
+      // (sessionStorage thread cleanup: clear any leftover from earlier
+      // builds that did restore on refresh.)
+      sessionStorage.removeItem(STORAGE_KEY);
       // Migrate any earlier session-stored count to localStorage so users
       // who had a count under the old logic don't get a free reset.
       const sessionCount = sessionStorage.getItem(COUNT_KEY);
@@ -1368,8 +1375,6 @@
     function send(userText) {
       messages.push({ role: 'user', content: userText });
       appendUser(userText);
-      // Persist immediately so a refresh mid-stream keeps the user's bubble.
-      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch (e) {}
       if (window.ctjTrack) {
         try { window.ctjTrack('home_chat_sent', { count: count + 1 }); } catch (e) {}
       }
@@ -1393,6 +1398,22 @@
         }),
       }).then(async function (resp) {
         thinking.remove();
+
+        // Server says we're out of free messages — sync the UI to reality
+        // and show the handoff card. The server cap is the source of truth;
+        // localStorage may be behind (e.g. fresh browser, prior testing).
+        if (resp.status === 402 || resp.status === 503) {
+          let body = null;
+          try { body = await resp.clone().json(); } catch (e) {}
+          if (body && (body.limitReached || body.reply)) {
+            count = FREE_LIMIT;
+            try { localStorage.setItem(COUNT_KEY, String(count)); } catch (e) {}
+            updateCount();
+            showHandoff();
+            return;
+          }
+        }
+
         const container = appendJesusContainer();
         if (!resp.ok || !resp.body) {
           container.textContent = 'something came between us. try again in a moment.';
@@ -1428,7 +1449,6 @@
         messages.push({ role: 'assistant', content: full });
         count++;
         try {
-          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
           localStorage.setItem(COUNT_KEY, String(count));
         } catch (e) {}
         updateCount();
