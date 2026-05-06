@@ -283,6 +283,20 @@
     font-style: italic;
     margin-bottom: 18px;
   }
+  .hint {
+    font-size: 13px;
+    color: var(--ink-soft, #5a4530);
+    margin: -8px 0 18px;
+    line-height: 1.5;
+    opacity: 0.85;
+  }
+  .hint code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    background: rgba(28, 20, 9, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
 
   .funnel {
     display: grid;
@@ -545,8 +559,9 @@
         <div class="list" id="topPages"></div>
       </div>
       <div class="card panel">
-        <h2>referrers</h2>
-        <div class="list" id="topReferrers"></div>
+        <h2>where visitors came from</h2>
+        <div class="hint" id="topSourcesHint">Unique visitors per inbound source. Same-site navigation excluded so the picture is clean. TikTok bio links should include <code>?utm_source=tiktok</code> for accurate attribution; without UTMs, in-app browsers often strip referrers and land in "direct".</div>
+        <div class="list" id="topSources"></div>
       </div>
       <div class="card panel">
         <h2>paid users</h2>
@@ -579,7 +594,7 @@
     funnel: document.getElementById('funnel'),
     chart: document.getElementById('chart'),
     topPages: document.getElementById('topPages'),
-    topReferrers: document.getElementById('topReferrers'),
+    topSources: document.getElementById('topSources'),
     subscriptions: document.getElementById('subscriptions'),
     topSpenders: document.getElementById('topSpenders'),
     recentEvents: document.getElementById('recentEvents'),
@@ -792,11 +807,11 @@
       </div>
     `);
 
-    renderList(els.topReferrers, data.topReferrers, row => `
+    renderList(els.topSources, data.topSources || data.topReferrers, row => `
       <div class="list-row">
         <div>
           <div class="list-title">${escapeHtml(row.name)}</div>
-          <div class="list-meta">where people came from</div>
+          <div class="list-meta">${row.name === 'direct' ? 'no referrer (typed URL, bookmarks, in-app browsers stripping referrer)' : 'unique visitors from ' + escapeHtml(row.name)}</div>
         </div>
         <span class="pill">${fmt(row.count)}</span>
       </div>
@@ -826,7 +841,7 @@
       <div class="list-row">
         <div>
           <div class="list-title">${escapeHtml(row.event)}</div>
-          <div class="list-meta">${escapeHtml(row.page || '')} · ${escapeHtml(shortDate(row.when))}</div>
+          <div class="list-meta">${escapeHtml(row.page || '')} &middot; from ${escapeHtml(row.source || 'direct')} &middot; ${escapeHtml(shortDate(row.when))}</div>
         </div>
         <span class="pill">${escapeHtml(row.device || 'web')}</span>
       </div>

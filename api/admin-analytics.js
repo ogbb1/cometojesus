@@ -114,7 +114,11 @@ export default async function handler(req, res) {
 
   const eventCounts = {};
   const pageCounts = {};
-  const referrerCounts = {};
+  // Attribution = unique visitors per traffic source. Counts events would
+  // double-count anyone who clicks around the site (every internal nav
+  // would inflate their source). We track unique identities per source
+  // and report THAT.
+  const sourceVisitors = {};
   const uniqueVisitors = new Set();
   const daily = {};
   const funnelEvents = [
@@ -136,8 +140,17 @@ export default async function handler(req, res) {
 
     increment(eventCounts, name);
     increment(pageCounts, event.page_path);
-    increment(referrerCounts, event.referrer_host);
     if (identity) uniqueVisitors.add(identity);
+
+    // Attribution: prefer the new metadata.entry_source (sticky per session,
+    // captures TikTok/IG/etc. with utm fallback to host normalization).
+    // Fall back to referrer_host for legacy rows. Skip "internal" so the
+    // top sources reflect inbound traffic only — not page-to-page nav.
+    const entrySource = (event.metadata && event.metadata.entry_source) || event.referrer_host;
+    if (identity && entrySource && entrySource !== 'internal') {
+      if (!sourceVisitors[entrySource]) sourceVisitors[entrySource] = new Set();
+      sourceVisitors[entrySource].add(identity);
+    }
 
     if (!daily[day]) {
       daily[day] = {
@@ -170,7 +183,19 @@ export default async function handler(req, res) {
   response.summary.signupCompletions = eventCounts.signup_completed || 0;
   response.eventsByName = topEntries(eventCounts, 20);
   response.topPages = topEntries(pageCounts, 10);
-  response.topReferrers = topEntries(referrerCounts, 10);
+
+  // topSources = unique visitors per traffic source, "internal" excluded.
+  // This replaces the old topReferrers (which was dominated by "internal"
+  // because every same-host page nav fired an event).
+  const sourceCounts = {};
+  for (const key of Object.keys(sourceVisitors)) {
+    sourceCounts[key] = sourceVisitors[key].size;
+  }
+  response.topSources = topEntries(sourceCounts, 12);
+  // Keep topReferrers field name for backward compat with any older
+  // dashboard render — same shape, same data.
+  response.topReferrers = response.topSources;
+  response.summary.attributedVisitors = Object.values(sourceCounts).reduce((a, b) => a + b, 0);
 
   // Funnel rows include conversionFromPrevPct (% of the previous step that
   // made it to this step) and dropoffPct so the dashboard can render the
@@ -199,7 +224,7 @@ export default async function handler(req, res) {
     event: event.event_name,
     when: event.created_at,
     page: event.page_path,
-    referrer: event.referrer_host,
+    source: (event.metadata && event.metadata.entry_source) || event.referrer_host || 'direct',
     device: event.device_type,
     metadata: event.metadata || {},
   }));
