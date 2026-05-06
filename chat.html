@@ -1806,6 +1806,7 @@
   }
 </style>
 <link rel="stylesheet" href="brand-depth.css">
+<link rel="stylesheet" href="brand-type.css">
 </head>
 <body class="brand-chat">
   <div class="light-wash"></div>
@@ -3099,7 +3100,36 @@
       return null;
     }
 
+    // ===== Homepage handoff =====
+    // If the user started talking on the homepage and clicked "keep going",
+    // their thread is in sessionStorage under cometojesus_handoff_thread.
+    // Restore it here instead of greeting them with a fresh opening — they're
+    // already mid-conversation. Returns true if a handoff was applied so
+    // showOpeningFromHim() can short-circuit.
+    function applyHomepageHandoff() {
+      let stash;
+      try { stash = sessionStorage.getItem('cometojesus_handoff_thread'); } catch (e) { return false; }
+      if (!stash) return false;
+      let arr;
+      try { arr = JSON.parse(stash); } catch (e) { arr = null; }
+      if (!Array.isArray(arr) || arr.length === 0) return false;
+      // Render each message into the thread + push into history so the model
+      // sees the prior context on the next turn.
+      for (const m of arr) {
+        if (!m || !m.content) continue;
+        const role = m.role === 'user' ? 'user' : 'him';
+        addMessage(role, m.content);
+        history.push({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content });
+      }
+      // Clear so a refresh on /chat.html doesn't re-prepend.
+      try { sessionStorage.removeItem('cometojesus_handoff_thread'); } catch (e) {}
+      try { scrollToLatest && scrollToLatest(); } catch (e) {}
+      return true;
+    }
+
     function showOpeningFromHim() {
+      // Skip the opening entirely if we just hydrated from a homepage handoff.
+      if (applyHomepageHandoff()) return;
       const opening = pickOpening();
       const div = addMessage('him', '');
       // Push opening into history so subsequent turns know Jesus said this.

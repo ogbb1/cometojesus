@@ -70,6 +70,22 @@
 
 <noscript><style>.reveal { opacity: 1 !important; transform: none !important; filter: none !important; }</style></noscript>
 
+<script>
+  // Turnstile — only on the deployed origin. The homepage inline chat uses
+  // it to obtain a token before calling /api/chat (anonymous users are
+  // gated by it server-side). Same loader pattern as chat.html.
+  (function () {
+    var h = location.hostname;
+    if (h === 'cometojesus.co' || h === 'www.cometojesus.co') {
+      var s = document.createElement('script');
+      s.async = true;
+      s.defer = true;
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      document.head.appendChild(s);
+    }
+  })();
+</script>
+
 <style>
   :root {
     /* Warm cream palette */
@@ -244,6 +260,37 @@
     font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase;
     color: var(--ink-soft); margin-bottom: 48px;
   }
+  /* ===== Inline home chat — first 5 messages live on the homepage,
+     then the user is handed off to /chat.html with the thread restored
+     via sessionStorage. */
+  .home-chat{margin-top:54px;display:flex;flex-direction:column;align-items:stretch;gap:18px;max-width:680px;margin-left:auto;margin-right:auto;width:100%}
+  .hc-thread{display:flex;flex-direction:column;gap:18px;text-align:left}
+  .hc-thread:empty{display:none}
+  .hc-msg{max-width:100%;line-height:1.4}
+  .hc-msg.user{align-self:flex-end;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:18px 18px 4px 18px;font-family:var(--font-body);font-size:18px;max-width:85%}
+  .hc-msg.jesus{align-self:flex-start;font-family:var(--font-body);font-style:italic;font-weight:600;font-size:26px;line-height:1.32;color:var(--ink);max-width:100%;letter-spacing:0.005em}
+  .hc-msg.jesus .word{display:inline-block;padding:0 0.06em;margin:0 -0.06em;opacity:0;filter:blur(6px);transform:translateY(4px);transition:opacity .9s ease,filter .9s ease,transform .9s ease}
+  .hc-msg.jesus .word.in{opacity:1;filter:blur(0);transform:none}
+  .hc-thinking{align-self:flex-start;display:inline-flex;gap:5px;padding:8px 0}
+  .hc-thinking span{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.4;animation:hcDot 1.4s infinite}
+  .hc-thinking span:nth-child(2){animation-delay:.2s}
+  .hc-thinking span:nth-child(3){animation-delay:.4s}
+  @keyframes hcDot{0%,80%,100%{opacity:.25;transform:scale(.85)}40%{opacity:.85;transform:scale(1.1)}}
+  .hc-composer{display:flex;align-items:center;gap:10px;background:rgba(255,250,242,.85);backdrop-filter:blur(8px);border:1px solid var(--rule);border-radius:999px;padding:6px 6px 6px 22px;box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 8px 24px -12px rgba(28,20,9,.18)}
+  .hc-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--font-body);font-size:18px;color:var(--ink);padding:12px 0}
+  .hc-input::placeholder{color:var(--ink-soft);font-style:italic}
+  .hc-send{width:48px;height:48px;border-radius:50%;border:none;background:var(--ink);color:var(--bg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform .15s,background .2s}
+  .hc-send:hover:not(:disabled){background:var(--accent-deep);transform:translateX(2px)}
+  .hc-send:disabled{opacity:.45;cursor:not-allowed}
+  .hc-arr{font-size:20px;line-height:1}
+  .hc-meta{display:inline-flex;align-items:center;gap:10px;justify-content:center;font-family:var(--font-ui);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);opacity:.8}
+  .hc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .hc-count{color:var(--accent-deep);font-weight:600}
+  .hc-handoff{display:none;flex-direction:column;align-items:center;gap:14px;margin-top:12px;padding:22px;border-top:1px solid var(--rule)}
+  .hc-handoff[data-show="1"]{display:flex}
+  .hc-handoff-text{font-family:var(--font-body);font-style:italic;font-weight:600;font-size:22px;color:var(--ink);text-align:center}
+  .hc-turnstile{position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none}
+
   .hero-cta-row {
     display: inline-flex; align-items: center; gap: 18px; flex-wrap: wrap;
     justify-content: center;
@@ -768,6 +815,7 @@
   }
 </style>
 <link rel="stylesheet" href="/brand-depth.css">
+<link rel="stylesheet" href="/brand-type.css">
 
 <script defer src="/analytics.js"></script>
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b7eeed438443412d954b904d75ff4e89"}'></script>
@@ -791,12 +839,35 @@
     <h1 class="hero-headline reveal">come to <span class="accent">me.</span></h1>
     <p class="hero-verse reveal">"all you who are weary and burdened, and I will give you rest."</p>
     <div class="hero-ref reveal">Matthew 11:28</div>
-    <div class="hero-cta-row reveal">
-      <a href="/chat.html" class="btn-primary" data-track-begin="hero">begin a conversation <span class="arr">&rarr;</span></a>
-    </div>
-    <div class="hero-meta reveal">
-      <span class="hero-meta-dot"></span>
-      <span>no account needed for your first 5 messages</span>
+    <div class="home-chat reveal" id="homeChat">
+      <div class="hc-thread" id="hcThread" aria-live="polite"></div>
+      <form class="hc-composer" id="hcForm" autocomplete="off">
+        <input class="hc-input" id="hcInput" type="text" placeholder="say what's on your heart..." maxlength="500" required>
+        <button class="hc-send" id="hcSend" type="submit" aria-label="send">
+          <span class="hc-arr">&rarr;</span>
+        </button>
+      </form>
+      <div class="hc-meta" id="hcMeta">
+        <span class="hc-dot"></span>
+        <span id="hcMetaText">no account needed. <span class="hc-count" id="hcCount">5</span> free messages.</span>
+      </div>
+      <div class="hc-handoff" id="hcHandoff" hidden>
+        <p class="hc-handoff-text">this conversation is getting somewhere.</p>
+        <a href="/chat.html" class="btn-primary" id="hcContinue">keep going in the chat <span class="arr">&rarr;</span></a>
+      </div>
+      <!-- Invisible Turnstile widget — token returned via onHomeTurnstileSuccess.
+           data-execution="render" auto-executes on render so we get a token
+           without the user clicking anything. After each successful send we
+           call turnstile.reset() + execute() to obtain a fresh token. Only
+           renders on cometojesus.co (script loader gates by hostname). -->
+      <div class="hc-turnstile">
+        <div class="cf-turnstile" id="hcTurnstile"
+             data-sitekey="0x4AAAAAADA2i5EmVkeDR0ho"
+             data-callback="onHomeTurnstileSuccess"
+             data-theme="light"
+             data-size="invisible"
+             data-execution="render"></div>
+      </div>
     </div>
   </div>
 </header>
@@ -1134,6 +1205,263 @@
 
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
+
+<script>
+  // ===== Inline home chat — first 5 messages live on the homepage =====
+  // Wraps the same /api/chat backend used by chat.html. Uses an invisible
+  // Cloudflare Turnstile widget on the deployed origin to obtain a token
+  // (the API rejects anonymous calls without one). On a non-deployed origin
+  // (preview iframe / localhost), the script element loader skips Turnstile
+  // entirely and we send chat without a token — the API will refuse, which
+  // is fine for preview-only contexts.
+  //
+  // After 5 messages, the thread is stashed in sessionStorage and a handoff
+  // CTA appears. /chat.html reads `cometojesus_handoff_thread` and restores
+  // the conversation seamlessly.
+  (function () {
+    const FREE_LIMIT = 5;
+    const STORAGE_KEY = 'cometojesus_home_thread';
+    const COUNT_KEY = 'cometojesus_home_count';
+
+    const thread = document.getElementById('hcThread');
+    const form = document.getElementById('hcForm');
+    const input = document.getElementById('hcInput');
+    const sendBtn = document.getElementById('hcSend');
+    const handoff = document.getElementById('hcHandoff');
+    const countEl = document.getElementById('hcCount');
+    const continueBtn = document.getElementById('hcContinue');
+    if (!thread || !form) return;
+
+    let messages = [];
+    let count = 0;
+    let turnstileToken = null;
+    const isProdOrigin = location.hostname === 'cometojesus.co' || location.hostname === 'www.cometojesus.co';
+
+    try {
+      messages = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]');
+      count = parseInt(sessionStorage.getItem(COUNT_KEY) || '0', 10) || 0;
+    } catch (e) { messages = []; count = 0; }
+
+    // Turnstile token callback. The widget is mounted invisible in the hero
+    // and auto-runs on render. waitForToken() polls this variable.
+    window.onHomeTurnstileSuccess = function (token) {
+      turnstileToken = token;
+    };
+
+    function renderRestored() {
+      thread.innerHTML = '';
+      messages.forEach(function (m) {
+        const div = document.createElement('div');
+        div.className = 'hc-msg ' + (m.role === 'user' ? 'user' : 'jesus');
+        div.textContent = m.content;
+        thread.appendChild(div);
+      });
+      updateCount();
+      if (count >= FREE_LIMIT) showHandoff();
+    }
+
+    function updateCount() {
+      const remaining = Math.max(0, FREE_LIMIT - count);
+      if (countEl) countEl.textContent = remaining;
+    }
+
+    function showHandoff() {
+      handoff.setAttribute('data-show', '1');
+      handoff.hidden = false;
+      input.disabled = true;
+      sendBtn.disabled = true;
+      input.placeholder = 'continue in the full chat →';
+      try {
+        sessionStorage.setItem('cometojesus_handoff_thread', JSON.stringify(messages));
+      } catch (e) {}
+    }
+
+    function appendUser(text) {
+      const div = document.createElement('div');
+      div.className = 'hc-msg user';
+      div.textContent = text;
+      thread.appendChild(div);
+      div.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    function appendThinking() {
+      const div = document.createElement('div');
+      div.className = 'hc-thinking';
+      div.innerHTML = '<span></span><span></span><span></span>';
+      thread.appendChild(div);
+      return div;
+    }
+
+    function appendJesusContainer() {
+      const div = document.createElement('div');
+      div.className = 'hc-msg jesus';
+      thread.appendChild(div);
+      return div;
+    }
+
+    function dripWords(container, text) {
+      // Drip words in at a considered cadence so even when the upstream
+      // response arrives in one chunk, the user reads it like Jesus is
+      // speaking, not autocompleting.
+      return new Promise(function (resolve) {
+        const words = text.split(/(\s+)/);
+        let i = 0;
+        const tick = function () {
+          if (i >= words.length) { resolve(); return; }
+          const w = words[i++];
+          if (/\S/.test(w)) {
+            const span = document.createElement('span');
+            span.className = 'word';
+            span.textContent = w;
+            container.appendChild(span);
+            requestAnimationFrame(function () { span.classList.add('in'); });
+          } else {
+            container.appendChild(document.createTextNode(w));
+          }
+          const last = w.slice(-1);
+          const delay = '.!?'.includes(last) ? 280 : ',;:'.includes(last) ? 180 : 90;
+          setTimeout(tick, delay);
+        };
+        tick();
+      });
+    }
+
+    // Awaitable for the turnstile token. Resolves with token (or null after
+     // an 8s timeout). Each send() call awaits this, then attempts the fetch.
+    function waitForToken() {
+      if (!isProdOrigin) return Promise.resolve(null);
+      if (turnstileToken) return Promise.resolve(turnstileToken);
+      return new Promise(function (resolve) {
+        const start = Date.now();
+        const tick = function () {
+          if (turnstileToken) { resolve(turnstileToken); return; }
+          if (Date.now() - start > 8000) { resolve(null); return; }
+          setTimeout(tick, 150);
+        };
+        tick();
+      });
+    }
+
+    function send(userText) {
+      messages.push({ role: 'user', content: userText });
+      appendUser(userText);
+      // Persist immediately so a refresh mid-stream keeps the user's bubble.
+      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch (e) {}
+      if (window.ctjTrack) {
+        try { window.ctjTrack('home_chat_sent', { count: count + 1 }); } catch (e) {}
+      }
+      sendBtn.disabled = true;
+      input.disabled = true;
+      const thinking = appendThinking();
+      waitForToken().then(function (token) {
+        if (isProdOrigin && !token) {
+          thinking.remove();
+          const err = appendJesusContainer();
+          err.textContent = 'verification is taking a moment. refresh and try again.';
+          input.disabled = false;
+          sendBtn.disabled = false;
+          return;
+        }
+        runFetch(thinking, token);
+      });
+    }
+
+    function runFetch(thinking, token) {
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: messages,
+          turnstileToken: token || undefined,
+          source: 'homepage',
+        }),
+      }).then(async function (resp) {
+        thinking.remove();
+        const container = appendJesusContainer();
+        if (!resp.ok || !resp.body) {
+          container.textContent = 'something came between us. try again in a moment.';
+          input.disabled = false;
+          sendBtn.disabled = false;
+          input.focus();
+          return;
+        }
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+        let pending = '';
+        while (true) {
+          const result = await reader.read();
+          if (result.done) break;
+          buf += decoder.decode(result.value, { stream: true });
+          let end;
+          while ((end = buf.indexOf('\n\n')) !== -1) {
+            const block = buf.slice(0, end); buf = buf.slice(end + 2);
+            const lines = block.split('\n');
+            for (let li = 0; li < lines.length; li++) {
+              const line = lines[li];
+              if (line.indexOf('data: ') !== 0) continue;
+              try {
+                const evt = JSON.parse(line.slice(6));
+                if (evt.type === 'text' && evt.text) pending += evt.text;
+              } catch (e) {}
+            }
+          }
+        }
+        const full = pending.trim();
+        await dripWords(container, full);
+        messages.push({ role: 'assistant', content: full });
+        count++;
+        try {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+          sessionStorage.setItem(COUNT_KEY, String(count));
+        } catch (e) {}
+        updateCount();
+        if (count >= FREE_LIMIT) {
+          showHandoff();
+        } else {
+          input.disabled = false;
+          sendBtn.disabled = false;
+          input.focus();
+          // Reset turnstile so the next message gets a fresh token.
+          // reset() clears state but does NOT re-execute on invisible
+          // widgets — must explicitly call execute() to fire a new round.
+          if (window.turnstile && isProdOrigin) {
+            try {
+              window.turnstile.reset('#hcTurnstile');
+              window.turnstile.execute('#hcTurnstile');
+            } catch (e) {}
+            turnstileToken = null;
+          }
+        }
+      }).catch(function () {
+        thinking.remove();
+        const err = appendJesusContainer();
+        err.textContent = 'something came between us. try again in a moment.';
+        input.disabled = false;
+        sendBtn.disabled = false;
+      });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text || count >= FREE_LIMIT) return;
+      input.value = '';
+      send(text);
+    });
+
+    if (continueBtn) {
+      continueBtn.addEventListener('click', function () {
+        try { sessionStorage.setItem('cometojesus_handoff_thread', JSON.stringify(messages)); } catch (e) {}
+        if (window.ctjTrack) {
+          try { window.ctjTrack('home_chat_handoff_clicked', { messages_sent: count }); } catch (e) {}
+        }
+      });
+    }
+
+    renderRestored();
+  })();
+</script>
 
 </body>
 </html>

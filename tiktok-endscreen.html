@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>cometojesus — tiktok end screen</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,30..100,0..1;1,9..144,300..900,30..100,0..1&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#1a1208;min-width:1080px;min-height:1920px;overflow:auto}
+  body{display:flex;flex-direction:column;align-items:center;gap:24px;padding:24px}
+
+  .toolbar{
+    position:fixed;top:18px;right:18px;z-index:99;
+    display:flex;gap:10px;
+    font-family:-apple-system,system-ui,sans-serif;
+  }
+  .toolbar button{
+    background:#1c1409;color:#f4eadb;
+    border:none;padding:12px 18px;border-radius:8px;
+    font-size:14px;font-weight:500;cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  }
+  .toolbar button:hover{background:#3a2a14}
+  .hint{
+    position:fixed;top:72px;right:18px;z-index:99;
+    background:rgba(28,20,9,0.92);color:#f4eadb;
+    padding:10px 14px;border-radius:8px;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:12px;max-width:260px;line-height:1.4;
+  }
+
+  .frame{
+    position:relative;
+    width:1080px;height:1920px;
+    background:#f4eadb;
+    overflow:hidden;
+    isolation:isolate;
+  }
+
+  .frame::before{
+    content:"";position:absolute;inset:0;
+    background:url("rollinghills.webp") center 38% / cover no-repeat;
+    filter:saturate(0.85) contrast(1.05) brightness(0.92);
+    z-index:0;
+  }
+  .frame::after{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 120% 70% at 50% 50%,
+        rgba(244,234,219,0.18) 0%,
+        rgba(244,234,219,0.42) 45%,
+        rgba(244,234,219,0.78) 78%,
+        rgba(244,234,219,0.95) 100%),
+      linear-gradient(180deg,
+        rgba(244,234,219,0.55) 0%,
+        rgba(244,234,219,0.0) 22%,
+        rgba(244,234,219,0.0) 78%,
+        rgba(244,234,219,0.85) 100%);
+    z-index:1;
+  }
+
+  .grain{
+    position:absolute;inset:-50px;z-index:2;pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.11   0 0 0 0 0.08   0 0 0 0 0.04   0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size:320px 320px;
+    mix-blend-mode:multiply;
+    opacity:0.18;
+  }
+  .grain.coarse{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='480' height='480'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.13   0 0 0 0 0.09   0 0 0 0 0.04   0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size:480px 480px;
+    opacity:0.10;
+  }
+
+  .glow{
+    position:absolute;top:-200px;left:-100px;width:1100px;height:1100px;z-index:1;
+    background:radial-gradient(circle, rgba(255,238,195,0.55) 0%, rgba(255,238,195,0.18) 35%, rgba(255,238,195,0) 65%);
+    pointer-events:none;
+  }
+
+  .content{
+    position:absolute;inset:0;z-index:5;
+    display:flex;flex-direction:column;align-items:center;
+    padding:160px 96px 140px;
+    color:#1c1409;
+  }
+
+  .brand{
+    display:flex;align-items:center;gap:22px;
+    margin-bottom:200px;
+  }
+  .brand img{
+    width:96px;height:96px;
+    filter:drop-shadow(0 2px 6px rgba(28,20,9,0.15));
+  }
+  .brand .wm{
+    font-family:'Fraunces',Georgia,serif;
+    font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;
+    font-weight:500;font-size:46px;letter-spacing:-0.005em;
+    color:#1c1409;
+  }
+  .brand .wm em{
+    font-style:italic;font-weight:600;color:#5a4222;
+  }
+
+  .head{
+    text-align:center;
+    font-family:'Fraunces',Georgia,serif;
+    font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;
+    font-weight:500;
+    font-size:172px;
+    line-height:0.95;
+    letter-spacing:-0.025em;
+    color:#1c1409;
+    margin-bottom:60px;
+    text-wrap:balance;
+  }
+  .head .me{
+    font-style:italic;font-weight:600;
+    color:#5a4222;
+    font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;
+  }
+  .head .me::after{
+    content:".";
+    color:#5a4222;
+  }
+
+  .eyebrow{
+    display:flex;align-items:center;gap:18px;
+    margin-bottom:54px;
+    font-family:'Fraunces',Georgia,serif;
+    font-weight:500;font-size:22px;
+    letter-spacing:0.42em;text-transform:uppercase;
+    color:#7a5a30;
+  }
+  .eyebrow::before,.eyebrow::after{
+    content:"";width:64px;height:1px;background:#7a5a30;opacity:0.55;
+  }
+
+  .verse{
+    text-align:center;
+    font-family:'Cormorant Garamond',Georgia,serif;
+    font-style:italic;font-weight:500;
+    font-size:62px;line-height:1.22;
+    letter-spacing:0.005em;
+    color:#3a2a14;
+    max-width:880px;
+    margin-bottom:36px;
+    text-wrap:balance;
+  }
+  .verse .accent{color:#5a4222;font-weight:600}
+
+  .ref{
+    font-family:'Fraunces',Georgia,serif;
+    font-weight:500;font-size:24px;
+    letter-spacing:0.38em;text-transform:uppercase;
+    color:#7a5a30;
+    margin-bottom:auto;
+  }
+
+  .spacer{flex:1;min-height:80px}
+
+  .cta{
+    display:flex;flex-direction:column;align-items:center;gap:18px;
+  }
+  .cta .label{
+    font-family:'Fraunces',Georgia,serif;
+    font-style:italic;font-weight:500;font-size:36px;
+    color:#3a2a14;
+    letter-spacing:0.005em;
+  }
+  .cta .url{
+    font-family:'Fraunces',Georgia,serif;
+    font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;
+    font-weight:600;font-size:88px;
+    letter-spacing:-0.012em;
+    color:#1c1409;
+    padding:8px 0 16px;
+    border-bottom:2px solid #5a4222;
+    position:relative;
+  }
+  .cta .url::before,.cta .url::after{
+    content:"";position:absolute;bottom:-2px;width:14px;height:14px;
+    border-bottom:2px solid #5a4222;
+  }
+  .cta .url::before{left:-26px;border-left:2px solid #5a4222}
+  .cta .url::after{right:-26px;border-right:2px solid #5a4222}
+  .cta .url .dot{color:#5a4222}
+
+  .tag{
+    margin-top:22px;
+    font-family:'Fraunces',Georgia,serif;
+    font-style:italic;font-weight:400;font-size:26px;
+    color:#7a5a30;
+    letter-spacing:0.005em;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button id="dlBtn">&darr; download PNG (1080&times;1920)</button>
+</div>
+<div class="hint">PNG is 9:16. Drop into TikTok as the final clip's still frame, hold for 2&ndash;4s.</div>
+
+<div class="frame" id="frame">
+  <div class="glow"></div>
+  <div class="grain coarse"></div>
+  <div class="grain"></div>
+
+  <div class="content">
+
+    <div class="brand">
+      <img src="cometojesus-invitation-mark-transparent.png" alt="">
+      <div class="wm">come to <em>Jesus</em></div>
+    </div>
+
+    <h1 class="head">come to <span class="me">me</span></h1>
+
+    <div class="eyebrow">a quiet place</div>
+
+    <p class="verse">
+      &ldquo;all you who are weary and burdened, <br>
+      and <span class="accent">I will give you rest.</span>&rdquo;
+    </p>
+
+    <div class="ref">Matthew 11:28</div>
+
+    <div class="spacer"></div>
+
+    <div class="cta">
+      <div class="label">talk with him.</div>
+      <div class="url">cometojesus<span class="dot">.</span>co</div>
+      <div class="tag">free to start. no account for your first messages.</div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.min.js"></script>
+<script>
+  document.getElementById('dlBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('dlBtn');
+    const original = btn.textContent;
+    btn.textContent = 'rendering...';
+    btn.disabled = true;
+    try {
+      const node = document.getElementById('frame');
+      const dataUrl = await htmlToImage.toPng(node, {
+        width: 1080,
+        height: 1920,
+        pixelRatio: 1,
+        cacheBust: true,
+      });
+      const link = document.createElement('a');
+      link.download = 'cometojesus-tiktok-endscreen.png';
+      link.href = dataUrl;
+      link.click();
+      btn.textContent = 'downloaded';
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1500);
+    } catch (e) {
+      console.error(e);
+      btn.textContent = 'error - see console';
+      setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2000);
+    }
+  });
+</script>
+
+</body>
+</html>

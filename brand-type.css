@@ -1,0 +1,191 @@
+/* ============================================================
+   come to jesus — brand type system
+   Single source of truth. Documented in BRAND_TYPE.md.
+   Load this AFTER any reset, BEFORE per-page styles.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,30..100,0..1;1,9..144,300..900,30..100,0..1&display=swap');
+
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-voice:   'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Cormorant Garamond', Georgia, serif;
+  --font-ui:      'Fraunces', Georgia, serif;
+
+  --ink:         #1c1409;
+  --ink-mid:     #3a2a14;
+  --accent:      #7a5a30;
+  --accent-deep: #5a4222;
+  --bg:          #f4eadb;
+}
+
+/* ===== Display scale ===== */
+
+.t-hero {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-feature-settings: "ss01", "ss02";
+  font-weight: 500;
+  font-size: clamp(72px, 11vw, 172px);
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-feature-settings: "ss01", "ss02";
+  font-weight: 500;
+  font-size: clamp(56px, 7vw, 96px);
+  line-height: 1.02;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-feature-settings: "ss01", "ss02";
+  font-weight: 500;
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 1.08;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.t-h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 72, "SOFT" 100, "WONK" 1;
+  font-weight: 500;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.18;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+/* ===== Voice (Cormorant italic — Jesus's words / scripture) ===== */
+
+.t-verse,
+.voice-jesus {
+  font-family: var(--font-voice);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--ink-mid);
+  text-wrap: balance;
+}
+
+.t-verse {
+  font-size: clamp(28px, 3.4vw, 48px);
+  line-height: 1.28;
+}
+
+.voice-jesus {
+  /* Used inside chat — let parent control size */
+  color: var(--ink);
+}
+
+/* ===== Body ===== */
+
+.t-body-lg {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.55;
+  color: var(--ink-mid);
+}
+
+.t-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ink-mid);
+}
+
+.t-body-sm {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-mid);
+}
+
+/* ===== UI / labels ===== */
+
+.t-eyebrow {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 0;
+}
+
+.t-ref {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 0;
+}
+
+.t-label {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.005em;
+  color: var(--ink-mid);
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 0;
+}
+
+.t-button {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.005em;
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 0;
+}
+
+/* ===== Modifiers ===== */
+
+.fraunces-display {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-feature-settings: "ss01", "ss02";
+  font-weight: 500;
+}
+
+.fraunces-italic-accent {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-feature-settings: "ss01", "ss02";
+  font-style: italic;
+  font-weight: 600;
+  color: var(--accent-deep);
+}
+
+/* Eyebrow with hairline rules either side */
+.eyebrow-rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+}
+.eyebrow-rule::before,
+.eyebrow-rule::after {
+  content: "";
+  width: 48px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.text-balance { text-wrap: balance; }
