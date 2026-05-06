@@ -1215,8 +1215,14 @@
   // and restores the conversation seamlessly.
   (function () {
     const FREE_LIMIT = 5;
-    const STORAGE_KEY = 'cometojesus_home_thread';
-    const COUNT_KEY = 'cometojesus_home_count';
+    // Thread lives in sessionStorage (per-tab) so a returning visitor
+    // doesn't see a stale conversation. Count lives in localStorage so
+    // closing the tab and coming back tomorrow does NOT grant a fresh
+    // 5-message allowance — the cap is genuinely lifetime-per-browser.
+    // (Server-side fingerprint cap is the real enforcement; this just
+    // stops the UI from misrepresenting the remaining quota.)
+    const STORAGE_KEY = 'cometojesus_home_thread';     // sessionStorage
+    const COUNT_KEY = 'cometojesus_home_count';        // localStorage
 
     const thread = document.getElementById('hcThread');
     const form = document.getElementById('hcForm');
@@ -1233,7 +1239,14 @@
 
     try {
       messages = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]');
-      count = parseInt(sessionStorage.getItem(COUNT_KEY) || '0', 10) || 0;
+      // Migrate any earlier session-stored count to localStorage so users
+      // who had a count under the old logic don't get a free reset.
+      const sessionCount = sessionStorage.getItem(COUNT_KEY);
+      if (sessionCount && !localStorage.getItem(COUNT_KEY)) {
+        localStorage.setItem(COUNT_KEY, sessionCount);
+      }
+      sessionStorage.removeItem(COUNT_KEY);
+      count = parseInt(localStorage.getItem(COUNT_KEY) || '0', 10) || 0;
     } catch (e) { messages = []; count = 0; }
 
     function renderRestored() {
@@ -1254,6 +1267,24 @@
     }
 
     function showHandoff() {
+      // Returning visitor whose count is already at the cap (or beyond)
+      // but whose thread is gone (sessionStorage cleared on tab close)
+      // gets a different headline + button so the card doesn't pretend
+      // there's a conversation in progress to continue.
+      const returningAtCap = messages.length === 0 && count >= FREE_LIMIT;
+      const handoffText = handoff.querySelector('.hc-handoff-text');
+      if (handoffText) {
+        handoffText.textContent = returningAtCap
+          ? "you've used your free messages here."
+          : 'this conversation is getting somewhere.';
+      }
+      if (continueBtn && continueBtn.firstChild) {
+        // First child of the anchor is the text node; the arrow span
+        // is the second child and is preserved as-is.
+        continueBtn.firstChild.nodeValue = returningAtCap
+          ? 'sign in to keep going '
+          : 'keep going in the chat ';
+      }
       handoff.setAttribute('data-show', '1');
       handoff.hidden = false;
       input.disabled = true;
@@ -1398,7 +1429,7 @@
         count++;
         try {
           sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-          sessionStorage.setItem(COUNT_KEY, String(count));
+          localStorage.setItem(COUNT_KEY, String(count));
         } catch (e) {}
         updateCount();
         if (count >= FREE_LIMIT) {
