@@ -3662,13 +3662,16 @@
       // Funnel marker: fires once per page load when the user first commits
       // to the chat (sends a message). Page view tracks "reached chat", this
       // tracks "actually engaged."
+      // Module-scoped `currentTier` lives in the module script above; this
+      // regular script reaches it via the window getter exposed there.
+      const tierForTrack = (window.__getCurrentTier && window.__getCurrentTier()) || 'unknown';
       if (!chatStartedFired) {
         chatStartedFired = true;
         if (window.va) window.va('event', { name: 'chat_started' });
-        if (window.ctjTrack) window.ctjTrack('chat_started', { tier: currentTier || 'unknown' });
+        if (window.ctjTrack) window.ctjTrack('chat_started', { tier: tierForTrack });
       }
       if (userMessageCountThisPage === 3 && window.ctjTrack) {
-        window.ctjTrack('third_message_sent', { tier: currentTier || 'unknown' });
+        window.ctjTrack('third_message_sent', { tier: tierForTrack });
       }
 
       // Enter thinking state, sun dims, holds. Brief reverent pause.
@@ -3835,7 +3838,8 @@
           : upgradeLink.classList.contains('about-cta')
             ? 'chat_about'
             : 'chat_link';
-      window.ctjTrack('upgrade_clicked', { source, tier: currentTier || 'unknown' });
+      const tierForUpgrade = (window.__getCurrentTier && window.__getCurrentTier()) || 'unknown';
+      window.ctjTrack('upgrade_clicked', { source, tier: tierForUpgrade });
     });
     aboutCloseEl.addEventListener('click', () => {
       aboutOverlayEl.classList.remove('visible');
